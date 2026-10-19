@@ -5,20 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
   <style>
     .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: #FFD700; }
     .action-card.expense { border-color: #FCA5A5; background: linear-gradient(135deg, rgba(220,38,38,0.1), #1C1C1C); }
     .action-card.expense .action-name { color: #FCA5A5; }
+    .action-card.product { border-color: #93C5FD; background: linear-gradient(135deg, rgba(59,130,246,0.1), #1C1C1C); }
+    .action-card.product .action-name { color: #93C5FD; }
   </style>
 </head>
 <body>
 
   <div class="sw-header">
     <div class="sw-logo">
-      <img src="../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       AKBAR JEWELLERS
     </div>
     <div style="display: flex; gap: 15px; align-items: center;">
@@ -53,6 +55,7 @@
       <a href="sales.html" class="action-card"><div class="action-name">New Sale</div></a>
       <a href="expenses.html" class="action-card expense"><div class="action-name">Add Expense</div></a>
       <a href="purchase.html" class="action-card"><div class="action-name">New Purchase</div></a>
+      <a href="products.html" class="action-card product"><div class="action-name">Add Product</div></a>
       <a href="reports.html" class="action-card"><div class="action-name">View Reports</div></a>
     </div>
 
@@ -71,6 +74,7 @@
     </div>
   </div>
 
+  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
@@ -82,14 +86,16 @@
       if (!currentUser) return;
       
       document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
-      document.getElementById('welcomeName').textContent = currentUser.username;
+      document.getElementById('welcomeName').textContent = currentUser.email;
       document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       
       let navHtml = '<button class="nav-btn active">Dashboard</button>';
       if (currentUser.role === 'admin' || currentUser.role === 'sales') navHtml += '<button class="nav-btn" onclick="navigate(\'sales.html\')">Sales</button>';
       if (currentUser.role === 'admin' || currentUser.role === 'purchase') navHtml += '<button class="nav-btn" onclick="navigate(\'purchase.html\')">Purchase</button>';
+      navHtml += '<button class="nav-btn" onclick="navigate(\'products.html\')">Products</button>';
+      navHtml += '<button class="nav-btn" onclick="navigate(\'customers.html\')">Customers</button>';
       navHtml += '<button class="nav-btn" onclick="navigate(\'reports.html\')">Reports</button>';
-      if (currentUser.role === 'admin') navHtml += '<button class="nav-btn" onclick="navigate(\'settings.html\')">Settings</button>';
+      navHtml += '<button class="nav-btn" onclick="navigate(\'settings.html\')">Settings</button>';
       document.getElementById('navMenu').innerHTML = navHtml;
 
       const sales = await getRecordsFast('sales');
