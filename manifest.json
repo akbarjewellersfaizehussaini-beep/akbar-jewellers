@@ -1,0 +1,28 @@
+{
+  "name": "Akbar Jewellers - Faiz e Hussaini",
+  "short_name": "Akbar Jewellers",
+  "description": "Diamond aur Kundan Antique Jewellery ke Expert - New Canal Park, Ali Plaza Tajbagh, Lahore",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#FFD700",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "business", "lifestyle"],
+  "lang": "en-PK",
+  "dir": "ltr"
+}
