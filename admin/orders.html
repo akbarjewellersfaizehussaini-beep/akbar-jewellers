@@ -3,14 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders – SHAH REHAN JEWELLERS Admin</title>
+  <title>Orders – Akbar Jewellers Admin</title>
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
     body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
     .admin-header { background: #1C1C1C; border-bottom: 2px solid #FFD700; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .admin-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #FFD700; font-weight: 700; }
+    .admin-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #FFD700; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .admin-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #FFD700; }
     .admin-nav { display: flex; gap: 20px; align-items: center; }
     .admin-nav a { color: #FFF8DC; text-decoration: none; font-size: 0.9rem; }
     .admin-nav a:hover, .admin-nav a.active { color: #FFD700; }
@@ -46,20 +48,21 @@
       .orders-table { overflow-x: auto; }
     }
   </style>
-  <link rel="icon" type="image/svg+xml" href="../images/favicon-admin.svg">
-<link rel="icon" type="image/svg+xml" href="../images/favicon-admin.svg">
 </head>
 <body>
 
   <div class="admin-header">
-    <div class="admin-logo">SHAH REHAN JEWELLERS – Admin</div>
+    <div class="admin-logo">
+      <img src="../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      AKBAR JEWELLERS – Admin
+    </div>
     <nav class="admin-nav">
       <a href="dashboard.html" class="mobile-show">Dashboard</a>
       <a href="products.html" class="mobile-show">Products</a>
       <a href="orders.html" class="active mobile-show">Orders</a>
-     <a href="vlogs.html" class="mobile-show">Vlogs</a>
+      <a href="blogs.html" class="mobile-show">Blogs</a>
+      <a href="vlogs.html" class="mobile-show">Vlogs</a>
       <a href="settings.html" class="mobile-show">Settings</a>
-      <a href="software.html" class="mobile-show">Software</a>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </nav>
   </div>
@@ -87,7 +90,192 @@
   </div>
 
   <script src="../js/supabase.js"></script>
-  <script src="../js/orders.js"></script>
+  <script>
+    let currentOrder = null;
+
+    function checkAuth() {
+      const session = localStorage.getItem('akbar_admin_session');
+      if (!session) { window.location.href = 'login.html'; return false; }
+      try {
+        const data = JSON.parse(session);
+        if (Date.now() > data.expires_at) {
+          localStorage.removeItem('akbar_admin_session');
+          window.location.href = 'login.html';
+          return false;
+        }
+        return true;
+      } catch { window.location.href = 'login.html'; return false; }
+    }
+    function logout() { localStorage.removeItem('akbar_admin_session'); window.location.href = 'login.html'; }
+
+    function formatPKR(n) { return 'Rs ' + Math.round(n || 0).toLocaleString('en-PK'); }
+    function formatDate(d) { return d ? new Date(d).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
+
+    async function loadOrders() {
+      const container = document.getElementById('ordersContainer');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?select=*&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const orders = await res.json();
+        
+        if (!orders || orders.length === 0) {
+          container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No orders yet</p></div>';
+          return;
+        }
+        
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Advance</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orders.map(o => `
+                <tr>
+                  <td style="color:#FFD700; font-weight:600;">${o.order_number}</td>
+                  <td>
+                    <div>${o.customer_name}</div>
+                    <div style="color:#B8B8B8; font-size:0.8rem;">${o.customer_whatsapp}</div>
+                  </td>
+                  <td>${formatPKR(o.total_amount)}</td>
+                  <td>${formatPKR(o.advance_amount)}</td>
+                  <td><span class="status-badge status-${o.order_status || 'pending'}">${(o.order_status || 'pending').toUpperCase()}</span></td>
+                  <td>${formatDate(o.created_at)}</td>
+                  <td><button class="btn-view" onclick='viewOrder(${JSON.stringify(o).replace(/'/g, "&#39;")})'>View</button></td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div class="empty-state"><p>Error loading orders</p></div>';
+      }
+    }
+
+    function viewOrder(o) {
+      currentOrder = o;
+      const content = document.getElementById('orderDetailContent');
+      
+      const itemsHtml = (o.items || []).map(item => `
+        <div style="background:rgba(255,215,0,0.05); border-radius:8px; padding:10px; margin-bottom:8px;">
+          <div style="color:#FFD700; font-weight:600;">${item.name}</div>
+          <div style="color:#B8B8B8; font-size:0.85rem;">Karat: ${item.karat} • Weight: ${item.weight}${item.unit} • Size: ${item.size || 'N/A'}</div>
+          <div style="color:#FFF8DC; margin-top:4px;">${item.total}</div>
+        </div>
+      `).join('');
+      
+      content.innerHTML = `
+        <div class="order-detail-row">
+          <span class="order-detail-label">Order Number</span>
+          <span class="order-detail-value" style="color:#FFD700;">${o.order_number}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Customer</span>
+          <span class="order-detail-value">${o.customer_name}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">WhatsApp</span>
+          <span class="order-detail-value">${o.customer_whatsapp}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Address</span>
+          <span class="order-detail-value">${o.customer_address}, ${o.customer_city}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Transaction ID</span>
+          <span class="order-detail-value">${o.transaction_id || '—'}</span>
+        </div>
+        ${o.payment_screenshot_url ? `
+          <div class="order-detail-row">
+            <span class="order-detail-label">Payment Screenshot</span>
+            <span class="order-detail-value"><a href="${o.payment_screenshot_url}" target="_blank" style="color:#93C5FD;">View</a></span>
+          </div>
+        ` : ''}
+        
+        <h4 style="color:#FFD700; margin:20px 0 10px;">Items</h4>
+        ${itemsHtml}
+        
+        <div class="order-detail-row" style="margin-top:15px;">
+          <span class="order-detail-label">Subtotal</span>
+          <span class="order-detail-value">${formatPKR(o.subtotal)}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">GST (3%)</span>
+          <span class="order-detail-value">${formatPKR(o.gst_amount)}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Total</span>
+          <span class="order-detail-value" style="color:#FFD700;">${formatPKR(o.total_amount)}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Advance (${o.advance_type === 'full' ? '100%' : '85%'})</span>
+          <span class="order-detail-value">${formatPKR(o.advance_amount)}</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Remaining</span>
+          <span class="order-detail-value">${formatPKR(o.remaining_amount)}</span>
+        </div>
+        
+        <div style="margin-top:20px;">
+          <label class="form-label" style="color:#FFD700; font-size:0.85rem; display:block; margin-bottom:8px;">Update Status</label>
+          <select id="orderStatusSelect" class="status-select">
+            <option value="pending" ${o.order_status === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="confirmed" ${o.order_status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+            <option value="processing" ${o.order_status === 'processing' ? 'selected' : ''}>Processing</option>
+            <option value="shipped" ${o.order_status === 'shipped' ? 'selected' : ''}>Shipped</option>
+            <option value="delivered" ${o.order_status === 'delivered' ? 'selected' : ''}>Delivered</option>
+            <option value="cancelled" ${o.order_status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+          <button class="btn-update" onclick="updateOrderStatus()">Update Status</button>
+        </div>
+      `;
+      
+      document.getElementById('orderModal').classList.add('active');
+    }
+
+    function closeOrderModal() {
+      document.getElementById('orderModal').classList.remove('active');
+    }
+
+    async function updateOrderStatus() {
+      if (!currentOrder) return;
+      const newStatus = document.getElementById('orderStatusSelect').value;
+      
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${currentOrder.id}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ order_status: newStatus })
+        });
+        
+        if (!res.ok) throw new Error('Update failed');
+        
+        alert('✅ Status updated to ' + newStatus);
+        closeOrderModal();
+        loadOrders();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAuth()) return;
+      loadOrders();
+    });
+  </script>
 
 </body>
 </html>
