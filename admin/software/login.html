@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login – Akbar Jewellers Software</title>
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body { margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #0A0A0A; font-family: 'Poppins', sans-serif; }
@@ -18,22 +17,29 @@
     .form-input:focus { outline: none; border-color: #FFD700; box-shadow: 0 0 15px rgba(255,215,0,0.1); }
     .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: all 0.3s; font-family: 'Poppins', sans-serif; }
     .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,215,0,0.3); }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
     .role-hint { color: #B8B8B8; font-size: 0.75rem; margin-top: 20px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 15px; line-height: 1.6; }
     .creator-credit { color: #666; font-size: 0.7rem; margin-top: 20px; }
+    .error-box { background: rgba(220,38,38,0.2); border: 1px solid #DC2626; color: #FCA5A5; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; text-align: left; }
+    .debug-box { background: rgba(59,130,246,0.1); border: 1px solid #3B82F6; color: #93C5FD; padding: 10px; border-radius: 8px; font-size: 0.7rem; margin-top: 15px; display: none; text-align: left; word-break: break-all; max-height: 150px; overflow-y: auto; }
   </style>
 </head>
 <body>
 
   <div class="login-box">
-    <img src="../images/logo.png" class="logo" onerror="this.style.display='none'" alt="Logo">
+    <img src="../../images/logo.png" class="logo" onerror="this.style.display='none'" alt="Logo">
     <h1>AKBAR JEWELLERS</h1>
     <p class="urdu" dir="rtl">فیض حسینی</p>
     <p>Software Login</p>
+    
+    <div id="errorBox" class="error-box"></div>
     
     <input type="text" id="loginUser" class="form-input" placeholder="Username">
     <input type="password" id="loginPass" class="form-input" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
     
     <button class="btn-login" id="loginBtn" onclick="doLogin()">Login</button>
+
+    <div id="debugBox" class="debug-box"></div>
 
     <div class="role-hint">
       <strong>Demo Logins:</strong><br>
@@ -49,27 +55,67 @@
 
   <script src="db.js"></script>
   <script>
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function showDebug(msg) {
+      const box = document.getElementById('debugBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
     async function doLogin() {
       const user = document.getElementById('loginUser').value.trim().toLowerCase();
       const pass = document.getElementById('loginPass').value.trim();
       const btn = document.getElementById('loginBtn');
       
-      if (!user || !pass) { alert('❌ Please enter username and password'); return; }
+      document.getElementById('errorBox').style.display = 'none';
+      document.getElementById('debugBox').style.display = 'none';
       
-      btn.textContent = 'Logging in...'; btn.disabled = true;
+      if (!user || !pass) { 
+        showError('❌ Please enter username and password'); 
+        return; 
+      }
+      
+      btn.textContent = 'Logging in...'; 
+      btn.disabled = true;
 
       try {
+        if (typeof sbFetch === 'undefined') {
+          throw new Error('db.js not loaded. Check file exists in admin/software/ folder.');
+        }
+
+        showDebug('Loading... Searching for: ' + user);
+        console.log('🔍 Login attempt:', user);
+        
         const rows = await sbFetch(`admin_users?email=eq.${user}&select=*`);
+        console.log('🔍 Supabase response:', rows);
+        
         if (rows && rows.length > 0) {
-          localStorage.setItem('akbar_user_session', JSON.stringify(rows[0]));
-          window.location.href = 'index.html';
+          const dbUser = rows[0];
+          console.log('🔍 Found user:', dbUser);
+          
+          if (dbUser.password_hash === pass) {
+            localStorage.setItem('akbar_user_session', JSON.stringify(dbUser));
+            window.location.href = 'index.html';
+          } else {
+            showError('❌ Wrong password');
+            showDebug('Input password: "' + pass + '"\nDB password: "' + dbUser.password_hash + '"');
+          }
         } else {
-          alert('❌ Invalid Credentials. Check username & password.');
+          showError('❌ User "' + user + '" not found in admin_users table');
+          showDebug('Please add this user in Supabase Table Editor → admin_users\n\n1. Go to: supabase.com/dashboard\n2. Table Editor → admin_users\n3. Insert row:\n   email: ' + user + '\n   password_hash: ' + pass + '\n   role: admin\n   is_active: true');
         }
       } catch (e) {
-        alert('❌ Login Error: ' + e.message);
+        console.error('❌ Login error:', e);
+        showError('❌ Error: ' + e.message);
+        showDebug('Error details:\n' + e.message + '\n\nCheck:\n1. db.js exists in admin/software/\n2. Supabase URL & key correct\n3. admin_users table exists');
       } finally {
-        btn.textContent = 'Login'; btn.disabled = false;
+        btn.textContent = 'Login'; 
+        btn.disabled = false;
       }
     }
   </script>
