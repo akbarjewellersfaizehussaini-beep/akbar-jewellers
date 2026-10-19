@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Confirmed – SHAH REHAN JEWELLERS</title>
+  <title>Order Confirmed – Akbar Jewellers</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -32,18 +33,18 @@
   <div class="success-container">
     <div class="success-icon">🎉</div>
     <h1 class="success-title">Order Confirmed!</h1>
-    <p class="success-msg">Thank you for shopping with SHAH REHAN JEWELLERS</p>
+    <p class="success-msg">Thank you for shopping with AKBAR JEWELLERS</p>
     
     <div class="invoice-box" id="invoiceBox">
       <!-- Filled by JS -->
     </div>
     
     <a href="index.html" class="btn btn-gold">🏠 Back to Home</a>
-    <a href="https://wa.me/923266501314" class="btn btn-wa">📱 WhatsApp Us</a>
+    <a href="https://wa.me/923234086439" class="btn btn-wa">📱 WhatsApp Us</a>
     <button onclick="window.print()" class="btn btn-outline">🖨 Print Invoice</button>
     
+    <p class="urdu-tagline" dir="rtl">ڈائمنڈ اور کندن انٹیک جیولری کے ماہر</p>
     <p class="urdu-tagline" dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
-    <p class="urdu-tagline" dir="rtl">آخر میں آپ کا اعتماد، ہماری ضمانت</p>
   </div>
 
   <script>
@@ -52,7 +53,7 @@
     }
     
     function loadOrder() {
-      const order = JSON.parse(localStorage.getItem('srj_last_order') || '{}');
+      const order = JSON.parse(localStorage.getItem('akbar_last_order') || '{}');
       const box = document.getElementById('invoiceBox');
       
       if (!order.order_number) {
@@ -121,7 +122,7 @@
         </p>
         
         <p style="text-align: center; font-size: 9px; color: #666; margin-top: 20px;">
-          Designed by Bilal Marghoob Creations | 0092 326 69501314
+          Designed by Bilal Marghoob Creations | 0326 6501314
         </p>
       `;
     }
