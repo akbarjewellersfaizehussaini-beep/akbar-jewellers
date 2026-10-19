@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout – SHAH REHAN JEWELLERS</title>
+  <title>Checkout – Akbar Jewellers</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -23,11 +24,10 @@
     .payment-option.selected { background: rgba(255,215,0,0.1); border-color: #FFD700; }
     .payment-option .title { color: #FFD700; font-weight: 600; font-size: 1rem; }
     .payment-option .desc { color: #B8B8B8; font-size: 0.8rem; margin-top: 4px; }
-    .easypaisa-box { border-radius: 12px; padding: 20px; margin: 20px 0; }
-    .easypaisa-box h4 { color: #FFF8DC; margin-bottom: 10px; font-size: 1rem; }
-    .easypaisa-number { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-    .easypaisa-number strong { color: #FFD700; font-size: 1.1rem; }
-    .btn-copy { background: #FFD700; color: #0A0A0A; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+    .payment-notice { background: linear-gradient(135deg, rgba(37,211,102,0.1), rgba(37,211,102,0.02)); border: 2px solid #25D366; border-radius: 12px; padding: 20px; margin: 15px 0; }
+    .payment-notice h4 { color: #25D366; margin-bottom: 10px; font-size: 1rem; }
+    .payment-notice p { color: #FFF8DC; font-size: 0.9rem; line-height: 1.6; margin-bottom: 8px; }
+    .payment-notice .wa-btn { display: inline-block; margin-top: 10px; padding: 10px 25px; background: #25D366; color: white; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; }
     .order-summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,215,0,0.1); font-size: 0.9rem; }
     .order-summary-total { border-top: 2px solid #FFD700; padding-top: 12px; margin-top: 10px; font-size: 1.2rem; font-weight: 700; color: #FFD700; display: flex; justify-content: space-between; }
     .btn-place-order { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
@@ -41,7 +41,10 @@
 
   <header class="site-header">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="images/logo.png" alt="Akbar Jewellers Logo" class="header-logo rotating-logo" onerror="this.style.display='none'">
+        <h1 class="brand-name">AKBAR JEWELLERS</h1>
+      </div>
       <a href="cart.html" style="color: #FFD700; text-decoration: none;">← Back to Cart</a>
     </div>
   </header>
@@ -102,8 +105,8 @@
             </div>
           </label>
 
-          <div id="paymentBreakdown" class="easypaisa-box" style="background: linear-gradient(135deg, #2A2A2A, #1C1C1C); border: 1px solid #FFD700;">
-            <h4>📊 Payment Breakdown</h4>
+          <div id="paymentBreakdown" style="background: linear-gradient(135deg, #2A2A2A, #1C1C1C); border: 1px solid #FFD700; border-radius: 12px; padding: 20px; margin: 20px 0;">
+            <h4 style="color: #FFD700; margin-bottom: 10px;">📊 Payment Breakdown</h4>
             <div style="display: flex; justify-content: space-between; padding: 8px 0;">
               <span style="color: #B8B8B8;">Total Amount</span>
               <strong id="bkTotal" style="color: #FFF8DC;">Rs 0</strong>
@@ -118,35 +121,15 @@
             </div>
           </div>
 
-          <h3 style="margin-top: 25px;">💳 Select Payment Method</h3>
-          <div id="paymentMethodsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
-            <label class="payment-method-card" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; transition: all 0.3s;">
-              <input type="radio" name="paymentMethod" value="easypaisa" checked style="display: none;">
-              <img src="images/easypaisa.jpg" alt="Easypaisa" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #25D366;" onerror="this.src='images/placeholder.svg'">
-              <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">Easypaisa</div>
-            </label>
-            <label class="payment-method-card" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; transition: all 0.3s;">
-              <input type="radio" name="paymentMethod" value="jazzcash" style="display: none;">
-              <img src="images/jazzcash.jpg" alt="JazzCash" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #DC2626;" onerror="this.src='images/placeholder.svg'">
-              <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">JazzCash</div>
-            </label>
-            <label class="payment-method-card" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; transition: all 0.3s;">
-              <input type="radio" name="paymentMethod" value="bank" style="display: none;">
-              <img src="images/bank.jpg" alt="Bank Transfer" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #3B82F6;" onerror="this.src='images/placeholder.svg'">
-              <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">Bank Transfer</div>
-            </label>
-          </div>
-
-          <div id="paymentDetails" class="easypaisa-box" style="background: linear-gradient(135deg, #0F5132, #128C7E);">
-            <h4>💚 Pay via Easypaisa</h4>
-            <div class="easypaisa-number">
-              <div>
-                <div style="font-size: 0.75rem; color: #B8B8B8;">Account Number</div>
-                <strong>03266501314</strong>
-              </div>
-              <button type="button" class="btn-copy" onclick="copyNumber()">📋 Copy</button>
-            </div>
-            <div style="font-size: 0.85rem; color: #FFF8DC;">Account Title: <strong>Syed Ahmed Bilal</strong></div>
+          <h3 style="margin-top: 25px;">💳 Payment Details</h3>
+          
+          <!-- IMPORTANT: Payment details admin panel se aayengi -->
+          <div class="payment-notice" id="paymentDetailsBox">
+            <h4>📱 Payment Details</h4>
+            <p>Payment details ke liye hamari team se WhatsApp par raabta karein. Aap ko account number aur title bhej diya jayega.</p>
+            <a href="https://wa.me/923234086439?text=Assalam%20o%20Alaikum%2C%20mujhe%20payment%20details%20chahiye" target="_blank" class="wa-btn">
+              📱 WhatsApp par Rabta Karein
+            </a>
           </div>
 
           <div class="form-group">
@@ -184,9 +167,6 @@
 
   <script src="js/supabase.js"></script>
   <script>
-    // ===== CLOUDINARY CONFIG =====
-   const CLOUDINARY_CLOUD_NAME = 'mo7txjdn';
-const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
     async function uploadToCloudinary(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -199,9 +179,8 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
       return data.secure_url;
     }
 
-    let cart = JSON.parse(localStorage.getItem('srj_cart') || '[]');
+    let cart = JSON.parse(localStorage.getItem('akbar_cart') || '[]');
     let paymentType = 'full';
-    let selectedPaymentMethod = 'easypaisa';
 
     function parsePrice(str) {
       if (typeof str === 'number') return str;
@@ -254,39 +233,6 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
       updatePaymentBreakdown(total);
     }
 
-    function selectPaymentMethod(method) {
-      selectedPaymentMethod = method;
-      document.querySelectorAll('input[name="paymentMethod"]').forEach(r => r.checked = (r.value === method));
-
-      const details = document.getElementById('paymentDetails');
-      const methods = {
-        easypaisa: { title: '💚 Pay via Easypaisa', bg: 'linear-gradient(135deg, #0F5132, #128C7E)', number: '03266501314', label: 'Account Number' },
-        jazzcash: { title: '🔴 Pay via JazzCash', bg: 'linear-gradient(135deg, #7F1D1D, #DC2626)', number: '03266501314', label: 'Account Number' },
-        bank: { title: '🏦 Bank Transfer', bg: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', number: 'PK36MEZN0001234567890123', label: 'IBAN' }
-      };
-      const m = methods[method];
-      details.style.background = m.bg;
-      details.innerHTML = `
-        <h4>${m.title}</h4>
-        <div class="easypaisa-number">
-          <div>
-            <div style="font-size: 0.75rem; color: #B8B8B8;">${m.label}</div>
-            <strong>${m.number}</strong>
-          </div>
-          <button type="button" class="btn-copy" onclick="copyNumber()">📋 Copy</button>
-        </div>
-        <div style="font-size: 0.85rem; color: #FFF8DC;">Account Title: <strong>Syed Ahmed Bilal</strong></div>
-      `;
-    }
-
-    function copyNumber() {
-      const details = document.getElementById('paymentDetails');
-      const numberMatch = details?.innerHTML.match(/<strong[^>]*>([^<]+)<\/strong>/);
-      const number = numberMatch ? numberMatch[1] : '03266501314';
-      navigator.clipboard.writeText(number);
-      alert('✅ Number copied: ' + number);
-    }
-
     async function placeOrder() {
       const name = document.getElementById('cName').value.trim();
       const whatsapp = document.getElementById('cWhatsapp').value.trim();
@@ -305,7 +251,6 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
       btn.disabled = true;
       btn.textContent = 'Uploading screenshot...';
 
-      // Upload screenshot to Cloudinary
       let screenshotUrl = '';
       try {
         screenshotUrl = await uploadToCloudinary(screenshot);
@@ -328,7 +273,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
 
       const now = new Date();
       const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
-      const orderNumber = `SRJ-${dateStr}-${String(Math.floor(Math.random()*1000)).padStart(3,'0')}`;
+      const orderNumber = `AKBAR-${dateStr}-${String(Math.floor(Math.random()*1000)).padStart(3,'0')}`;
       const delivery = new Date(now.getTime() + 7*24*60*60*1000);
       const expectedDelivery = delivery.toISOString().slice(0,10);
 
@@ -346,7 +291,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
         advance_type: paymentType,
         advance_amount: advance,
         remaining_amount: remaining,
-        payment_method: selectedPaymentMethod,
+        payment_method: 'pending',
         transaction_id: tid,
         payment_screenshot_url: screenshotUrl,
         order_status: 'pending',
@@ -371,7 +316,7 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
           throw new Error(err);
         }
 
-        localStorage.setItem('srj_last_order', JSON.stringify(orderData));
+        localStorage.setItem('akbar_last_order', JSON.stringify(orderData));
 
         const ownerMsg = `🔔 *NEW ORDER RECEIVED*%0A%0A` +
           `Order: ${orderNumber}%0A` +
@@ -379,14 +324,13 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
           `WhatsApp: ${whatsapp}%0A` +
           `Total: ${formatPKR(total)}%0A` +
           `Advance: ${formatPKR(advance)} (${paymentType === 'full' ? '100%' : '85%'})%0A` +
-          `Payment: ${selectedPaymentMethod}%0A` +
           `TID: ${tid}%0A` +
           `Screenshot: ${screenshotUrl}%0A%0A` +
           `Login to admin for details.`;
 
-        window.open(`https://wa.me/923266501314?text=${ownerMsg}`, '_blank');
+        window.open(`https://wa.me/923234086439?text=${ownerMsg}`, '_blank');
 
-        localStorage.removeItem('srj_cart');
+        localStorage.removeItem('akbar_cart');
         window.location.href = 'order-success.html';
 
       } catch (error) {
@@ -398,7 +342,6 @@ const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
 
     document.addEventListener('DOMContentLoaded', () => {
       renderSummary();
-      selectPaymentMethod('easypaisa');
     });
   </script>
 
