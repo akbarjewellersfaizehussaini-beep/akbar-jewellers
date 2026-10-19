@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings – SHAH REHAN JEWELLERS Admin</title>
-  <link rel="icon" type="image/svg+xml" href="../images/favicon-admin.svg">
+  <title>Settings – Akbar Jewellers Admin</title>
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
     body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
     .admin-header { background: #1C1C1C; border-bottom: 2px solid #FFD700; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-    .admin-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #FFD700; font-weight: 700; }
+    .admin-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #FFD700; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .admin-logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid #FFD700; }
     .admin-nav { display: flex; gap: 20px; align-items: center; }
     .admin-nav a { color: #FFF8DC; text-decoration: none; font-size: 0.9rem; transition: color 0.3s; }
     .admin-nav a:hover, .admin-nav a.active { color: #FFD700; }
@@ -27,6 +28,13 @@
     .edit-icon:hover { background: #FFD700; color: #0A0A0A; transform: scale(1.1); }
     .add-btn { background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; padding: 10px 20px; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; }
     .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255,215,0,0.4); }
+    .social-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+    .social-item { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 15px; }
+    .social-item label { color: #FFD700; font-size: 0.85rem; display: block; margin-bottom: 8px; font-weight: 600; }
+    .social-item input { width: 100%; padding: 10px 14px; background: #0A0A0A; border: 1px solid rgba(255,215,0,0.3); border-radius: 8px; color: #FFF8DC; font-family: 'Poppins', sans-serif; font-size: 0.9rem; }
+    .social-item input:focus { outline: none; border-color: #FFD700; }
+    .social-icon-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .social-icon-label svg { width: 20px; height: 20px; fill: #FFD700; }
     .pay-section-title { color: #FFD700; font-family: 'Playfair Display', serif; font-size: 1.1rem; margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
     .pay-section-title img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #FFD700; }
     .bank-card { background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 12px; }
@@ -52,13 +60,16 @@
 <body>
 
   <div class="admin-header">
-    <div class="admin-logo">SHAH REHAN JEWELLERS – Admin</div>
+    <div class="admin-logo">
+      <img src="../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      AKBAR JEWELLERS – Admin
+    </div>
     <nav class="admin-nav">
       <a href="dashboard.html">Dashboard</a>
       <a href="products.html">Products</a>
       <a href="orders.html">Orders</a>
-      <a href="vlogs.html">Vlogs</a>
       <a href="blogs.html">Blogs</a>
+      <a href="vlogs.html">Vlogs</a>
       <a href="settings.html" class="active">Settings</a>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </nav>
@@ -67,89 +78,111 @@
   <div style="max-width: 1000px; margin: 0 auto; padding: 25px;">
     <h1 class="section-title">Settings</h1>
 
-    <!-- CHARGES CONFIGURATION -->
+    <!-- SHOP INFO -->
     <div class="settings-card">
-      <h3>⚙️ Charges Configuration</h3>
-      <div id="chargesContainer">
-        <div class="setting-row">
-          <span class="setting-label">Making Charges</span>
-          <span class="setting-value">
-            <span id="makingChargesValue">15%</span>
-            <button class="edit-icon" onclick="editCharge('Making Charges', 15)">✏️</button>
-          </span>
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Polish Charges</span>
-          <span class="setting-value">
-            <span id="polishChargesValue">10%</span>
-            <button class="edit-icon" onclick="editCharge('Polish Charges', 10)">✏️</button>
-          </span>
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">GST</span>
-          <span class="setting-value">
-            <span id="gstValue">3%</span>
-            <button class="edit-icon" onclick="editCharge('GST', 3)">✏️</button>
-          </span>
-        </div>
-        <div class="setting-row">
-          <span class="setting-label">Service Charges (Biscuit)</span>
-          <span class="setting-value">
-            <span id="serviceChargesValue">1%</span>
-            <button class="edit-icon" onclick="editCharge('Service Charges', 1)">✏️</button>
-          </span>
-        </div>
+      <h3>🏪 Shop Information</h3>
+      <div class="form-group">
+        <label class="form-label">Shop Name</label>
+        <input type="text" id="shopName" class="form-input" value="AKBAR JEWELLERS">
       </div>
+      <div class="form-group">
+        <label class="form-label">Urdu Name (فیض حسینی)</label>
+        <input type="text" id="shopNameUrdu" class="form-input" value="فیض حسینی" dir="rtl" style="font-family: 'Noto Nastaliq Urdu', serif;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tagline</label>
+        <input type="text" id="shopTagline" class="form-input" value="Diamond aur Kundan Antique Jewellery ke Expert">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" id="shopAddress" class="form-input" value="New Canal Park, Ali Plaza Tajbagh, Lahore">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone / WhatsApp</label>
+        <input type="text" id="shopPhone" class="form-input" value="03234086439">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="shopEmail" class="form-input" value="akbarjewellersfaizehussaini@gmail.com">
+      </div>
+      <button class="add-btn" onclick="saveShopInfo()" style="width:100%; justify-content:center; margin-top:10px;">💾 Save Shop Info</button>
     </div>
 
-    <!-- PAYMENT DETAILS -->
+    <!-- SOCIAL MEDIA LINKS -->
     <div class="settings-card">
-      <h3>💳 Payment Details</h3>
+      <h3>📱 Social Media Links</h3>
+      <p style="color: #B8B8B8; font-size: 0.85rem; margin-bottom: 20px;">Yeh links website ke footer mein icons ke roop mein dikhenge. Sirf woh link dein jo aap ke paas hain — baaki khali chhod dein.</p>
+      
+      <div class="social-grid">
+        <div class="social-item">
+          <div class="social-icon-label">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <label>Instagram</label>
+          </div>
+          <input type="url" id="socialInstagram" placeholder="https://instagram.com/akbarjewellers">
+        </div>
+        
+        <div class="social-item">
+          <div class="social-icon-label">
+            <svg viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+            <label>Facebook</label>
+          </div>
+          <input type="url" id="socialFacebook" placeholder="https://facebook.com/akbarjewellers">
+        </div>
+        
+        <div class="social-item">
+          <div class="social-icon-label">
+            <svg viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+            <label>Twitter / X</label>
+          </div>
+          <input type="url" id="socialTwitter" placeholder="https://twitter.com/akbarjewellers">
+        </div>
+        
+        <div class="social-item">
+          <div class="social-icon-label">
+            <svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+            <label>YouTube</label>
+          </div>
+          <input type="url" id="socialYoutube" placeholder="https://youtube.com/@AkbarJewellersFaizeHussaini" value="https://www.youtube.com/@AkbarJewellersFaizeHussaini">
+        </div>
+        
+        <div class="social-item">
+          <div class="social-icon-label">
+            <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            <label>TikTok</label>
+          </div>
+          <input type="url" id="socialTiktok" placeholder="https://tiktok.com/@akbarjewellers">
+        </div>
+      </div>
+      
+      <button class="add-btn" onclick="saveSocialLinks()" style="width:100%; justify-content:center; margin-top:20px;">💾 Save Social Links</button>
+    </div>
 
-      <!-- Easypaisa Section -->
+    <!-- PAYMENT METHODS -->
+    <div class="settings-card">
+      <h3>💳 Payment Methods</h3>
+      <p style="color: #B8B8B8; font-size: 0.85rem; margin-bottom: 20px;">Yeh payment methods checkout page par customer ko dikhenge. Easypaisa, JazzCash, aur Bank accounts add karein.</p>
+
+      <!-- Easypaisa -->
       <div class="pay-section-title">
-        <img src="../images/easypaisa.jpg" alt="Easypaisa" onerror="this.src='../images/placeholder.svg'">
-        Easypaisa
+        💚 Easypaisa
         <button class="add-btn" style="margin-left: auto;" onclick="openPayModal('easypaisa')">+ Add</button>
       </div>
       <div id="easypaisaContainer"></div>
 
-      <!-- JazzCash Section -->
+      <!-- JazzCash -->
       <div class="pay-section-title">
-        <img src="../images/jazzcash.jpg" alt="JazzCash" onerror="this.src='../images/placeholder.svg'">
-        JazzCash
+        🔴 JazzCash
         <button class="add-btn" style="margin-left: auto;" onclick="openPayModal('jazzcash')">+ Add</button>
       </div>
       <div id="jazzcashContainer"></div>
 
-      <!-- Bank Section -->
+      <!-- Bank -->
       <div class="pay-section-title">
-        <img src="../images/bank.jpg" alt="Bank" onerror="this.src='../images/placeholder.svg'">
-        Bank Transfer
+        🏦 Bank Transfer
         <button class="add-btn" style="margin-left: auto;" onclick="openPayModal('bank')">+ Add Bank</button>
       </div>
       <div id="bankContainer"></div>
-    </div>
-  </div>
-
-  <!-- Charge Edit Modal -->
-  <div id="chargeModal" class="admin-modal">
-    <div class="admin-modal-content">
-      <h2 id="chargeModalTitle">Edit Charge</h2>
-      <form id="chargeForm">
-        <div class="form-group">
-          <label class="form-label">Charge Name</label>
-          <input type="text" id="chargeName" class="form-input" readonly>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Value (%)</label>
-          <input type="number" id="chargeValue" class="form-input" step="0.1" min="0" required>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button type="button" onclick="closeChargeModal()" style="flex:1; padding:12px; background:transparent; border:2px solid #FFD700; color:#FFD700; border-radius:50px; cursor:pointer;">Cancel</button>
-          <button type="submit" class="add-btn" style="flex:1; justify-content:center;">Save</button>
-        </div>
-      </form>
     </div>
   </div>
 
@@ -166,15 +199,15 @@
         </div>
         <div class="form-group">
           <label class="form-label">Account Title *</label>
-          <input type="text" id="payTitle" class="form-input" placeholder="e.g., Syed Ahmed Bilal" required>
+          <input type="text" id="payTitle" class="form-input" placeholder="e.g., Akbar Jewellers" required>
         </div>
         <div class="form-group">
           <label class="form-label">Account Number / IBAN *</label>
-          <input type="text" id="payNumber" class="form-input" placeholder="e.g., 03266501314 / PK36MEZN..." required>
+          <input type="text" id="payNumber" class="form-input" placeholder="e.g., 03234086439 / PK36MEZN..." required>
         </div>
         <div class="form-group">
           <label class="form-label">Branch (Bank only, optional)</label>
-          <input type="text" id="payBranch" class="form-input" placeholder="e.g., Lahore Cantt">
+          <input type="text" id="payBranch" class="form-input" placeholder="e.g., Tajbagh Lahore">
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button type="button" onclick="closePayModal()" style="flex:1; padding:12px; background:transparent; border:2px solid #FFD700; color:#FFD700; border-radius:50px; cursor:pointer;">Cancel</button>
@@ -187,61 +220,111 @@
   <script src="../js/supabase.js"></script>
   <script>
     function checkAuth() {
-      const session = localStorage.getItem('srj_admin_session');
+      const session = localStorage.getItem('akbar_admin_session');
       if (!session) { window.location.href = 'login.html'; return false; }
       try {
         const data = JSON.parse(session);
         if (Date.now() > data.expires_at) {
-          localStorage.removeItem('srj_admin_session');
+          localStorage.removeItem('akbar_admin_session');
           window.location.href = 'login.html';
           return false;
         }
         return true;
       } catch { window.location.href = 'login.html'; return false; }
     }
-    function logout() { localStorage.removeItem('srj_admin_session'); window.location.href = 'login.html'; }
+    function logout() { localStorage.removeItem('akbar_admin_session'); window.location.href = 'login.html'; }
 
-    // ===== CHARGES =====
-    function editCharge(name, currentValue) {
-      document.getElementById('chargeModalTitle').textContent = 'Edit ' + name;
-      document.getElementById('chargeName').value = name;
-      document.getElementById('chargeValue').value = currentValue;
-      document.getElementById('chargeModal').classList.add('active');
-    }
-    function closeChargeModal() { document.getElementById('chargeModal').classList.remove('active'); }
-
-    document.getElementById('chargeForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('chargeName').value;
-      const value = parseFloat(document.getElementById('chargeValue').value);
-      if (name === 'Making Charges') document.getElementById('makingChargesValue').textContent = value + '%';
-      if (name === 'Polish Charges') document.getElementById('polishChargesValue').textContent = value + '%';
-      if (name === 'GST') document.getElementById('gstValue').textContent = value + '%';
-      if (name === 'Service Charges') document.getElementById('serviceChargesValue').textContent = value + '%';
+    async function loadSettings() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?setting_key=eq.${encodeURIComponent(name)}`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?select=*`, {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
-        const existing = await res.json();
-        if (existing && existing.length > 0) {
-          await fetch(`${SUPABASE_URL}/rest/v1/settings?setting_key=eq.${encodeURIComponent(name)}`, {
-            method: 'PATCH',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ setting_value: value.toString() })
-          });
-        } else {
-          await fetch(`${SUPABASE_URL}/rest/v1/settings`, {
-            method: 'POST',
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ setting_key: name, setting_value: value.toString() })
-          });
-        }
-        alert('✅ ' + name + ' updated to ' + value + '%');
-        closeChargeModal();
-      } catch (error) {
-        alert('❌ Error: ' + error.message);
+        const settings = await res.json();
+        
+        const s = {};
+        (settings || []).forEach(item => { s[item.setting_key] = item.setting_value; });
+        
+        if (s.shop_name) document.getElementById('shopName').value = s.shop_name;
+        if (s.shop_name_urdu) document.getElementById('shopNameUrdu').value = s.shop_name_urdu;
+        if (s.shop_tagline) document.getElementById('shopTagline').value = s.shop_tagline;
+        if (s.shop_address) document.getElementById('shopAddress').value = s.shop_address;
+        if (s.shop_phone) document.getElementById('shopPhone').value = s.shop_phone;
+        if (s.shop_email) document.getElementById('shopEmail').value = s.shop_email;
+        
+        if (s.social_instagram) document.getElementById('socialInstagram').value = s.social_instagram;
+        if (s.social_facebook) document.getElementById('socialFacebook').value = s.social_facebook;
+        if (s.social_twitter) document.getElementById('socialTwitter').value = s.social_twitter;
+        if (s.social_youtube) document.getElementById('socialYoutube').value = s.social_youtube;
+        if (s.social_tiktok) document.getElementById('socialTiktok').value = s.social_tiktok;
+        
+      } catch (e) {
+        console.error('Settings load error:', e);
       }
-    });
+    }
+
+    async function upsertSetting(key, value) {
+      if (!value || value.trim() === '') {
+        await fetch(`${SUPABASE_URL}/rest/v1/settings?setting_key=eq.${encodeURIComponent(key)}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        return;
+      }
+      
+      const existing = await fetch(`${SUPABASE_URL}/rest/v1/settings?setting_key=eq.${encodeURIComponent(key)}&select=id`, {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+      const rows = await existing.json();
+      
+      if (rows && rows.length > 0) {
+        await fetch(`${SUPABASE_URL}/rest/v1/settings?setting_key=eq.${encodeURIComponent(key)}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ setting_value: value })
+        });
+      } else {
+        await fetch(`${SUPABASE_URL}/rest/v1/settings`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ setting_key: key, setting_value: value })
+        });
+      }
+    }
+
+    async function saveShopInfo() {
+      try {
+        await upsertSetting('shop_name', document.getElementById('shopName').value.trim());
+        await upsertSetting('shop_name_urdu', document.getElementById('shopNameUrdu').value.trim());
+        await upsertSetting('shop_tagline', document.getElementById('shopTagline').value.trim());
+        await upsertSetting('shop_address', document.getElementById('shopAddress').value.trim());
+        await upsertSetting('shop_phone', document.getElementById('shopPhone').value.trim());
+        await upsertSetting('shop_email', document.getElementById('shopEmail').value.trim());
+        alert('✅ Shop info saved!');
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
+    }
+
+    async function saveSocialLinks() {
+      try {
+        await upsertSetting('social_instagram', document.getElementById('socialInstagram').value.trim());
+        await upsertSetting('social_facebook', document.getElementById('socialFacebook').value.trim());
+        await upsertSetting('social_twitter', document.getElementById('socialTwitter').value.trim());
+        await upsertSetting('social_youtube', document.getElementById('socialYoutube').value.trim());
+        await upsertSetting('social_tiktok', document.getElementById('socialTiktok').value.trim());
+        alert('✅ Social links saved! Website footer par icons show honge.');
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
+    }
 
     // ===== PAYMENT METHODS =====
     function openPayModal(type) {
@@ -266,11 +349,10 @@
           bank: document.getElementById('bankContainer')
         };
 
-        // Clear
         Object.values(containers).forEach(c => c.innerHTML = '');
 
         const grouped = { easypaisa: [], jazzcash: [], bank: [] };
-        methods.forEach(m => {
+        (methods || []).forEach(m => {
           if (grouped[m.method_type]) grouped[m.method_type].push(m);
         });
 
@@ -294,7 +376,6 @@
         });
       } catch (e) {
         console.error(e);
-        alert('❌ Error loading payment methods: ' + e.message);
       }
     }
 
@@ -329,7 +410,11 @@
 
         const res = await fetch(url, {
           method,
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+          headers: { 
+            'apikey': SUPABASE_KEY, 
+            'Authorization': `Bearer ${SUPABASE_KEY}`, 
+            'Content-Type': 'application/json' 
+          },
           body: JSON.stringify(data)
         });
 
@@ -358,21 +443,12 @@
       }
     }
 
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('admin-modal')) {
-        e.target.classList.remove('active');
-      }
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.admin-modal').forEach(m => m.classList.remove('active'));
-      }
-    });
-
     document.addEventListener('DOMContentLoaded', () => {
       if (!checkAuth()) return;
+      loadSettings();
       loadPaymentMethods();
     });
   </script>
+
 </body>
 </html>
