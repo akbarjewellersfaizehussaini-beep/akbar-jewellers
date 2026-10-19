@@ -1,4 +1,4 @@
-// ===== SHAH REHAN JEWELLERS – APP LOGIC =====
+// ===== AKBAR JEWELLERS – APP LOGIC =====
 
 function formatPKR(amount) { 
   return 'Rs ' + Math.round(amount || 0).toLocaleString('en-PK'); 
@@ -13,7 +13,7 @@ function navigate(page) { window.location.href = page; }
 
 // ---------- AUTHENTICATION ----------
 function checkAuth(allowedRoles = []) {
-  const session = localStorage.getItem('srj_user_session');
+  const session = localStorage.getItem('akbar_user_session');
   if (!session) { window.location.href = 'login.html'; return null; }
   
   const user = JSON.parse(session);
@@ -26,16 +26,16 @@ function checkAuth(allowedRoles = []) {
 }
 
 function logout() {
-  localStorage.removeItem('srj_user_session');
+  localStorage.removeItem('akbar_user_session');
   window.location.href = 'login.html';
 }
 
 function getCurrentUser() {
-  const s = localStorage.getItem('srj_user_session');
+  const s = localStorage.getItem('akbar_user_session');
   return s ? JSON.parse(s) : null;
 }
 
-// ---------- CALCULATIONS (Dynamic) ----------
+// ---------- CALCULATIONS ----------
 function calculateInvoice(weight, rate, making, polish, gstPct, discount) {
   const metal = weight * rate;
   const makingTotal = making + polish;
@@ -60,7 +60,6 @@ function filterByDate(data, range) {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   
-  // Start of week (Sunday)
   const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
   const weekStr = startOfWeek.toISOString().slice(0, 10);
   
@@ -110,5 +109,5 @@ function printElement(elementId) {
   
   window.print();
   document.body.innerHTML = originalContent;
-  window.location.reload(); // Reload to restore JS state
+  window.location.reload();
 }

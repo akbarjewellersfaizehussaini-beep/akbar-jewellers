@@ -1,4 +1,4 @@
-/* ===== SHAH REHAN JEWELLERS – SOFTWARE STYLES ===== */
+/* ===== AKBAR JEWELLERS – SOFTWARE STYLES ===== */
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -51,42 +51,12 @@ body {
   gap: 10px;
 }
 
-.sync-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
+.sw-logo img {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: var(--success);
-  animation: pulse 2s infinite;
+  border: 2px solid var(--gold);
 }
-
-.status-dot.offline { background: var(--danger); animation: none; }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.1); }
-}
-
-.install-btn {
-  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-  color: var(--bg-dark);
-  padding: 8px 18px;
-  border: none;
-  border-radius: 50px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: none;
-}
-
-.install-btn.show { display: inline-block; }
 
 /* ===== NAVIGATION ===== */
 .sw-nav {
