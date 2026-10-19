@@ -2872,4 +2872,56 @@ body {
   .floating-whatsapp svg { width: 26px; height: 26px; }
   
   .site-header { top: 50px; }
+}/* ===== AKBAR JEWELLERS – URDU TAGLINE FONT ===== */
+.tagline-urdu {
+  font-family: 'Noto Nastaliq Urdu', serif;
+  direction: rtl;
+  font-size: 1.1rem;
+  color: #FFD700;
+  line-height: 2.2;
+  text-align: center;
+}
+
+.tagline-english {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  color: #FFF8DC;
+  letter-spacing: 1px;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Social Media Icons (Footer) */
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.social-icons a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #FFD700;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  background: #FFD700;
+  color: #0A0A0A;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.social-icons a svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
