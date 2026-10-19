@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artificial Jewellery – SHAH REHAN JEWELLERS</title>
+  <meta name="description" content="Elegant artificial jewellery in Lahore Cantt. Affordable prices.">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="blog.html" class="nav-link">Blog</a>
+      </nav>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a href="cart.html" style="position: relative; color: #FFD700; font-size: 1.5rem; text-decoration: none;">
+          🛒
+          <span id="cartCount" style="position: absolute; top: -8px; right: -10px; background: #DC2626; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50px; font-weight: 700;">0</span>
+        </a>
+        <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="cat-hero artificial-hero">
+    <img src="images/artificial-logo.jpg" alt="Artificial" class="cat-hero-logo" onerror="this.src='images/placeholder.svg'">
+    <h1>Artificial Jewellery</h1>
+    <p>ELEGANT • AFFORDABLE • FIXED PRICE</p>
+  </section>
+
+  <div class="container-main">
+    <div class="filters-bar">
+      <div class="filter-group">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="renderProducts(allProducts)">All</button>
+        <button class="filter-btn" onclick="filterBySubcategory('Bridal Sets')">Bridal Sets</button>
+        <button class="filter-btn" onclick="filterBySubcategory('Necklace Sets')">Necklace Sets</button>
+        <button class="filter-btn" onclick="filterBySubcategory('Earrings')">Earrings</button>
+        <button class="filter-btn" onclick="filterBySubcategory('Rings')">Rings</button>
+        <button class="filter-btn" onclick="filterBySubcategory('Bangles')">Bangles</button>
+      </div>
+      <div class="sort-group">
+        <select class="filter-select" onchange="sortProducts(this.value)">
+          <option value="new">Sort: Newest</option>
+          <option value="low">Price: Low to High</option>
+          <option value="high">Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+    
+    <div id="categoryProductsGrid" class="products-grid">
+      <div class="loading-spinner">Loading products...</div>
+    </div>
+  </div>
+
+  <section class="reviews-section">
+    <div class="container-main">
+      <h2 class="section-title">⭐ Celebrity Reviews</h2>
+      <p class="section-subtitle-urdu" dir="rtl">ہمارے معزز گاہکوں کی رائے</p>
+      <div class="review-carousel" id="reviewCarousel"></div>
+    </div>
+  </section>
+
+  <section class="write-review-section">
+    <div class="container-main">
+      <h2 class="section-title">✍️ Write Your Review</h2>
+      <p class="section-subtitle-urdu" dir="rtl">اپنی رائے دیں</p>
+      <form class="review-form" onsubmit="submitReview(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Your Name *</label>
+            <input type="text" id="reviewName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rating *</label>
+            <select id="reviewRating" class="form-input" required>
+              <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+              <option value="4">⭐⭐⭐⭐ Very Good</option>
+              <option value="3">⭐⭐⭐ Good</option>
+              <option value="2">⭐⭐ Fair</option>
+              <option value="1">⭐ Poor</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Review *</label>
+          <textarea id="reviewText" class="form-input" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn-gold" style="width: 100%; padding: 15px;">Submit Review</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- PRODUCT MODAL -->
+  <div id="productModal" class="modal-overlay">
+    <div class="modal-content product-modal">
+      <button class="modal-close" onclick="closeProductModal()">×</button>
+      
+      <div class="modal-grid">
+        <div class="modal-left">
+          <img id="modalImage" src="" alt="Product" class="modal-image">
+        </div>
+        
+        <div class="modal-right">
+          <h2 class="modal-title">SHAH REHAN JEWELLERS</h2>
+          <h3 id="modalProductName" class="product-name"></h3>
+          <p id="modalProductCode" class="product-code"></p>
+          <p id="modalDescription" class="product-description"></p>
+
+          <!-- PRODUCT DETAILS BOX (Price + Discount + Weight + Sold auto) -->
+          <div id="productDetailsBox" class="product-details-box"></div>
+
+          <!-- COLOR SECTION -->
+          <div id="colorSection" class="form-group">
+            <label class="form-label urdu" dir="rtl">رنگ منتخب کریں</label>
+            <select id="modalColor" class="form-input">
+              <option value="Golden">Golden</option>
+              <option value="Silver">Silver</option>
+              <option value="Rose Gold">Rose Gold</option>
+              <option value="Multi">Multi</option>
+            </select>
+          </div>
+
+          <!-- SIZE -->
+          <div class="form-group">
+            <label class="form-label urdu" dir="rtl">آپ کا سائز</label>
+            <select id="modalSize" class="form-input"><option value="">Select Size</option></select>
+          </div>
+
+          <!-- HIDDEN ELEMENTS (for JS compatibility) -->
+          <div id="karatSection" style="display:none;"><input type="hidden" name="karat" value="N/A"></div>
+          <div id="weightSection" style="display:none;"><input type="hidden" id="modalWeight" value="0"><input type="hidden" id="modalUnit" value="gram"></div>
+          <div id="customWeightBox" style="display:none;"></div>
+          <div id="customWeightBtn" style="display:none;"></div>
+          <div id="autoPriceDisplay" style="display:none;"></div>
+          <div id="priceBreakdown" class="hidden"></div>
+
+          <!-- BUTTONS -->
+          <div class="modal-buttons">
+            <button onclick="addToCart()" class="btn-gold">Add to Cart</button>
+            <button onclick="whatsappOrder()" class="btn-whatsapp">WhatsApp Order</button>
+          </div>
+
+          <p class="urdu-tagline urdu" dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-brand">SHAH REHAN JEWELLERS</h3>
+          <p>Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+          <p>📞 0092 326 6501314</p>
+          <p>✉️ shahrehanjewellers@google.com</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="blog.html">Blog</a>
+          <a href="disclaimer.html">Disclaimer</a>
+        </div>
+        <div>
+          <h4>Follow Us</h4>
+          <a href="https://wa.me/923266501314">WhatsApp</a>
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+        </div>
+      </div>
+      <div class="footer-taglines">
+        <p dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+        <p dir="rtl">آخر میں آپ کا اعتماد، ہماری ضمانت</p>
+        <p dir="rtl">ہر قدم مکمل شفافیت کے ساتھ</p>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 SHAH REHAN JEWELLERS. All Rights Reserved.</p>
+        <p class="creator-credit">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/923266501314" class="floating-whatsapp">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+  </a>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/category.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => initCategoryPage('artificial'));</script>
+
+</body>
+</html>

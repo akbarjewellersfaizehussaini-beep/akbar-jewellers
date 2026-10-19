@@ -1,0 +1,13 @@
+{
+  "name": "SRJ Jeweller Software",
+  "short_name": "SRJ Software",
+  "description": "SHAH REHAN JEWELLERS - Business Management Software for Jewellers",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#FFD700",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [],
+  "categories": ["business", "productivity", "finance"]
+}

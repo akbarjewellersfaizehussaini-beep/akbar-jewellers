@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">Sales</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">New Sale</h1>
+
+    <div class="form-card">
+      <h3 class="form-card-title">Customer Info</h3>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="cName" class="form-input" placeholder="Name"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="cPhone" class="form-input" placeholder="03XXXXXXXXX"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Address</label><input type="text" id="cAddress" class="form-input" placeholder="Address"></div>
+        <div class="form-group"><label class="form-label">Sale Date</label><input type="date" id="sDate" class="form-input"></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 class="form-card-title">Item Details</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Product ID (Optional)</label>
+          <select id="sProductId" class="form-select" onchange="autoFillProduct()">
+            <option value="">-- Select Product --</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Item Description *</label><input type="text" id="sItem" class="form-input" placeholder="e.g., Gold Ring"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Quantity *</label><input type="number" id="sQty" class="form-input" value="1" min="1" placeholder="1"></div>
+        <div class="form-group"><label class="form-label">Weight/gram (per piece) *</label><input type="number" id="sWeight" class="form-input" step="0.001" placeholder="0.000"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Rate/gram (Rs) *</label><input type="number" id="sRate" class="form-input" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Making Charges (Rs)</label><input type="number" id="sMaking" class="form-input" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">GST % (Auto)</label><input type="number" id="sGST" class="form-input" readonly style="background:#2A2A2A; color:#FFD700;"></div>
+      </div>
+    </div>
+
+    <div class="form-card" style="background: linear-gradient(135deg, #1C1C1C, #2A2A2A); border-color: #FFD700;">
+      <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 1.3rem;">
+        <span style="color: #FFD700; font-weight: 700;">TOTAL:</span>
+        <strong id="calTotal" style="color: #FFD700; font-family:'Playfair Display',serif;">Rs 0</strong>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Received Amount (Rs)</label><input type="number" id="sPaid" class="form-input" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">Balance / Udhaar (Rs)</label><input type="number" id="sRemaining" class="form-input" readonly style="background:#2A2A2A; color:#FCD34D;"></div>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+      <button class="btn-primary" onclick="saveSale(false)" style="flex: 1;">Save & View Invoice</button>
+      <button class="btn-secondary" onclick="saveSale(true)" style="flex: 1; background: #25D366; color: white; border: none;">Save & WhatsApp Invoice</button>
+    </div>
+
+    <h2 class="section-title">Recent Sales (Click to view Invoice)</h2>
+    <div class="data-list" id="salesList"></div>
+  </div>
+
+  <!-- Invoice Modal -->
+  <div id="invoiceModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableInvoice"></div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">Print Invoice</button>
+        <button class="btn-secondary" onclick="sendInvoiceWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let shopRules = { gst_pct: 3, making_pct: 15 };
+    let allProducts = [];
+    let currentInvoice = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales'])) return;
+      
+      document.getElementById('sDate').value = new Date().toISOString().slice(0, 10);
+      shopRules = await getShopSettings();
+      document.getElementById('sGST').value = shopRules.gst_pct;
+      
+      allProducts = await getRecordsFast('products');
+      const prodSelect = document.getElementById('sProductId');
+      allProducts.forEach(p => {
+        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name}</option>`;
+      });
+      
+      loadSales();
+      autoCalc();
+    });
+
+    function autoFillProduct() {
+      const code = document.getElementById('sProductId').value;
+      if (!code) return;
+      const prod = allProducts.find(p => p.product_code === code);
+      if (prod) {
+        document.getElementById('sItem').value = prod.name;
+        document.getElementById('sWeight').value = prod.weight;
+        autoCalc();
+      }
+    }
+
+    function autoCalc() {
+      const qty = parseFloat(document.getElementById('sQty').value) || 1;
+      const weight = parseFloat(document.getElementById('sWeight').value) || 0;
+      const rate = parseFloat(document.getElementById('sRate').value) || 0;
+      const making = parseFloat(document.getElementById('sMaking').value) || 0;
+      
+      // Total metal = Qty * Weight * Rate
+      const totalWeight = qty * weight;
+      const metal = totalWeight * rate;
+      const makingTotal = making * qty; // Making per piece
+      const subtotal = metal + makingTotal;
+      const gst = subtotal * (shopRules.gst_pct / 100);
+      const total = subtotal + gst;
+      
+      document.getElementById('calTotal').textContent = formatPKR(total);
+      const paid = parseFloat(document.getElementById('sPaid').value) || 0;
+      document.getElementById('sRemaining').value = Math.max(0, Math.round(total - paid));
+    }
+    ['sQty', 'sWeight', 'sRate', 'sMaking', 'sPaid'].forEach(id => document.getElementById(id)?.addEventListener('input', autoCalc));
+
+    async function saveSale(sendWA) {
+      const customer = document.getElementById('cName').value.trim();
+      const item = document.getElementById('sItem').value.trim();
+      const total = parseFloat(document.getElementById('calTotal').textContent.replace(/[^0-9]/g, '')) || 0;
+      
+      if (!customer || !item || total <= 0) { alert('❌ Fill customer name, item, and amounts'); return; }
+
+      const btn = event.target;
+      btn.textContent = 'Saving...'; btn.disabled = true;
+
+      try {
+        const qty = parseFloat(document.getElementById('sQty').value) || 1;
+        const weight = parseFloat(document.getElementById('sWeight').value) || 0;
+        
+        const sale = {
+          invoice_number: 'SRJ-' + Date.now(),
+          product_id: document.getElementById('sProductId').value || null,
+          customer_name: customer,
+          customer_phone: document.getElementById('cPhone').value.trim(),
+          customer_address: document.getElementById('cAddress').value.trim(),
+          items_summary: item,
+          qty: qty,
+          weight: weight,
+          total_weight: qty * weight, // Total weight save karein
+          rate: parseFloat(document.getElementById('sRate').value) || 0,
+          making: parseFloat(document.getElementById('sMaking').value) || 0,
+          gst_pct: shopRules.gst_pct,
+          total: total,
+          received: parseFloat(document.getElementById('sPaid').value) || 0,
+          balance: parseFloat(document.getElementById('sRemaining').value) || 0,
+          sale_date: document.getElementById('sDate').value || new Date().toISOString().slice(0,10)
+        };
+
+        const saved = await addRecord('sales', sale);
+        
+        if (sendWA) {
+          const shop = await getShopSettings();
+          const msg = `*INVOICE: ${sale.invoice_number}*\nCustomer: ${customer}\nItem: ${item} (Qty: ${qty})\nWeight: ${qty * weight}g\nRate: ${formatPKR(sale.rate)}/g\nTotal: ${formatPKR(total)}\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
+          openWhatsApp(sale.customer_phone, msg);
+        }
+        
+        currentInvoice = saved;
+        showInvoice(saved);
+        clearForm(); loadSales();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      } finally {
+        btn.textContent = sendWA ? 'Save & WhatsApp Invoice' : 'Save & View Invoice';
+        btn.disabled = false;
+      }
+    }
+
+    async function showInvoice(sale) {
+      const shop = await getShopSettings();
+      document.getElementById('printableInvoice').innerHTML = `
+        <div class="invoice-container">
+          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+            <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date || sale.created_at)}</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
+            </div>
+          </div>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+              <tr style="background:#FAF7F0;">
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight (Total)</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.qty || 1}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${((sale.qty || 1) * (sale.weight || 0)).toFixed(3)}g</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.rate)}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
+            <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
+            <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
+          </div>
+          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
+            TOTAL: ${formatPKR(sale.total)}
+          </div>
+          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
+            Thank you for shopping with ${shop.name}
+          </div>
+        </div>
+      `;
+      document.getElementById('invoiceModal').classList.add('active');
+    }
+
+    function sendInvoiceWhatsApp() {
+      if (!currentInvoice) return;
+      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${currentInvoice.qty||1})\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+      openWhatsApp(currentInvoice.customer_phone, msg);
+    }
+
+    function clearForm() {
+      ['cName','cPhone','cAddress','sItem','sWeight','sRate','sMaking','sPaid','sRemaining'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('sQty').value = '1';
+      document.getElementById('sProductId').value = '';
+      document.getElementById('sDate').value = new Date().toISOString().slice(0,10);
+      autoCalc();
+    }
+
+    async function loadSales() {
+      const sales = await getRecordsFast('sales');
+      const container = document.getElementById('salesList');
+      if (sales.length === 0) { container.innerHTML = '<div class="empty-state"><p>No sales yet</p></div>'; return; }
+      
+      container.innerHTML = sales.slice(0, 20).map(s => `
+        <div class="data-item" style="cursor:pointer;" onclick='showInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
+          <div>
+            <div class="data-item-title">${s.items_summary} <span style="color:#FFD700; font-size:0.8rem;">(Qty: ${s.qty || 1})</span></div>
+            <div class="data-item-sub">${s.customer_name} • ${formatDate(s.sale_date || s.created_at)}</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="data-item-value">${formatPKR(s.total)}</div>
+            ${s.balance > 0 ? `<div class="data-item-sub" style="color:#FCD34D;">Due: ${formatPKR(s.balance)}</div>` : '<div class="data-item-sub" style="color:#86EFAC;">Paid</div>'}
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

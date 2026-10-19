@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gold Jewellery Shop in Lahore Cantt | Shah Rehan Jewellers – 24K Gold & Diamond</title>
+<meta name="description" content="Shah Rehan Jewellers – Best gold, silver & diamond jewellery shop in Main Bazar #2, Ghaziabad, Lahore Cantt. Live 24K gold rates, bridal sets, custom designs. Call 0092 326 6501314.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;500;600;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "JewelryStore",
+  "name": "Shah Rehan Jewellers",
+  "url": "https://bilalmarghoobboutique-cmyk.github.io/shah-rehan-jewellers/",
+  "telephone": "+923266501314",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Main Bazar #2, Ghaziabad",
+    "addressLocality": "Lahore Cantt",
+    "addressCountry": "PK"
+  },
+  "priceRange": "$$",
+  "openingHours": "Mo-Sa 11:00-21:00"
+}
+</script>
+
+</head>
+<body>
+
+  <!-- ===================== PREMIUM TOP BAR ===================== -->
+  <div class="top-bar">
+    <div class="container mx-auto px-4 flex justify-between items-center text-sm">
+      <div class="top-bar-rates" id="topBarRates">
+        <span class="rate-item">
+          <img src="images/gold-logo.jpg" alt="Gold" class="rate-icon-img" onerror="this.style.display='none'">
+          <span class="rate-label">24K Gold</span>
+          <span class="rate-value" id="top24K">Loading...</span>
+          <span class="rate-unit">/tola</span>
+        </span>
+        <span class="divider">|</span>
+        <span class="rate-item pathoor-item">
+          <img src="images/pathoor-logo.jpg" alt="Pathoor" class="rate-icon-img" onerror="this.style.display='none'">
+          <span class="rate-label">24K Pathoor</span>
+          <span class="rate-value" id="topPathoor">Loading...</span>
+          <span class="rate-unit">/tola</span>
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="images/srj-logo.svg" alt="SRJ Logo" class="top-bar-logo rotating-logo" onerror="this.style.display='none'">
+        <span class="top-bar-contact">📞 0092 326 6501314</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="images/srj-logo.svg" alt="SRJ Logo" class="header-logo rotating-logo" onerror="this.style.display='none'">
+        <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      </div>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link active">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="vlogs.html" class="nav-link">Vlogs</a>
+        <a href="blog.html" class="nav-link">Blog</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a href="cart.html" style="position: relative; color: #FFD700; font-size: 1.5rem; text-decoration: none;">
+          🛒
+          <span id="cartCount" style="position: absolute; top: -8px; right: -10px; background: #DC2626; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50px; font-weight: 700;">0</span>
+        </a>
+        <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== HERO SECTION (30% Content + 70% Video) ===================== -->
+  <section class="hero-split">
+    
+    <!-- LEFT: Content (30%) -->
+    <div class="hero-content-half">
+      <div class="hero-content-inner">
+        <img src="images/srj-logo.svg" alt="SRJ Logo" class="hero-rotating-logo" onerror="this.style.display='none'">
+        <h1 class="hero-title">Shah Rehan Jewellers</h1>
+        <p class="hero-subtitle">Exclusive Gold & Diamond Collection 2026</p>
+        <div class="hero-buttons">
+          <a href="collections.html" class="btn-gold">Shop Now</a>
+          <a href="https://wa.me/923266501314" class="btn-outline">WhatsApp Us</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RIGHT: Video (70%) - Autoplay -->
+    <a href="collections.html" class="hero-video-half">
+      <video 
+        id="heroVideo"
+        autoplay 
+        muted 
+        loop 
+        playsinline 
+        webkit-playsinline
+        preload="auto"
+        disablepictureinpicture
+        controlslist="nodownload"
+        class="hero-video-element">
+        <source src="videos/shah-rehan-model.mp4" type="video/mp4">
+      </video>
+      <div class="video-overlay"></div>
+      <div class="watermark">SHAH REHAN JEWELLERS</div>
+    </a>
+    
+  </section>
+
+  <!-- LIVE RATES -->
+  <section class="rates-section">
+    <div class="container mx-auto px-4">
+      <h2 class="section-title">Live Gold & Silver Rates</h2>
+      <p class="section-subtitle-urdu" dir="rtl">آج کا سونے اور چاندی کا ریٹ</p>
+      
+      <div class="rate-tabs">
+        <button class="tab-btn active" onclick="switchRateTab('gold')">
+          <img src="images/gold-logo.jpg" alt="Gold" class="tab-logo" onerror="this.style.display='none'">
+          Gold
+        </button>
+        <button class="tab-btn" onclick="switchRateTab('silver')">
+          <img src="images/silver-logo.jpg" alt="Silver" class="tab-logo" onerror="this.style.display='none'">
+          Silver
+        </button>
+        <button class="tab-btn" onclick="switchRateTab('biscuits')">
+          <img src="images/gold-buiscuit-logo.jpg" alt="Biscuits" class="tab-logo" onerror="this.style.display='none'">
+          Biscuits
+        </button>
+        <a href="https://scicalcpro.vercel.app/gold-silver-calculator.html" target="_blank" class="tab-btn calculator-tab">
+          <span class="tab-calc-icon">🧮</span>
+          Gold & Silver Calculator
+        </a>
+      </div>
+
+      <!-- GOLD TAB (35% Carousel + 65% Graph) -->
+      <div id="goldRatesTab" class="rates-content">
+        <div class="rates-with-graph">
+          
+          <div class="rates-carousel-side">
+            <div id="goldRatesContainer" class="rates-grid"></div>
+          </div>
+          
+          <div class="rates-graph-side">
+            <div class="graph-header">
+              <h3 class="graph-title">📈 Gold Rate Chart</h3>
+              <p class="graph-subtitle">Last 30 Days Trend (Lahore)</p>
+            </div>
+            <div class="graph-wrapper">
+              <canvas id="goldRateChart"></canvas>
+            </div>
+            <div class="graph-stats">
+              <div class="stat-item">
+                <span class="stat-label">Today Close</span>
+                <span class="stat-value" id="graphToday">—</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Today High</span>
+                <span class="stat-value" id="todayHigh">—</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Today Low</span>
+                <span class="stat-value" id="todayLow">—</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Change</span>
+                <span class="stat-value" id="graphChange">—</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">30D High</span>
+                <span class="stat-value" id="graphHigh">—</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">30D Low</span>
+                <span class="stat-value" id="graphLow">—</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      <!-- SILVER TAB -->
+      <div id="silverRatesTab" class="rates-content hidden">
+        <div class="rates-with-graph">
+          <div class="rates-carousel-side">
+            <div id="silverRatesContainer" class="rates-grid-silver"></div>
+          </div>
+          <div class="rates-graph-side">
+            <div class="graph-header">
+              <h3 class="graph-title">📈 Silver Rate Chart</h3>
+              <p class="graph-subtitle">Last 30 Days Trend (Lahore)</p>
+            </div>
+            <div class="graph-wrapper">
+              <canvas id="silverRateChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BISCUITS TAB -->
+      <div id="biscuitsTab" class="rates-content hidden">
+        <div class="biscuits-grid">
+
+          <div class="biscuit-card">
+            <div class="biscuit-logo-wrap">
+              <img src="images/gold-buiscuit-logo.jpg" alt="Gold Biscuit" onerror="this.src='images/placeholder.svg'">
+            </div>
+            <h3>Gold Biscuit</h3>
+            <p class="biscuit-subtitle">24K Pure Gold • Live Rate</p>
+
+            <div class="biscuit-units" id="goldBiscuitUnits">
+              <div class="loading-units">Loading rates...</div>
+            </div>
+          </div>
+
+          <div class="biscuit-card pathoor-biscuit-card">
+            <div class="biscuit-logo-wrap pathoor-logo-wrap">
+              <img src="images/pathoor-logo.jpg" alt="Pathoor Gold" onerror="this.src='images/placeholder.svg'">
+            </div>
+            <h3>24K Pathoor Gold</h3>
+            <p class="biscuit-subtitle">Local Market Rate • Live</p>
+
+            <div class="biscuit-units" id="pathoorBiscuitUnits">
+              <div class="loading-units">Loading rates...</div>
+            </div>
+          </div>
+
+          <div class="biscuit-card silver-biscuit-card">
+            <div class="biscuit-logo-wrap silver-logo-wrap">
+              <img src="images/silver-1.jpg" alt="Silver Biscuit" onerror="this.src='images/placeholder.svg'">
+            </div>
+            <h3>Silver Biscuit</h3>
+            <p class="biscuit-subtitle">999 Pure Silver • Live Rate</p>
+
+            <div class="biscuit-units" id="silverBiscuitUnits">
+              <div class="loading-units">Loading rates...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="usd-rate">
+        <span>💵 1 USD = <strong id="usdRate">276.95</strong> PKR</span>
+        <span class="last-updated">Last Updated: <span id="lastUpdated">Loading...</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="categories-section">
+    <div class="container mx-auto px-4">
+      <h2 class="section-title">Our Collections</h2>
+      
+      <div class="categories-grid">
+        <a href="gold.html" class="category-card">
+          <div class="category-logo-img">
+            <img src="images/gold-logo.jpg" alt="Gold Jewellery" onerror="this.src='images/placeholder.svg'">
+          </div>
+          <div class="category-name">Gold Jewellery</div>
+        </a>
+
+        <a href="silver.html" class="category-card">
+          <div class="category-logo-img">
+            <img src="images/silver-logo.jpg" alt="Silver Jewellery" onerror="this.src='images/placeholder.svg'">
+          </div>
+          <div class="category-name">Silver Jewellery</div>
+        </a>
+
+        <a href="diamond.html" class="category-card">
+          <div class="category-logo-img">
+            <img src="images/diamond-logo.jpg" alt="Diamond" onerror="this.src='images/placeholder.svg'">
+          </div>
+          <div class="category-name">Diamond</div>
+        </a>
+
+        <a href="artificial.html" class="category-card">
+          <div class="category-logo-img">
+            <img src="images/artificial-logo.jpg" alt="Artificial" onerror="this.src='images/placeholder.svg'">
+          </div>
+          <div class="category-name">Artificial</div>
+        </a>
+
+        <a href="javascript:void(0)" onclick="scrollToRatesAndTab('biscuits')" class="category-card">
+          <div class="category-logo-img">
+            <img src="images/gold-buiscuit-logo.jpg" alt="Gold & Silver Biscuits" onerror="this.src='images/placeholder.svg'">
+          </div>
+          <div class="category-name">Gold & Silver Biscuits</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="products-section">
+    <div class="container mx-auto px-4">
+      <h2 class="section-title">Featured Products</h2>
+      <p class="section-subtitle-urdu" dir="rtl">ہماری منتخب مصنوعات</p>
+      
+      <div id="productsGrid" class="products-grid">
+        <div class="loading-spinner">Loading products...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== VLOGS SECTION ===================== -->
+  <section class="vlogs-home-section">
+    <div class="container mx-auto px-4">
+      <h2 class="section-title">Watch Our Vlogs</h2>
+      <p class="section-subtitle-urdu" dir="rtl">ہماری ویڈیوز دیکھیں</p>
+      
+      <div id="homeVlogsGrid" class="vlogs-home-grid">
+        <div class="loading-vlogs">Loading vlogs...</div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="vlogs.html" class="btn-gold">🎬 View All Vlogs</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BLOG SECTION ===================== -->
+  <section class="blog-section">
+    <div class="container mx-auto px-4">
+      <h2 class="section-title">Latest from Our Blog</h2>
+      <p class="section-subtitle-urdu" dir="rtl">ہمارے بلاگ سے تازہ ترین</p>
+      
+      <div id="homeBlogGrid" class="blog-grid">
+        <div class="loading-blogs">Loading blogs...</div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="blog.html" class="btn-gold">📚 View All Blog Posts</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT MODAL -->
+ <!-- PRODUCT MODAL (Advanced - Same as Category Pages) -->
+<div id="productModal" class="modal-overlay">
+  <div class="modal-content product-modal">
+    <button class="modal-close" onclick="closeProductModal()">×</button>
+    
+    <div class="modal-grid">
+      <div class="modal-left">
+        <img id="modalImage" src="" alt="Product" class="modal-image">
+      </div>
+      
+      <div class="modal-right">
+        <h2 class="modal-title">SHAH REHAN JEWELLERS</h2>
+        <h3 id="modalProductName" class="product-name"></h3>
+        <p id="modalProductCode" class="product-code"></p>
+        <p id="modalDescription" class="product-description"></p>
+        
+        <!-- PRODUCT DETAILS BOX (Weight, Karat, Sold, Price) -->
+        <div id="productDetailsBox" class="product-details-box"></div>
+        
+        <!-- AUTO PRICE DISPLAY -->
+        <div id="autoPriceDisplay"></div>
+        
+        <!-- CUSTOM WEIGHT BUTTON (Gold/Silver) -->
+        <button id="customWeightBtn" class="btn-custom-weight" onclick="toggleCustomWeight()" style="display:none;">
+          ⚖️ Apni Marzi ka Wazan Banwain
+        </button>
+        
+        <!-- CUSTOM WEIGHT SECTION -->
+        <div id="customWeightBox" style="display: none;">
+          <div class="custom-weight-notice">
+            <div class="notice-icon">⚖️</div>
+            <div>
+              <strong>Custom Weight Order</strong>
+              <p>Apni pasand ka weight daalein. Custom jewellery banwaen.</p>
+            </div>
+          </div>
+          
+          <!-- KARAT -->
+          <div id="karatSection" class="form-group">
+            <label class="form-label urdu" dir="rtl">آپ کس کیرٹ میں بنوانا چاہتے ہیں؟</label>
+            <div class="karat-options">
+              <label class="karat-option"><input type="radio" name="karat" value="24K" checked> 24K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="22K"> 22K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="21K"> 21K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="18K"> 18K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="16K"> 16K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="14K"> 14K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="12K"> 12K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="10K"> 10K</label>
+              <label class="karat-option"><input type="radio" name="karat" value="8K"> 8K</label>
+            </div>
+          </div>
+          
+          <!-- COLOR (Artificial only) -->
+          <div id="colorSection" class="form-group" style="display: none;">
+            <label class="form-label urdu" dir="rtl">رنگ منتخب کریں</label>
+            <select id="modalColor" class="form-input">
+              <option value="Golden">Golden</option>
+              <option value="Silver">Silver</option>
+              <option value="Rose Gold">Rose Gold</option>
+              <option value="Multi">Multi</option>
+            </select>
+          </div>
+          
+          <!-- SIZE -->
+          <div class="form-group">
+            <label class="form-label urdu" dir="rtl">آپ کا سائز</label>
+            <select id="modalSize" class="form-input">
+              <option value="">Select Size</option>
+            </select>
+          </div>
+          
+          <!-- WEIGHT INPUT -->
+          <div id="weightSection" class="form-group">
+            <label class="form-label urdu" dir="rtl">آپ کا مطلوبہ وزن</label>
+            <div class="weight-input-group">
+              <input type="number" id="modalWeight" class="form-input" placeholder="Enter weight" step="0.1" min="0.1">
+              <select id="modalUnit" class="form-input unit-select">
+                <option value="gram">Gram</option>
+                <option value="tola">Tola</option>
+                <option value="masha">Masha</option>
+                <option value="ratti">Ratti</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- CALCULATE BUTTON -->
+          <button onclick="calculatePrice()" class="btn-calculate" id="calculateBtn">Calculate Price</button>
+          
+          <!-- PRICE BREAKDOWN -->
+          <div id="priceBreakdown" class="price-breakdown hidden">
+            <div class="price-row"><span>Rate/gram</span><span id="pRate">Rs 0</span></div>
+            <div class="price-row"><span>Weight</span><span id="pWeight">0 g</span></div>
+            <div class="price-row"><span>Metal Value</span><span id="pGold">Rs 0</span></div>
+            <div class="price-row" id="pMakingRow"><span>Making (15%)</span><span id="pMaking">Rs 0</span></div>
+            <div class="price-row" id="pPolishRow"><span>Polish (10%)</span><span id="pPolish">Rs 0</span></div>
+            <div class="price-row" id="pGSTRow"><span>GST (3%)</span><span id="pGST">Rs 0</span></div>
+            <div class="price-row total-row"><span>TOTAL</span><span id="pTotal">Rs 0</span></div>
+          </div>
+          
+          <!-- BUTTONS (Inside custom weight) -->
+          <div class="modal-buttons" id="modalButtons" style="display:none;">
+            <button onclick="addToCart()" class="btn-gold">Add to Cart</button>
+            <button onclick="whatsappOrder()" class="btn-whatsapp">WhatsApp Order</button>
+          </div>
+        </div>
+        
+        <!-- READYMADE BUTTONS (Always visible) -->
+        <div id="readymadeButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+          <button onclick="buyReadymade()" class="btn-gold">🛒 Add to Cart</button>
+          <button onclick="whatsappReadymade()" class="btn-whatsapp">📱 WhatsApp</button>
+        </div>
+        
+        <p class="urdu-tagline urdu" dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- FOOTER -->
+   <!-- FOOTER -->
+  <footer class="site-footer footer-premium">
+    <div class="container mx-auto px-4 py-12">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-brand">SHAH REHAN JEWELLERS</h3>
+          <p>Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+          <p>📞 0092 326 6501314</p>
+          <p>✉️ shahrehanjewellers@google.com</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="vlogs.html">Vlogs</a>
+          <a href="blog.html">Blog</a>
+          <a href="disclaimer.html">Disclaimer</a>
+        </div>
+        <div>
+          <h4>Follow Us</h4>
+          <a href="https://wa.me/923266501314">WhatsApp</a>
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+        </div>
+      </div>
+      
+      <div class="footer-taglines-premium">
+        <p class="footer-tagline-item urdu" dir="rtl">آپ کا آرڈر مکمل رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+        <p class="footer-tagline-item urdu" dir="rtl">آپ کا اعتماد ہماری سب سے بڑی ضمانت ہے</p>
+        <p class="footer-tagline-item urdu" dir="rtl">ہر قدم مکمل شفافیت اور دیانت داری کے ساتھ</p>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2026 SHAH REHAN JEWELLERS. All Rights Reserved.</p>
+        <p class="creator-credit">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FLOATING WHATSAPP -->
+  <a href="https://wa.me/923266501314" class="floating-whatsapp">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+  </a>
+
+  <script>
+    // Scroll to rates and open specific tab
+    function scrollToRatesAndTab(tab) {
+      document.querySelector('.rates-section').scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        switchRateTab(tab);
+      }, 500);
+    }
+
+    // Force video autoplay
+    document.addEventListener('DOMContentLoaded', function() {
+      const video = document.getElementById('heroVideo');
+      if (video) {
+        video.muted = true;
+        video.play().catch(function(err) {
+          console.log('Autoplay attempt failed:', err);
+          const playVideo = () => {
+            video.play().then(() => {
+              document.removeEventListener('click', playVideo);
+              document.removeEventListener('touchstart', playVideo);
+            });
+          };
+          document.addEventListener('click', playVideo);
+          document.addEventListener('touchstart', playVideo);
+          setTimeout(() => video.play().catch(e => console.log('Retry failed:', e)), 1000);
+        });
+      }
+    });
+  </script>
+
+  <script src="js/supabase.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- ===================== LOAD HOMEPAGE VLOGS ===================== -->
+  <script>
+    async function loadHomeVlogs() {
+      const grid = document.getElementById('homeVlogsGrid');
+      if (!grid) return;
+      
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/vlogs?select=*&is_active=eq.true&order=display_order.asc,created_at.desc&limit=3`,
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+          }
+        );
+        
+        const vlogs = await res.json();
+        
+        if (!vlogs || vlogs.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-vlogs-home" style="grid-column:1/-1;">
+              <div style="font-size:3rem;margin-bottom:12px;">📹</div>
+              <p style="color:#B8B8B8;">No vlogs yet. Check back soon!</p>
+            </div>
+          `;
+          return;
+        }
+        
+        grid.innerHTML = vlogs.map(v => {
+          const date = new Date(v.created_at);
+          const formattedDate = date.toLocaleDateString('en-PK', { 
+            day: '2-digit', month: 'short', year: 'numeric' 
+          });
+          
+          const categoryMap = {
+            'showcase': 'Showcase',
+            'bridal': 'Bridal',
+            'diamond': 'Diamond',
+            'gold': 'Gold',
+            'silver': 'Silver',
+            'artificial': 'Artificial',
+            'shop-tour': 'Shop Tour',
+            'behind-scenes': 'Behind Scenes',
+            'other': 'Video'
+          };
+          const categoryLabel = categoryMap[v.category] || 'Video';
+          
+          return `
+            <div class="vlog-home-card">
+              <div class="vlog-home-video-wrapper">
+                <iframe 
+                  src="https://www.youtube.com/embed/${v.youtube_id}?rel=0&modestbranding=1" 
+                  title="${v.title}"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowfullscreen>
+                </iframe>
+              </div>
+              <div class="vlog-home-info">
+                <span class="vlog-home-category">${categoryLabel}</span>
+                <h3>${v.title}</h3>
+                <p>${v.description || ''}</p>
+                <div class="vlog-home-date">
+                  <span>📅</span>
+                  <span>${formattedDate}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Error loading vlogs:', error);
+        grid.innerHTML = '<div class="loading-vlogs">Error loading vlogs</div>';
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadHomeVlogs);
+  </script>
+
+  <!-- ===================== LOAD HOMEPAGE BLOGS ===================== -->
+  <script>
+    async function loadHomeBlogs() {
+      const grid = document.getElementById('homeBlogGrid');
+      if (!grid) return;
+      
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/blogs?select=*&is_published=eq.true&order=created_at.desc&limit=3`,
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+          }
+        );
+        
+        const blogs = await res.json();
+        
+        if (!blogs || blogs.length === 0) {
+          grid.innerHTML = '<div class="loading-blogs">No blogs yet</div>';
+          return;
+        }
+        
+        grid.innerHTML = blogs.map(b => `
+          <a href="blog-post.html?slug=${b.slug}" class="blog-card-with-image">
+            <div class="blog-card-image-wrapper">
+              <img src="${b.featured_image || 'images/placeholder.svg'}" alt="${b.title}" onerror="this.src='images/placeholder.svg'">
+              <span class="blog-card-category">${b.category || 'Blog'}</span>
+            </div>
+            <div class="blog-card-content">
+              <h3>${b.title}</h3>
+              <p>${b.excerpt || ''}</p>
+              <span class="blog-read-more">Read More →</span>
+            </div>
+          </a>
+        `).join('');
+        
+      } catch (error) {
+        console.error('Error loading blogs:', error);
+        grid.innerHTML = '<div class="loading-blogs">Error loading blogs</div>';
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadHomeBlogs);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <rect width="400" height="300" fill="#1C1C1C"/>
+  <circle cx="200" cy="130" r="50" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.3"/>
+  <text x="200" y="145" font-family="Playfair Display, serif" font-size="40" fill="#FFD700" 
+        text-anchor="middle" opacity="0.5">💎</text>
+  <text x="200" y="220" font-family="Poppins, sans-serif" font-size="16" fill="#B8B8B8" 
+        text-anchor="middle">SHAH REHAN JEWELLERS</text>
+  <text x="200" y="245" font-family="Poppins, sans-serif" font-size="12" fill="#666" 
+        text-anchor="middle">Image Coming Soon</text>
+</svg>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog – SHAH REHAN JEWELLERS</title>
+  <meta name="description" content="Read latest jewellery blogs from Shah Rehan Jewellers. Gold rate, bridal trends, investment guides.">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .blog-hero { height: 40vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 50%, rgba(255,215,0,0.3), transparent 60%), linear-gradient(135deg, #1A1A2E, #0F0F1E); }
+    .blog-hero h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: #FFD700; }
+    .blog-container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
+    .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; margin-top: 40px; }
+    .blog-card { background: linear-gradient(135deg, #1C1C1C, #2A2A2A); border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; overflow: hidden; transition: all 0.4s; text-decoration: none; color: inherit; display: block; }
+    .blog-card:hover { transform: translateY(-8px); border-color: #FFD700; box-shadow: 0 20px 50px rgba(255,215,0,0.3); }
+    .blog-card img { width: 100%; height: 220px; object-fit: cover; }
+    .blog-card-info { padding: 20px; }
+    .blog-card-info h3 { font-family: 'Playfair Display', serif; color: #FFD700; font-size: 1.2rem; margin-bottom: 8px; }
+    .blog-card-info p { color: #B8B8B8; font-size: 0.9rem; }
+    .blog-category { display: inline-block; background: rgba(255,215,0,0.15); color: #FFD700; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; margin-bottom: 8px; }
+    .loading-blogs { grid-column: 1/-1; text-align: center; padding: 60px; color: #FFD700; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="images/srj-logo.svg" alt="SRJ Logo" class="header-logo rotating-logo" onerror="this.style.display='none'">
+        <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      </div>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="vlogs.html" class="nav-link">Vlogs</a>
+        <a href="blog.html" class="nav-link active">Blog</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+    </div>
+  </header>
+
+  <section class="blog-hero">
+    <h1>📝 Our Blog</h1>
+  </section>
+
+  <div class="blog-container">
+    <div id="blogGrid" class="blog-grid">
+      <div class="loading-blogs">Loading blogs...</div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12 text-center">
+      <p class="footer-brand">SHAH REHAN JEWELLERS</p>
+      <p style="color: #B8B8B8; margin: 15px 0;">Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+      <p style="font-size: 9px; color: #666; margin-top: 30px;">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+    </div>
+  </footer>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    async function loadBlogs() {
+      const grid = document.getElementById('blogGrid');
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/blogs?select=*&is_published=eq.true&order=created_at.desc`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        const blogs = await res.json();
+        
+        if (!blogs || blogs.length === 0) {
+          grid.innerHTML = '<div class="loading-blogs">No blogs yet</div>';
+          return;
+        }
+        
+        grid.innerHTML = blogs.map(b => `
+          <a href="blog-post.html?slug=${b.slug}" class="blog-card">
+            <img src="${b.featured_image || 'images/placeholder.svg'}" alt="${b.title}" onerror="this.src='images/placeholder.svg'">
+            <div class="blog-card-info">
+              <span class="blog-category">${b.category || 'Blog'}</span>
+              <h3>${b.title}</h3>
+              <p>${b.excerpt || ''}</p>
+            </div>
+          </a>
+        `).join('');
+      } catch (e) {
+        grid.innerHTML = '<div class="loading-blogs">Error loading blogs</div>';
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadBlogs);
+  </script>
+</body>
+</html>

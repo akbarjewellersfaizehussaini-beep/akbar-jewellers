@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khata / Ledger – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+  <style>
+    .ledger-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .ledger-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .ledger-box { background: #0A0A0A; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid rgba(255,215,0,0.1); }
+    .ledger-box .label { color: #B8B8B8; font-size: 0.75rem; text-transform: uppercase; }
+    .ledger-box .value { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-top: 5px; }
+    .txn-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .txn-table th, .txn-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,215,0,0.1); font-size: 0.9rem; }
+    .txn-table th { color: #FFD700; font-size: 0.8rem; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">Khata / Ledger</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Khata / Ledger</h1>
+    <p class="page-subtitle">View complete account statement of any person.</p>
+
+    <div class="ledger-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Person Type</label>
+          <select id="lType" class="form-select" onchange="loadPersons()">
+            <option value="customer">Customer</option>
+            <option value="supplier">Supplier</option>
+            <option value="karigar">Karigar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Name</label>
+          <select id="lPerson" class="form-select" onchange="loadLedger()">
+            <option value="">-- Select --</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn-primary" onclick="printElement('printableLedger')" style="flex: 1;">Print Ledger</button>
+        <button class="btn-secondary" onclick="sendLedgerWhatsApp()" style="flex: 1; background: #25D366; color: white; border: none;">WhatsApp</button>
+      </div>
+    </div>
+
+    <div id="ledgerDisplay"></div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let ledgerData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      
+      // URL Parameters check (agar customer/supplier/karigar page se click hua hai)
+      const params = new URLSearchParams(window.location.search);
+      const preType = params.get('type');
+      const preName = params.get('name');
+      
+      if (preType) {
+        document.getElementById('lType').value = preType;
+        await loadPersons();
+        if (preName) {
+          document.getElementById('lPerson').value = preName;
+          await loadLedger();
+        }
+      } else {
+        await loadPersons();
+      }
+    });
+
+    async function loadPersons() {
+      const type = document.getElementById('lType').value;
+      const select = document.getElementById('lPerson');
+      select.innerHTML = '<option value="">-- Select --</option>';
+      document.getElementById('ledgerDisplay').innerHTML = '';
+      
+      let data = [];
+      if (type === 'customer') data = await getRecordsFast('customers');
+      else if (type === 'supplier') data = await getRecordsFast('suppliers');
+      else if (type === 'karigar') data = await getRecordsFast('karigars');
+
+      data.forEach(p => {
+        select.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+      });
+    }
+
+    async function loadLedger() {
+      const type = document.getElementById('lType').value;
+      const name = document.getElementById('lPerson').value;
+      if (!name) { document.getElementById('ledgerDisplay').innerHTML = ''; return; }
+
+      document.getElementById('ledgerDisplay').innerHTML = '<p style="text-align:center; padding:30px; color:#FFD700;">Loading...</p>';
+
+      const shop = await getShopSettings();
+      let transactions = [];
+      let totalBill = 0;
+      let totalPaid = 0;
+
+      if (type === 'customer') {
+        const sales = await getRecordsFast('sales');
+        const payments = await getRecordsFast('payments');
+        
+        sales.filter(s => s.customer_name === name).forEach(s => {
+          totalBill += Number(s.total) || 0;
+          transactions.push({ date: s.sale_date || s.created_at, desc: `Sale - ${s.items_summary}`, debit: Number(s.total) || 0, credit: 0, ref: s.invoice_number });
+        });
+        
+        payments.filter(p => p.person_name === name && p.person_type === 'customer').forEach(p => {
+          totalPaid += Number(p.amount) || 0;
+          transactions.push({ date: p.payment_date || p.created_at, desc: `Payment Received (${p.payment_type})`, debit: 0, credit: Number(p.amount) || 0, ref: p.receipt_number });
+        });
+      }
+      else if (type === 'supplier') {
+        const purchases = await getRecordsFast('purchases');
+        const payments = await getRecordsFast('payments');
+        
+        purchases.filter(p => p.supplier_name === name).forEach(p => {
+          totalBill += Number(p.total) || 0;
+          transactions.push({ date: p.purchase_date || p.created_at, desc: `Purchase - ${p.item}`, debit: Number(p.total) || 0, credit: 0, ref: p.invoice_no });
+        });
+        
+        payments.filter(p => p.person_name === name && p.person_type === 'supplier').forEach(p => {
+          totalPaid += Number(p.amount) || 0;
+          transactions.push({ date: p.payment_date || p.created_at, desc: `Payment Paid (${p.payment_type})`, debit: 0, credit: Number(p.amount) || 0, ref: p.receipt_number });
+        });
+      }
+      else if (type === 'karigar') {
+        const services = await getRecordsFast('services');
+        const payments = await getRecordsFast('payments');
+        
+        services.filter(s => s.karigar_name === name).forEach(s => {
+          totalBill += Number(s.charges) || 0;
+          transactions.push({ date: s.service_date || s.created_at, desc: `Job - ${s.item}`, debit: Number(s.charges) || 0, credit: 0, ref: s.id });
+        });
+        
+        payments.filter(p => p.person_name === name && p.person_type === 'karigar').forEach(p => {
+          totalPaid += Number(p.amount) || 0;
+          transactions.push({ date: p.payment_date || p.created_at, desc: `Payment Paid (${p.payment_type})`, debit: 0, credit: Number(p.amount) || 0, ref: p.receipt_number });
+        });
+      }
+
+      // Sort by date
+      transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      // Calculate running balance
+      let running = 0;
+      transactions.forEach(t => { running += t.debit - t.credit; t.balance = running; });
+
+      const balance = totalBill - totalPaid;
+      ledgerData = { type, name, transactions, totalBill, totalPaid, balance, shop };
+
+      document.getElementById('ledgerDisplay').innerHTML = `
+        <div class="ledger-card" id="printableLedger">
+          <div style="text-align:center; border-bottom:2px solid #FFD700; padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="font-family:'Playfair Display',serif; color:#FFD700; margin:0; font-size:1.5rem;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:0.8rem; color:#B8B8B8;">${shop.address}</p>
+            <h2 style="margin:15px 0 5px; color:#FFD700; font-family:'Playfair Display',serif;">${name} - ${type.toUpperCase()} LEDGER</h2>
+            <p style="margin:0; font-size:0.75rem; color:#B8B8B8;">Generated: ${formatDate(new Date())}</p>
+          </div>
+
+          <div class="ledger-summary">
+            <div class="ledger-box"><div class="label">Total Bill</div><div class="value" style="color:#93C5FD;">${formatPKR(totalBill)}</div></div>
+            <div class="ledger-box"><div class="label">Total Paid</div><div class="value" style="color:#86EFAC;">${formatPKR(totalPaid)}</div></div>
+            <div class="ledger-box"><div class="label">Final Balance</div><div class="value" style="color:${balance > 0 ? '#FCA5A5' : '#86EFAC'};">${formatPKR(Math.abs(balance))}</div></div>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="txn-table">
+              <thead><tr><th>Date</th><th>Description</th><th>Bill (Dr)</th><th>Paid (Cr)</th><th>Balance</th></tr></thead>
+              <tbody>
+                ${transactions.length === 0 ? '<tr><td colspan="5" style="text-align:center; color:#B8B8B8; padding:20px;">No transactions found</td></tr>' : 
+                  transactions.map(t => `
+                    <tr>
+                      <td>${formatDate(t.date)}</td>
+                      <td>${t.desc} ${t.ref ? `<br><span style="font-size:0.7rem; color:#888;">Ref: ${t.ref}</span>` : ''}</td>
+                      <td style="color:#FCA5A5;">${t.debit > 0 ? formatPKR(t.debit) : '—'}</td>
+                      <td style="color:#86EFAC;">${t.credit > 0 ? formatPKR(t.credit) : '—'}</td>
+                      <td style="color:${t.balance > 0 ? '#FCA5A5' : '#86EFAC'}; font-weight:bold;">${formatPKR(Math.abs(t.balance))}</td>
+                    </tr>
+                  `).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <div style="text-align:right; margin-top:20px; padding-top:15px; border-top:2px solid #FFD700;">
+            <p style="font-size:1.2rem; color:#FFD700; font-family:'Playfair Display',serif; font-weight:bold;">
+              Final Balance: ${formatPKR(Math.abs(balance))} ${balance > 0 ? (type === 'customer' ? '(Due from Customer)' : '(Payable by Shop)') : (balance < 0 ? '(Advance)' : '(Clear)')}
+            </p>
+          </div>
+        </div>
+      `;
+    }
+
+    function sendLedgerWhatsApp() {
+      if (!ledgerData) { alert('Please select a person first'); return; }
+      
+      const type = ledgerData.type;
+      let msg = `*${ledgerData.shop.name}*\n*${ledgerData.name} - ${type.toUpperCase()} LEDGER*\nDate: ${formatDate(new Date())}\n\n`;
+      
+      ledgerData.transactions.forEach(t => {
+        msg += `${formatDate(t.date)}\n${t.desc}\n`;
+        if (t.debit > 0) msg += `Bill: ${formatPKR(t.debit)}\n`;
+        if (t.credit > 0) msg += `Paid: ${formatPKR(t.credit)}\n`;
+        msg += '\n';
+      });
+      
+      msg += `*Total Bill: ${formatPKR(ledgerData.totalBill)}*\n`;
+      msg += `*Total Paid: ${formatPKR(ledgerData.totalPaid)}*\n`;
+      msg += `*Final Balance: ${formatPKR(Math.abs(ledgerData.balance))}*\n`;
+      
+      const phone = prompt('Enter WhatsApp number to send ledger:', '');
+      if (phone) openWhatsApp(phone, msg);
+    }
+  </script>
+</body>
+</html>

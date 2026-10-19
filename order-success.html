@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .success-container { max-width: 700px; margin: 0 auto; padding: 60px 20px; text-align: center; }
+    .success-icon { font-size: 6rem; margin-bottom: 20px; animation: bounce 1s ease; }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    .success-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #FFD700; margin-bottom: 15px; }
+    .success-msg { color: #B8B8B8; margin-bottom: 30px; }
+    .invoice-box { background: #1C1C1C; border: 2px solid #FFD700; border-radius: 16px; padding: 30px; text-align: left; margin: 30px 0; }
+    .invoice-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .invoice-row.total { border-top: 2px solid #FFD700; border-bottom: none; margin-top: 10px; padding-top: 15px; font-size: 1.2rem; font-weight: 700; color: #FFD700; }
+    .btn { padding: 14px 30px; border-radius: 50px; text-decoration: none; font-weight: 700; display: inline-block; margin: 8px; cursor: pointer; border: none; font-size: 1rem; }
+    .btn-gold { background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; }
+    .btn-outline { background: transparent; color: #FFD700; border: 2px solid #FFD700; }
+    .btn-wa { background: #25D366; color: white; }
+    .urdu-tagline { font-family: 'Noto Nastaliq Urdu', serif; color: #FFD700; font-size: 1.1rem; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="success-container">
+    <div class="success-icon">🎉</div>
+    <h1 class="success-title">Order Confirmed!</h1>
+    <p class="success-msg">Thank you for shopping with SHAH REHAN JEWELLERS</p>
+    
+    <div class="invoice-box" id="invoiceBox">
+      <!-- Filled by JS -->
+    </div>
+    
+    <a href="index.html" class="btn btn-gold">🏠 Back to Home</a>
+    <a href="https://wa.me/923266501314" class="btn btn-wa">📱 WhatsApp Us</a>
+    <button onclick="window.print()" class="btn btn-outline">🖨 Print Invoice</button>
+    
+    <p class="urdu-tagline" dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+    <p class="urdu-tagline" dir="rtl">آخر میں آپ کا اعتماد، ہماری ضمانت</p>
+  </div>
+
+  <script>
+    function formatPKR(amount) {
+      return 'Rs ' + Math.round(amount || 0).toLocaleString('en-PK');
+    }
+    
+    function loadOrder() {
+      const order = JSON.parse(localStorage.getItem('srj_last_order') || '{}');
+      const box = document.getElementById('invoiceBox');
+      
+      if (!order.order_number) {
+        box.innerHTML = '<p style="color: #B8B8B8; text-align: center;">No order found</p>';
+        return;
+      }
+      
+      const itemsHtml = (order.items || []).map(item => `
+        <div class="invoice-row">
+          <span>${item.name} (${item.karat}, ${item.weight}${item.unit})</span>
+          <span>${item.total}</span>
+        </div>
+      `).join('');
+      
+      box.innerHTML = `
+        <h3 style="color: #FFD700; font-family: 'Playfair Display', serif; text-align: center; margin-bottom: 20px;">Order Invoice</h3>
+        
+        <div class="invoice-row">
+          <span>Order Number</span>
+          <strong style="color: #FFD700;">${order.order_number}</strong>
+        </div>
+        <div class="invoice-row">
+          <span>Customer</span>
+          <span>${order.customer_name}</span>
+        </div>
+        <div class="invoice-row">
+          <span>WhatsApp</span>
+          <span>${order.customer_whatsapp}</span>
+        </div>
+        <div class="invoice-row">
+          <span>Expected Delivery</span>
+          <span>${order.expected_delivery}</span>
+        </div>
+        
+        <h4 style="color: #FFD700; margin: 20px 0 10px;">Items</h4>
+        ${itemsHtml}
+        
+        <div class="invoice-row">
+          <span>Subtotal</span>
+          <span>${formatPKR(order.subtotal)}</span>
+        </div>
+        <div class="invoice-row">
+          <span>GST (3%)</span>
+          <span>${formatPKR(order.gst_amount)}</span>
+        </div>
+        <div class="invoice-row total">
+          <span>TOTAL</span>
+          <span>${formatPKR(order.total_amount)}</span>
+        </div>
+        
+        <div class="invoice-row" style="margin-top: 15px;">
+          <span>Advance Paid (${order.advance_type === 'full' ? '100%' : '85%'})</span>
+          <span style="color: #FFD700;">${formatPKR(order.advance_amount)}</span>
+        </div>
+        <div class="invoice-row">
+          <span>Remaining</span>
+          <span>${formatPKR(order.remaining_amount)}</span>
+        </div>
+        <div class="invoice-row">
+          <span>Transaction ID</span>
+          <span>${order.transaction_id}</span>
+        </div>
+        
+        <p style="text-align: center; color: #B8B8B8; font-size: 0.85rem; margin-top: 20px;">
+          We will verify your payment and confirm shortly via WhatsApp.
+        </p>
+        
+        <p style="text-align: center; font-size: 9px; color: #666; margin-top: 20px;">
+          Designed by Bilal Marghoob Creations | 0092 326 69501314
+        </p>
+      `;
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadOrder);
+  </script>
+
+</body>
+</html>

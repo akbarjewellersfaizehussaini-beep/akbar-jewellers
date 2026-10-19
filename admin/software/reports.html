@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+  <style>
+    .filter-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .letterpad { background: #FFFDF5; color: #1A1A1A; padding: 30px; border-radius: 8px; border: 2px solid #D4AF37; margin-top: 20px; font-family: 'Poppins', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-x: auto; }
+    .letterpad-header { text-align: center; border-bottom: 3px double #D4AF37; padding-bottom: 20px; margin-bottom: 20px; }
+    .letterpad-header h1 { font-family: 'Playfair Display', serif; color: #D4AF37; margin: 0; font-size: 26px; letter-spacing: 1px; }
+    .letterpad-header p { margin: 3px 0; font-size: 11px; color: #666; }
+    .letterpad-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .letterpad-table th { background: #FAF7F0; color: #D4AF37; padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #D4AF37; white-space: nowrap; }
+    .letterpad-table td { padding: 10px 8px; border-bottom: 1px solid #EEE; font-size: 12px; vertical-align: top; }
+    .letterpad-total { text-align: right; padding-top: 15px; border-top: 2px solid #D4AF37; font-size: 16px; font-weight: 700; color: #D4AF37; }
+    .letterpad-footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #EEE; font-size: 10px; color: #999; }
+  </style>
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">Reports</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Business Reports</h1>
+
+    <div class="category-tabs">
+      <button class="cat-tab gold active" onclick="switchReport('sales', this)">Sales</button>
+      <button class="cat-tab silver" onclick="switchReport('purchases', this)">Purchases</button>
+      <button class="cat-tab diamond" onclick="switchReport('expenses', this)">Expenses</button>
+      <button class="cat-tab artificial" onclick="switchReport('debtors', this)">Debtors</button>
+      <button class="cat-tab gold" onclick="switchReport('creditors', this)">Creditors</button>
+    </div>
+
+    <div class="filter-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date Filter</label>
+          <select id="dateFilter" class="form-select" onchange="loadReport(currentReport)">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Action</label>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" onclick="printElement('printableReport')" style="flex:1;">Print Report</button>
+            <button class="btn-secondary" onclick="sendReportWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="reportContent"></div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let currentReport = 'sales';
+    let currentData = [];
+    let currentTotal = 0;
+    let shopInfo = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      shopInfo = await getShopSettings();
+      loadReport('sales');
+    });
+
+    async function switchReport(type, btn) {
+      currentReport = type;
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      await loadReport(type);
+    }
+
+    async function loadReport(type) {
+      const container = document.getElementById('reportContent');
+      container.innerHTML = '<p style="text-align:center; padding:30px; color:#FFD700;">Loading...</p>';
+      
+      const range = document.getElementById('dateFilter').value;
+      let rawData = [];
+      let title = '';
+      let amountKey = 'total';
+      
+      if (type === 'sales') {
+        rawData = await getRecordsFast('sales');
+        title = 'SALES REPORT';
+        amountKey = 'total';
+      }
+      else if (type === 'purchases') {
+        rawData = await getRecordsFast('purchases');
+        title = 'PURCHASE REPORT';
+        amountKey = 'total';
+      }
+      else if (type === 'expenses') {
+        rawData = await getRecordsFast('expenses');
+        title = 'EXPENSE REPORT';
+        amountKey = 'amount';
+      }
+      else if (type === 'debtors') {
+        const s = await getRecordsFast('sales');
+        rawData = s.filter(x => Number(x.balance) > 0);
+        title = 'DEBTORS REPORT';
+        amountKey = 'balance';
+      }
+      else if (type === 'creditors') {
+        const p = await getRecordsFast('purchases');
+        const s = await getRecordsFast('services');
+        const duePurchases = p.filter(x => Number(x.balance) > 0).map(x => ({...x, person: x.supplier_name, desc: 'Purchase - ' + x.item}));
+        const dueServices = s.filter(x => Number(x.balance) > 0).map(x => ({...x, person: x.karigar_name, desc: 'Job - ' + x.item, balance: x.balance}));
+        rawData = [...duePurchases, ...dueServices];
+        title = 'CREDITORS REPORT';
+        amountKey = 'balance';
+      }
+
+      currentData = filterByDate(rawData, range);
+      currentTotal = currentData.reduce((sum, x) => sum + (Number(x[amountKey]) || 0), 0);
+
+      const rangeText = document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text;
+
+      // Build table header based on report type
+      let tableHeaders = '';
+      if (type === 'sales') {
+        tableHeaders = `
+          <tr>
+            <th>Date</th>
+            <th>Customer / Item</th>
+            <th>Qty</th>
+            <th>Weight (g)</th>
+            <th>Rate/g</th>
+            <th style="text-align:right;">Total</th>
+          </tr>
+        `;
+      } else if (type === 'purchases') {
+        tableHeaders = `
+          <tr>
+            <th>Date</th>
+            <th>Supplier / Item</th>
+            <th>Weight (g)</th>
+            <th>Rate/g</th>
+            <th style="text-align:right;">Total</th>
+          </tr>
+        `;
+      } else {
+        tableHeaders = `
+          <tr>
+            <th>Date</th>
+            <th>Details</th>
+            <th style="text-align:right;">Amount</th>
+          </tr>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="letterpad" id="printableReport">
+          <div class="letterpad-header">
+            <h1>${shopInfo.name}</h1>
+            <p>${shopInfo.address}</p>
+            <p>Phone: ${shopInfo.phone}</p>
+            <hr style="border:none; border-top:1px solid #D4AF37; margin:10px 0;">
+            <h3 style="font-family:'Playfair Display',serif; color:#1A1A1A; margin:5px 0;">${title}</h3>
+            <p style="font-size:11px;">Period: ${rangeText} | Generated: ${formatDate(new Date())}</p>
+          </div>
+          <table class="letterpad-table">
+            <thead>${tableHeaders}</thead>
+            <tbody>
+              ${currentData.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px; color:#999;">No records found for this period</td></tr>' : 
+                currentData.map(x => {
+                  if (type === 'sales') {
+                    return `
+                      <tr>
+                        <td>${formatDate(x.date)}</td>
+                        <td><strong>${x.customer_name}</strong><br><span style="font-size:11px; color:#666;">${x.items_summary}</span></td>
+                        <td>${x.qty || 1}</td>
+                        <td>${x.weight || 0}g</td>
+                        <td>${formatPKR(x.rate)}</td>
+                        <td style="text-align:right; font-weight:600;">${formatPKR(x.total)}</td>
+                      </tr>
+                    `;
+                  } else if (type === 'purchases') {
+                    return `
+                      <tr>
+                        <td>${formatDate(x.date)}</td>
+                        <td><strong>${x.supplier_name}</strong><br><span style="font-size:11px; color:#666;">${x.item}</span></td>
+                        <td>${x.weight || 0}g</td>
+                        <td>${formatPKR(x.rate)}</td>
+                        <td style="text-align:right; font-weight:600;">${formatPKR(x.total)}</td>
+                      </tr>
+                    `;
+                  } else {
+                    return `
+                      <tr>
+                        <td>${formatDate(x.date)}</td>
+                        <td>
+                          ${type === 'debtors' ? `<strong>${x.customer_name}</strong> - ${x.items_summary}` : ''}
+                          ${type === 'creditors' ? `<strong>${x.person}</strong> - ${x.desc}` : ''}
+                          ${type === 'expenses' ? `<strong>${(x.category||'').toUpperCase()}</strong> ${x.paid_to ? '- ' + x.paid_to : ''}` : ''}
+                        </td>
+                        <td style="text-align:right; font-weight:600;">${formatPKR(x[amountKey])}</td>
+                      </tr>
+                    `;
+                  }
+                }).join('')}
+            </tbody>
+          </table>
+          <div class="letterpad-total">
+            TOTAL: ${formatPKR(currentTotal)}
+          </div>
+          <div class="letterpad-footer">
+            This is a computer-generated report. Thank you for your business!<br>
+            ${shopInfo.name} © ${new Date().getFullYear()}
+          </div>
+        </div>
+      `;
+    }
+
+    function sendReportWhatsApp() {
+      if (currentData.length === 0) { alert('No data to send'); return; }
+      
+      const rangeText = document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text;
+      const title = currentReport.toUpperCase() + ' REPORT';
+      const amountKey = currentReport === 'expenses' ? 'amount' : (currentReport === 'debtors' || currentReport === 'creditors' ? 'balance' : 'total');
+      
+      let msg = `*${shopInfo.name}*\n*${title}*\nPeriod: ${rangeText}\nDate: ${formatDate(new Date())}\n\n`;
+      
+      currentData.forEach((x, i) => {
+        let desc = '';
+        if (currentReport === 'sales') {
+          desc = `${x.customer_name} - ${x.items_summary} | Qty: ${x.qty||1}, Wt: ${x.weight||0}g, Rate: ${formatPKR(x.rate)}`;
+        }
+        else if (currentReport === 'purchases') {
+          desc = `${x.supplier_name} - ${x.item} | Wt: ${x.weight||0}g, Rate: ${formatPKR(x.rate)}`;
+        }
+        else if (currentReport === 'expenses') desc = `${(x.category||'').toUpperCase()}`;
+        else if (currentReport === 'debtors') desc = `${x.customer_name}`;
+        else if (currentReport === 'creditors') desc = `${x.person}`;
+        
+        msg += `${i+1}. ${desc}\n   Amount: ${formatPKR(x[amountKey])}\n`;
+      });
+      
+      msg += `\n*TOTAL: ${formatPKR(currentTotal)}*`;
+      
+      const phone = prompt('Enter WhatsApp number to send report:', '');
+      if (phone) openWhatsApp(phone, msg);
+    }
+  </script>
+</body>
+</html>

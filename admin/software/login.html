@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #0A0A0A; font-family: 'Poppins', sans-serif; }
+    .login-box { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+    .login-box h1 { font-family: 'Playfair Display', serif; color: #FFD700; margin-bottom: 5px; font-size: 1.8rem; }
+    .login-box p { color: #B8B8B8; margin-bottom: 30px; font-size: 0.9rem; }
+    .form-input { width: 100%; padding: 14px; margin-bottom: 15px; background: #0A0A0A; border: 1px solid rgba(255,215,0,0.2); border-radius: 10px; color: #FFF8DC; font-size: 1rem; box-sizing: border-box; transition: all 0.3s; }
+    .form-input:focus { outline: none; border-color: #FFD700; box-shadow: 0 0 15px rgba(255,215,0,0.1); }
+    .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: all 0.3s; font-family: 'Poppins', sans-serif; }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,215,0,0.3); }
+    .role-hint { color: #B8B8B8; font-size: 0.75rem; margin-top: 20px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 15px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+  <div class="login-box">
+    <img src="images/srj-logo.png" onerror="this.style.display='none'" style="width: 80px; margin-bottom: 15px;">
+    <h1>SHAH REHAN</h1>
+    <h1 style="margin-top: -10px; font-size: 1.5rem;">JEWELLERS</h1>
+    <p>Please login to your account</p>
+    
+    <input type="text" id="loginUser" class="form-input" placeholder="Username">
+    <input type="password" id="loginPass" class="form-input" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
+    
+    <button class="btn-login" id="loginBtn" onclick="doLogin()">Login</button>
+
+    <div class="role-hint">
+      <strong>Demo Logins:</strong><br>
+      Admin: admin / admin123<br>
+      Sales: sales / sales123<br>
+      Purchase: purchase / purchase123
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script>
+    async function doLogin() {
+      const user = document.getElementById('loginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPass').value.trim();
+      const btn = document.getElementById('loginBtn');
+      
+      if (!user || !pass) { alert('❌ Please enter username and password'); return; }
+      
+      btn.textContent = 'Logging in...'; btn.disabled = true;
+
+      try {
+        const rows = await sbFetch(`users?username=eq.${user}&password=eq.${pass}&select=*`);
+        if (rows && rows.length > 0) {
+          // Session save (sirf login ke liye, data ke liye nahi)
+          localStorage.setItem('srj_user_session', JSON.stringify(rows[0]));
+          window.location.href = 'index.html';
+        } else {
+          alert('❌ Invalid Credentials. Check username & password.');
+        }
+      } catch (e) {
+        alert('❌ Login Error: ' + e.message);
+      } finally {
+        btn.textContent = 'Login'; btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

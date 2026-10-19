@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body {
+      background: radial-gradient(ellipse at center, #1C1C1C, #0A0A0A);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: #1C1C1C;
+      border: 2px solid #FFD700;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(255,215,0,0.2);
+    }
+    .login-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      text-align: center;
+      background: linear-gradient(90deg, #FFD700, #FFF8DC, #FFD700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .login-subtitle {
+      text-align: center;
+      color: #B8B8B8;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      margin-bottom: 30px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label { color: #FFD700; font-size: 0.9rem; display: block; margin-bottom: 8px; }
+    .form-input {
+      width: 100%;
+      padding: 12px 15px;
+      background: #0A0A0A;
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 8px;
+      color: #FFF8DC;
+      font-size: 0.95rem;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #FFD700;
+      box-shadow: 0 0 15px rgba(255,215,0,0.3);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #FFD700, #C9A227);
+      color: #0A0A0A;
+      border: none;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,215,0,0.4);
+    }
+    .error-msg {
+      background: rgba(220,38,38,0.2);
+      border: 1px solid #DC2626;
+      color: #FCA5A5;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+      display: none;
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon-admin.svg">
+</head>
+<body>
+
+  <div class="login-box">
+    <h1 class="login-title">SHAH REHAN JEWELLERS</h1>
+    <p class="login-subtitle">ADMIN PANEL</p>
+    
+    <div id="errorMsg" class="error-msg"></div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label">📧 Email</label>
+        <input type="email" id="email" class="form-input" placeholder="admin@example.com" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">🔒 Password</label>
+        <input type="password" id="password" class="form-input" placeholder="Enter password" required>
+      </div>
+      
+      <button type="submit" class="btn-login">Login</button>
+    </form>
+    
+    <p style="text-align: center; color: #666; font-size: 0.75rem; margin-top: 25px;">
+      Designed by Bilal Marghoob Creations
+    </p>
+  </div>
+
+  <script src="../js/supabase.js"></script>
+  <script>
+    // Supabase Auth login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('errorMsg');
+      
+      errorDiv.style.display = 'none';
+      
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          errorDiv.textContent = '❌ ' + (data.error_description || data.msg || 'Login failed');
+          errorDiv.style.display = 'block';
+          return;
+        }
+        
+        // Save session
+        localStorage.setItem('srj_admin_session', JSON.stringify({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          user: data.user,
+          expires_at: Date.now() + (data.expires_in * 1000)
+        }));
+        
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+        
+      } catch (error) {
+        errorDiv.textContent = '❌ ' + error.message;
+        errorDiv.style.display = 'block';
+      }
+    });
+  </script>
+
+</body>
+</html>

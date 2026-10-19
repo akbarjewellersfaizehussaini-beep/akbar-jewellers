@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .checkout-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+    .checkout-title { font-family: 'Playfair Display', serif; font-size: 2rem; color: #FFD700; margin-bottom: 30px; grid-column: 1/-1; text-align: center; }
+    .checkout-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 25px; margin-bottom: 20px; }
+    .checkout-card h3 { color: #FFD700; font-family: 'Playfair Display', serif; margin-bottom: 20px; font-size: 1.2rem; }
+    .form-group { margin-bottom: 15px; }
+    .form-label { color: #FFD700; font-size: 0.85rem; display: block; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 12px 15px; background: #0A0A0A; border: 1px solid rgba(255,215,0,0.3); border-radius: 8px; color: #FFF8DC; font-size: 0.95rem; }
+    .form-input:focus { outline: none; border-color: #FFD700; }
+    .payment-option { display: flex; align-items: flex-start; padding: 15px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; margin-bottom: 12px; cursor: pointer; transition: all 0.3s ease; }
+    .payment-option:hover { border-color: #FFD700; }
+    .payment-option input { margin-right: 12px; margin-top: 4px; accent-color: #FFD700; }
+    .payment-option.selected { background: rgba(255,215,0,0.1); border-color: #FFD700; }
+    .payment-option .title { color: #FFD700; font-weight: 600; font-size: 1rem; }
+    .payment-option .desc { color: #B8B8B8; font-size: 0.8rem; margin-top: 4px; }
+    .easypaisa-box { border-radius: 12px; padding: 20px; margin: 20px 0; }
+    .easypaisa-box h4 { color: #FFF8DC; margin-bottom: 10px; font-size: 1rem; }
+    .easypaisa-number { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+    .easypaisa-number strong { color: #FFD700; font-size: 1.1rem; }
+    .btn-copy { background: #FFD700; color: #0A0A0A; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+    .order-summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,215,0,0.1); font-size: 0.9rem; }
+    .order-summary-total { border-top: 2px solid #FFD700; padding-top: 12px; margin-top: 10px; font-size: 1.2rem; font-weight: 700; color: #FFD700; display: flex; justify-content: space-between; }
+    .btn-place-order { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
+    .btn-place-order:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.4); }
+    .btn-place-order:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .file-input { display: block; width: 100%; padding: 10px; background: #0A0A0A; border: 1px dashed #FFD700; border-radius: 8px; color: #FFF8DC; cursor: pointer; }
+    @media (max-width: 768px) { .checkout-container { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <a href="cart.html" style="color: #FFD700; text-decoration: none;">← Back to Cart</a>
+    </div>
+  </header>
+
+  <div class="checkout-container">
+    <h1 class="checkout-title">Checkout</h1>
+
+    <div>
+      <form id="checkoutForm">
+        <div class="checkout-card">
+          <h3>👤 Customer Information</h3>
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="cName" class="form-input" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label class="form-label">WhatsApp Number *</label>
+              <input type="tel" id="cWhatsapp" class="form-input" placeholder="03XXXXXXXXX" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email (Optional)</label>
+              <input type="email" id="cEmail" class="form-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address *</label>
+            <input type="text" id="cAddress" class="form-input" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" id="cCity" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes (Optional)</label>
+              <input type="text" id="cNotes" class="form-input">
+            </div>
+          </div>
+        </div>
+
+        <div class="checkout-card">
+          <h3>💳 Payment Option</h3>
+
+          <label class="payment-option selected" onclick="selectPayment(this, 'full')">
+            <input type="radio" name="payment" value="full" checked>
+            <div>
+              <div class="title">100% Advance Payment (Default)</div>
+              <div class="desc">مکمل ادائیگی – سب سے آسان اور تیز</div>
+            </div>
+          </label>
+
+          <label class="payment-option" onclick="selectPayment(this, 'partial')">
+            <input type="radio" name="payment" value="partial">
+            <div>
+              <div class="title">85% Advance Payment (By Request)</div>
+              <div class="desc">15% ڈیلیوری کے وقت – صرف گاہک کی درخواست پر</div>
+            </div>
+          </label>
+
+          <div id="paymentBreakdown" class="easypaisa-box" style="background: linear-gradient(135deg, #2A2A2A, #1C1C1C); border: 1px solid #FFD700;">
+            <h4>📊 Payment Breakdown</h4>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+              <span style="color: #B8B8B8;">Total Amount</span>
+              <strong id="bkTotal" style="color: #FFF8DC;">Rs 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+              <span style="color: #B8B8B8;">Advance Required</span>
+              <strong id="bkAdvance" style="color: #FFD700;">Rs 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+              <span style="color: #B8B8B8;">Remaining</span>
+              <strong id="bkRemaining" style="color: #B8B8B8;">Rs 0</strong>
+            </div>
+          </div>
+
+          <h3 style="margin-top: 25px;">💳 Select Payment Method</h3>
+          <div id="paymentMethodsGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+            <label class="payment-method-card" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; transition: all 0.3s;">
+              <input type="radio" name="paymentMethod" value="easypaisa" checked style="display: none;">
+              <img src="images/easypaisa.jpg" alt="Easypaisa" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #25D366;" onerror="this.src='images/placeholder.svg'">
+              <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">Easypaisa</div>
+            </label>
+            <label class="payment-method-card" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; transition: all 0.3s;">
+              <input type="radio" name="paymentMethod" value="jazzcash" style="display: none;">
+              <img src="images/jazzcash.jpg" alt="JazzCash" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #DC2626;" onerror="this.src='images/placeholder.svg'">
+              <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">JazzCash</div>
+            </label>
+            <label class="payment-method-card" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px; transition: all 0.3s;">
+              <input type="radio" name="paymentMethod" value="bank" style="display: none;">
+              <img src="images/bank.jpg" alt="Bank Transfer" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #3B82F6;" onerror="this.src='images/placeholder.svg'">
+              <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">Bank Transfer</div>
+            </label>
+          </div>
+
+          <div id="paymentDetails" class="easypaisa-box" style="background: linear-gradient(135deg, #0F5132, #128C7E);">
+            <h4>💚 Pay via Easypaisa</h4>
+            <div class="easypaisa-number">
+              <div>
+                <div style="font-size: 0.75rem; color: #B8B8B8;">Account Number</div>
+                <strong>03266501314</strong>
+              </div>
+              <button type="button" class="btn-copy" onclick="copyNumber()">📋 Copy</button>
+            </div>
+            <div style="font-size: 0.85rem; color: #FFF8DC;">Account Title: <strong>Syed Ahmed Bilal</strong></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Transaction ID (TID) *</label>
+            <input type="text" id="cTID" class="form-input" placeholder="Enter transaction ID" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Upload Payment Screenshot *</label>
+            <input type="file" id="cScreenshot" class="file-input" accept="image/*" required>
+          </div>
+        </div>
+
+        <div class="checkout-card">
+          <label style="display: flex; align-items: flex-start; cursor: pointer;">
+            <input type="checkbox" id="agreeTerms" style="margin-right: 10px; margin-top: 4px; accent-color: #FFD700;" required>
+            <span style="font-size: 0.9rem; color: #FFF8DC;">
+              میں نے شرائط و ضوابط پڑھ لیے ہیں اور ان سے متفق ہوں
+              <br>
+              <span style="font-size: 0.8rem; color: #B8B8B8;">(I have read and agree to the Terms & Conditions)</span>
+            </span>
+          </label>
+        </div>
+      </form>
+    </div>
+
+    <div>
+      <div class="checkout-card" style="position: sticky; top: 100px;">
+        <h3>📦 Order Summary</h3>
+        <div id="orderSummary"></div>
+        <button class="btn-place-order" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    // ===== CLOUDINARY CONFIG =====
+   const CLOUDINARY_CLOUD_NAME = 'mo7txjdn';
+const CLOUDINARY_UPLOAD_PRESET = 'shah-rehan-jewellers';
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+        method: 'POST', body: formData
+      });
+      if (!res.ok) throw new Error('Cloudinary upload failed');
+      const data = await res.json();
+      return data.secure_url;
+    }
+
+    let cart = JSON.parse(localStorage.getItem('srj_cart') || '[]');
+    let paymentType = 'full';
+    let selectedPaymentMethod = 'easypaisa';
+
+    function parsePrice(str) {
+      if (typeof str === 'number') return str;
+      return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0;
+    }
+
+    function formatPKR(amount) {
+      return 'Rs ' + Math.round(amount).toLocaleString('en-PK');
+    }
+
+    function renderSummary() {
+      if (cart.length === 0) {
+        window.location.href = 'cart.html';
+        return;
+      }
+
+      let subtotal = 0;
+      const itemsHtml = cart.map(item => {
+        subtotal += parsePrice(item.total);
+        return `<div class="order-summary-item"><span style="color: #FFF8DC;">${item.name}</span><span style="color: #FFD700;">${item.total}</span></div>`;
+      }).join('');
+
+      const gst = subtotal * 0.03;
+      const total = subtotal + gst;
+
+      document.getElementById('orderSummary').innerHTML = itemsHtml + `
+        <div class="order-summary-item" style="margin-top: 10px;"><span style="color: #B8B8B8;">Subtotal</span><span style="color: #FFF8DC;">${formatPKR(subtotal)}</span></div>
+        <div class="order-summary-item"><span style="color: #B8B8B8;">GST (3%)</span><span style="color: #FFF8DC;">${formatPKR(gst)}</span></div>
+        <div class="order-summary-total"><span>TOTAL</span><span>${formatPKR(total)}</span></div>
+      `;
+
+      updatePaymentBreakdown(total);
+    }
+
+    function updatePaymentBreakdown(total) {
+      const advancePercent = paymentType === 'full' ? 1.0 : 0.85;
+      const advance = total * advancePercent;
+      const remaining = total - advance;
+      document.getElementById('bkTotal').textContent = formatPKR(total);
+      document.getElementById('bkAdvance').textContent = formatPKR(advance) + (paymentType === 'full' ? ' (100%)' : ' (85%)');
+      document.getElementById('bkRemaining').textContent = formatPKR(remaining);
+    }
+
+    function selectPayment(el, type) {
+      document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      paymentType = type;
+      let subtotal = cart.reduce((s, item) => s + parsePrice(item.total), 0);
+      const total = subtotal * 1.03;
+      updatePaymentBreakdown(total);
+    }
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
+      document.querySelectorAll('input[name="paymentMethod"]').forEach(r => r.checked = (r.value === method));
+
+      const details = document.getElementById('paymentDetails');
+      const methods = {
+        easypaisa: { title: '💚 Pay via Easypaisa', bg: 'linear-gradient(135deg, #0F5132, #128C7E)', number: '03266501314', label: 'Account Number' },
+        jazzcash: { title: '🔴 Pay via JazzCash', bg: 'linear-gradient(135deg, #7F1D1D, #DC2626)', number: '03266501314', label: 'Account Number' },
+        bank: { title: '🏦 Bank Transfer', bg: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', number: 'PK36MEZN0001234567890123', label: 'IBAN' }
+      };
+      const m = methods[method];
+      details.style.background = m.bg;
+      details.innerHTML = `
+        <h4>${m.title}</h4>
+        <div class="easypaisa-number">
+          <div>
+            <div style="font-size: 0.75rem; color: #B8B8B8;">${m.label}</div>
+            <strong>${m.number}</strong>
+          </div>
+          <button type="button" class="btn-copy" onclick="copyNumber()">📋 Copy</button>
+        </div>
+        <div style="font-size: 0.85rem; color: #FFF8DC;">Account Title: <strong>Syed Ahmed Bilal</strong></div>
+      `;
+    }
+
+    function copyNumber() {
+      const details = document.getElementById('paymentDetails');
+      const numberMatch = details?.innerHTML.match(/<strong[^>]*>([^<]+)<\/strong>/);
+      const number = numberMatch ? numberMatch[1] : '03266501314';
+      navigator.clipboard.writeText(number);
+      alert('✅ Number copied: ' + number);
+    }
+
+    async function placeOrder() {
+      const name = document.getElementById('cName').value.trim();
+      const whatsapp = document.getElementById('cWhatsapp').value.trim();
+      const address = document.getElementById('cAddress').value.trim();
+      const city = document.getElementById('cCity').value.trim();
+      const tid = document.getElementById('cTID').value.trim();
+      const screenshot = document.getElementById('cScreenshot').files[0];
+      const agree = document.getElementById('agreeTerms').checked;
+
+      if (!name || !whatsapp || !address || !city || !tid || !screenshot || !agree) {
+        alert('❌ Please fill all required fields');
+        return;
+      }
+
+      const btn = document.getElementById('placeOrderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Uploading screenshot...';
+
+      // Upload screenshot to Cloudinary
+      let screenshotUrl = '';
+      try {
+        screenshotUrl = await uploadToCloudinary(screenshot);
+        console.log('✅ Screenshot uploaded:', screenshotUrl);
+      } catch (err) {
+        alert('❌ Screenshot upload failed: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+        return;
+      }
+
+      btn.textContent = 'Placing Order...';
+
+      let subtotal = cart.reduce((s, item) => s + parsePrice(item.total), 0);
+      const gst = subtotal * 0.03;
+      const total = subtotal + gst;
+      const advancePercent = paymentType === 'full' ? 1.0 : 0.85;
+      const advance = total * advancePercent;
+      const remaining = total - advance;
+
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
+      const orderNumber = `SRJ-${dateStr}-${String(Math.floor(Math.random()*1000)).padStart(3,'0')}`;
+      const delivery = new Date(now.getTime() + 7*24*60*60*1000);
+      const expectedDelivery = delivery.toISOString().slice(0,10);
+
+      const orderData = {
+        order_number: orderNumber,
+        customer_name: name,
+        customer_whatsapp: whatsapp,
+        customer_email: document.getElementById('cEmail').value.trim() || null,
+        customer_address: address,
+        customer_city: city,
+        items: cart,
+        subtotal: subtotal,
+        gst_amount: gst,
+        total_amount: total,
+        advance_type: paymentType,
+        advance_amount: advance,
+        remaining_amount: remaining,
+        payment_method: selectedPaymentMethod,
+        transaction_id: tid,
+        payment_screenshot_url: screenshotUrl,
+        order_status: 'pending',
+        expected_delivery: expectedDelivery,
+        notes: document.getElementById('cNotes').value.trim() || null
+      };
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify(orderData)
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          throw new Error(err);
+        }
+
+        localStorage.setItem('srj_last_order', JSON.stringify(orderData));
+
+        const ownerMsg = `🔔 *NEW ORDER RECEIVED*%0A%0A` +
+          `Order: ${orderNumber}%0A` +
+          `Customer: ${name}%0A` +
+          `WhatsApp: ${whatsapp}%0A` +
+          `Total: ${formatPKR(total)}%0A` +
+          `Advance: ${formatPKR(advance)} (${paymentType === 'full' ? '100%' : '85%'})%0A` +
+          `Payment: ${selectedPaymentMethod}%0A` +
+          `TID: ${tid}%0A` +
+          `Screenshot: ${screenshotUrl}%0A%0A` +
+          `Login to admin for details.`;
+
+        window.open(`https://wa.me/923266501314?text=${ownerMsg}`, '_blank');
+
+        localStorage.removeItem('srj_cart');
+        window.location.href = 'order-success.html';
+
+      } catch (error) {
+        alert('❌ Error placing order: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSummary();
+      selectPaymentMethod('easypaisa');
+    });
+  </script>
+
+</body>
+</html>

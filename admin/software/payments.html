@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payments – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">Payments & Receipts</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Payment Receipt</h1>
+    <p class="page-subtitle">Receive advance from customers or pay suppliers/karigars.</p>
+
+    <div class="form-card">
+      <h3 class="form-card-title">New Payment Entry</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Person Type *</label>
+          <select id="pType" class="form-select" onchange="loadPersons()">
+            <option value="customer">Customer (Receive Payment)</option>
+            <option value="supplier">Supplier (Give Payment)</option>
+            <option value="karigar">Karigar (Give Payment)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Name *</label>
+          <select id="pPerson" class="form-select">
+            <option value="">-- Select --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Amount (Rs) *</label><input type="number" id="pAmount" class="form-input" placeholder="0"></div>
+        <div class="form-group">
+          <label class="form-label">Payment Type</label>
+          <select id="pPayType" class="form-select">
+            <option value="advance">Advance</option>
+            <option value="due">Against Due</option>
+            <option value="full">Full & Final</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select id="pMode" class="form-select">
+            <option value="cash">Cash</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="easypaisa">Easypaisa</option>
+            <option value="jazzcash">JazzCash</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Payment Date</label><input type="date" id="pDate" class="form-input"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <input type="text" id="pNotes" class="form-input" placeholder="Any details...">
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 15px;">
+        <button class="btn-primary" onclick="savePayment(false)" style="flex: 1;">Save & View Receipt</button>
+        <button class="btn-secondary" onclick="savePayment(true)" style="flex: 1; background: #25D366; color: white; border: none;">Save & WhatsApp</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">Recent Payments (Click to view Receipt)</h2>
+    <div class="data-list" id="paymentsList"></div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div id="receiptModal" class="modal">
+    <div class="modal-content" style="max-width: 600px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableReceipt"></div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="printElement('printableReceipt')" style="flex:1;">Print Receipt</button>
+        <button class="btn-secondary" onclick="sendReceiptWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+        <button class="btn-danger" onclick="document.getElementById('receiptModal').classList.remove('active')" style="flex:1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let currentReceipt = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
+      await loadPersons();
+      loadPayments();
+    });
+
+    async function loadPersons() {
+      const type = document.getElementById('pType').value;
+      const select = document.getElementById('pPerson');
+      select.innerHTML = '<option value="">-- Select --</option>';
+      
+      let data = [];
+      if (type === 'customer') data = await getRecordsFast('customers');
+      else if (type === 'supplier') data = await getRecordsFast('suppliers');
+      else if (type === 'karigar') data = await getRecordsFast('karigars');
+
+      data.forEach(p => {
+        select.innerHTML += `<option value="${p.name}|${p.phone || ''}">${p.name}</option>`;
+      });
+    }
+
+    async function savePayment(sendWA) {
+      const personType = document.getElementById('pType').value;
+      const personVal = document.getElementById('pPerson').value;
+      const amount = parseFloat(document.getElementById('pAmount').value) || 0;
+      
+      if (!personVal || amount <= 0) { alert('❌ Select person and enter valid amount'); return; }
+
+      const [personName, personPhone] = personVal.split('|');
+      const btn = event.target;
+      btn.textContent = 'Saving...'; btn.disabled = true;
+
+      try {
+        const payment = {
+          receipt_number: 'RCV-' + Date.now(),
+          person_type: personType,
+          person_name: personName,
+          person_phone: personPhone,
+          amount: amount,
+          payment_type: document.getElementById('pPayType').value,
+          payment_mode: document.getElementById('pMode').value,
+          notes: document.getElementById('pNotes').value.trim(),
+          payment_date: document.getElementById('pDate').value || new Date().toISOString().slice(0,10)
+        };
+
+        const saved = await addRecord('payments', payment);
+        currentReceipt = saved;
+        
+        if (sendWA) {
+          const action = personType === 'customer' ? 'Received from' : 'Paid to';
+          const msg = `*PAYMENT RECEIPT*\nReceipt #: ${payment.receipt_number}\n${action}: ${personName}\nAmount: ${formatPKR(amount)}\nDate: ${formatDate(payment.payment_date)}\nMode: ${payment.payment_mode.toUpperCase()}`;
+          openWhatsApp(personPhone, msg);
+        }
+        
+        showReceipt(saved);
+        clearForm(); loadPayments();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      } finally {
+        btn.textContent = sendWA ? 'Save & WhatsApp' : 'Save & View Receipt';
+        btn.disabled = false;
+      }
+    }
+
+    async function showReceipt(p) {
+      const shop = await getShopSettings();
+      const action = p.person_type === 'customer' ? 'RECEIVED FROM' : 'PAID TO';
+      
+      document.getElementById('printableReceipt').innerHTML = `
+        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:24px;">${shop.name}</h1>
+          <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+        </div>
+        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PAYMENT RECEIPT</h2>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px;">
+          <div>
+            <p style="margin:5px 0;"><strong>Receipt #:</strong> ${p.receipt_number}</p>
+            <p style="margin:5px 0;"><strong>Date:</strong> ${formatDate(p.payment_date || p.created_at)}</p>
+          </div>
+          <div style="text-align:right;">
+            <p style="margin:5px 0;"><strong>Mode:</strong> ${(p.payment_mode||'').toUpperCase()}</p>
+            <p style="margin:5px 0;"><strong>Type:</strong> ${(p.payment_type||'').toUpperCase()}</p>
+          </div>
+        </div>
+
+        <div style="background:#FAF7F0; padding:15px; border-radius:8px; margin-bottom:20px;">
+          <p style="margin:5px 0; font-size:12px; color:#888;">${action}</p>
+          <h3 style="margin:5px 0; color:#D4AF37;">${p.person_name}</h3>
+          ${p.person_phone ? `<p style="margin:5px 0; font-size:12px; color:#666;">${p.person_phone}</p>` : ''}
+        </div>
+
+        <div style="text-align:center; border-top:2px solid #D4AF37; border-bottom:2px solid #D4AF37; padding:20px 0; margin-bottom:20px;">
+          <p style="margin:0; font-size:12px; color:#888;">AMOUNT</p>
+          <h2 style="margin:5px 0; color:#D4AF37; font-family:'Playfair Display',serif; font-size:36px;">${formatPKR(p.amount)}</h2>
+        </div>
+
+        ${p.notes ? `<p style="font-size:12px; color:#666;"><strong>Notes:</strong> ${p.notes}</p>` : ''}
+
+        <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
+          Thank you! ${shop.name}
+        </div>
+      `;
+      document.getElementById('receiptModal').classList.add('active');
+    }
+
+    function sendReceiptWhatsApp() {
+      if (!currentReceipt) return;
+      const action = currentReceipt.person_type === 'customer' ? 'Received from' : 'Paid to';
+      const msg = `*PAYMENT RECEIPT*\nReceipt #: ${currentReceipt.receipt_number}\n${action}: ${currentReceipt.person_name}\nAmount: ${formatPKR(currentReceipt.amount)}\nDate: ${formatDate(currentReceipt.payment_date)}\nMode: ${currentReceipt.payment_mode.toUpperCase()}`;
+      openWhatsApp(currentReceipt.person_phone, msg);
+    }
+
+    function clearForm() {
+      ['pAmount','pNotes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pPerson').value = '';
+      document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
+    }
+
+    async function loadPayments() {
+      const payments = await getRecordsFast('payments');
+      const container = document.getElementById('paymentsList');
+      if (payments.length === 0) { container.innerHTML = '<div class="empty-state"><p>No payments yet</p></div>'; return; }
+
+      container.innerHTML = payments.slice(0, 20).map(p => {
+        const isReceive = p.person_type === 'customer';
+        const color = isReceive ? '#86EFAC' : '#FCA5A5';
+        const sign = isReceive ? '+' : '-';
+        return `
+          <div class="data-item" style="cursor:pointer;" onclick='showReceipt(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+            <div>
+              <div class="data-item-title">${p.person_name} <span style="font-size:0.7rem; color:#888;">(${p.person_type})</span></div>
+              <div class="data-item-sub">${p.receipt_number} • ${formatDate(p.payment_date || p.created_at)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="data-item-value" style="color:${color};">${sign} ${formatPKR(p.amount)}</div>
+              <div class="data-item-sub">${(p.payment_mode||'').toUpperCase()}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

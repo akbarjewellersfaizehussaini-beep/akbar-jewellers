@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">Customers</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Customer Management</h1>
+
+    <div class="form-card">
+      <h3 class="form-card-title">Add New Customer</h3>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Name *</label><input type="text" id="cName" class="form-input" placeholder="Full name"></div>
+        <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="cPhone" class="form-input" placeholder="03XXXXXXXXX"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">CNIC</label><input type="text" id="cCNIC" class="form-input" placeholder="XXXXX-XXXXXXX-X"></div>
+        <div class="form-group"><label class="form-label">Address</label><input type="text" id="cAddress" class="form-input" placeholder="Address"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Customer Photo</label>
+        <input type="file" id="cPhoto" class="form-input" accept="image/*" capture="user" style="padding:10px;">
+        <div id="cPhotoPreview" style="margin-top:10px;"></div>
+      </div>
+      <button class="btn-primary" onclick="saveCustomer()" style="width:100%;">Save Customer</button>
+    </div>
+
+    <h2 class="section-title">All Customers (Click name for Khata)</h2>
+    <div class="data-list" id="customersList"></div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      loadCustomers();
+    });
+
+    document.getElementById('cPhoto')?.addEventListener('change', (e) => {
+      if (e.target.files[0]) document.getElementById('cPhotoPreview').innerHTML = `<img src="${URL.createObjectURL(e.target.files[0])}" style="max-width:100px; border-radius:8px; border:2px solid #FFD700;">`;
+    });
+
+    async function saveCustomer() {
+      const name = document.getElementById('cName').value.trim();
+      const phone = document.getElementById('cPhone').value.trim();
+      if (!name || !phone) { alert('❌ Name and phone required'); return; }
+
+      const btn = event.target;
+      btn.textContent = 'Saving...'; btn.disabled = true;
+
+      try {
+        let photoUrl = null;
+        if (document.getElementById('cPhoto').files[0]) {
+          photoUrl = await uploadImage(document.getElementById('cPhoto').files[0]);
+        }
+
+        await addRecord('customers', {
+          name, phone,
+          cnic: document.getElementById('cCNIC').value.trim(),
+          address: document.getElementById('cAddress').value.trim(),
+          photo: photoUrl
+        });
+        
+        alert('✅ Customer saved!');
+        clearForm(); loadCustomers();
+      } catch (e) { alert('❌ ' + e.message); }
+      finally { btn.textContent = 'Save Customer'; btn.disabled = false; }
+    }
+
+    function clearForm() {
+      ['cName','cPhone','cCNIC','cAddress'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('cPhoto').value = '';
+      document.getElementById('cPhotoPreview').innerHTML = '';
+    }
+
+    async function loadCustomers() {
+      const customers = await getRecordsFast('customers');
+      const sales = await getRecordsFast('sales');
+      const payments = await getRecordsFast('payments');
+      const container = document.getElementById('customersList');
+      
+      if (customers.length === 0) { container.innerHTML = '<div class="empty-state"><p>No customers yet</p></div>'; return; }
+      
+      container.innerHTML = customers.map(c => {
+        // Calculate Balance / Advance
+        const cSales = sales.filter(s => s.customer_name === c.name);
+        const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+        
+        let totalBill = cSales.reduce((sum, s) => sum + (Number(s.total)||0), 0);
+        let totalPaid = cPays.reduce((sum, p) => sum + (Number(p.amount)||0), 0);
+        let balance = totalBill - totalPaid;
+        
+        let balHtml = '';
+        if (balance > 0) balHtml = `<span style="color:#FCA5A5;">Due: ${formatPKR(balance)}</span>`;
+        else if (balance < 0) balHtml = `<span style="color:#86EFAC;">Advance: ${formatPKR(Math.abs(balance))}</span>`;
+        else balHtml = `<span style="color:#B8B8B8;">Clear</span>`;
+
+        return `
+        <div class="data-item" style="cursor:pointer;" onclick="openLedger('customer','${c.name}')">
+          <div style="display:flex; gap:15px; align-items:center;">
+            ${c.photo ? `<img src="${c.photo}" style="width:50px; height:50px; border-radius:50%; border:2px solid #FFD700; object-fit:cover;">` : '<div style="width:50px; height:50px; border-radius:50%; background:#2A2A2A; display:flex; align-items:center; justify-content:center;">👤</div>'}
+            <div>
+              <div class="data-item-title">${c.name}</div>
+              <div class="data-item-sub">📞 ${c.phone} ${c.cnic ? '• CNIC: ' + c.cnic : ''}</div>
+              ${c.address ? `<div class="data-item-sub">📍 ${c.address}</div>` : ''}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="data-item-value" style="font-size:0.95rem;">${balHtml}</div>
+            <div class="data-item-sub" style="font-size:0.7rem;">Click for Khata</div>
+          </div>
+        </div>
+        `;
+      }).join('');
+    }
+
+    function openLedger(type, name) {
+      window.location.href = `ledger.html?type=${type}&name=${encodeURIComponent(name)}`;
+    }
+  </script>
+</body>
+</html>

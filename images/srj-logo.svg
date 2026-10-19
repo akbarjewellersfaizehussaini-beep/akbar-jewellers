@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700"/>
+      <stop offset="50%" style="stop-color:#FFF8DC"/>
+      <stop offset="100%" style="stop-color:#C9A227"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C9A227"/>
+      <stop offset="50%" style="stop-color:#FFD700"/>
+      <stop offset="100%" style="stop-color:#B8860B"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer Ring -->
+  <circle cx="100" cy="100" r="92" fill="none" stroke="url(#ringGrad)" stroke-width="4"/>
+  <circle cx="100" cy="100" r="85" fill="none" stroke="url(#ringGrad)" stroke-width="1.5" opacity="0.7"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="100" cy="100" r="70" fill="#0A0A0A" stroke="url(#ringGrad)" stroke-width="2"/>
+  
+  <!-- Decorative Stars -->
+  <circle cx="100" cy="14" r="3" fill="#FFD700"/>
+  <circle cx="100" cy="186" r="3" fill="#FFD700"/>
+  <circle cx="14" cy="100" r="3" fill="#FFD700"/>
+  <circle cx="186" cy="100" r="3" fill="#FFD700"/>
+  
+  <!-- SRJ Text -->
+  <text x="100" y="118" font-family="Playfair Display, serif" font-size="56" font-weight="900" 
+        fill="url(#goldGrad)" text-anchor="middle" letter-spacing="2">SRJ</text>
+  
+  <!-- Small Text Below -->
+  <text x="100" y="145" font-family="Poppins, sans-serif" font-size="10" font-weight="600" 
+        fill="#FFD700" text-anchor="middle" letter-spacing="3" opacity="0.8">JEWELLERS</text>
+</svg>

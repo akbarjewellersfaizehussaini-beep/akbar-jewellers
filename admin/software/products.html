@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">Products & Inventory</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Product Management</h1>
+    <p class="page-subtitle">Add products with unique IDs, images, and video.</p>
+
+    <div class="form-card">
+      <h3 class="form-card-title">Add New Product</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="prName" class="form-input" placeholder="e.g., Gold Necklace Set">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select id="prCategory" class="form-select">
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="diamond">Diamond</option>
+            <option value="artificial">Artificial</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Weight (grams) *</label><input type="number" id="prWeight" class="form-input" step="0.001" placeholder="0.000"></div>
+        <div class="form-group"><label class="form-label">Cost Price (Rs) *</label><input type="number" id="prCost" class="form-input" placeholder="0"></div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Sale Price (Rs) *</label><input type="number" id="prSale" class="form-input" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Product ID (Auto)</label><input type="text" id="prCode" class="form-input" readonly style="background:#2A2A2A; color:#FFD700; font-weight:700;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Product Images (Select up to 5) *</label>
+        <input type="file" id="prImages" class="form-input" accept="image/*" multiple style="padding:10px;">
+        <div id="prImagesPreview" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Product Video (Optional)</label>
+        <input type="file" id="prVideo" class="form-input" accept="video/*" style="padding:10px;">
+      </div>
+
+      <button class="btn-primary" onclick="saveProduct()" style="width:100%;">Save Product</button>
+    </div>
+
+    <h2 class="section-title">All Products</h2>
+    <div class="data-list" id="productsList"></div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin'])) return; // Sirf admin products add kar sakta hai
+      generateProductCode();
+      loadProducts();
+    });
+
+    // Auto Unique Code Generator (e.g. SRJ-GLD-001)
+    async function generateProductCode() {
+      const cat = document.getElementById('prCategory').value.toUpperCase().slice(0, 3);
+      const products = await getRecordsFast('products');
+      
+      // Count products in this category
+      const catCount = products.filter(p => p.category === document.getElementById('prCategory').value).length;
+      const num = String(catCount + 1).padStart(3, '0');
+      
+      document.getElementById('prCode').value = `SRJ-${cat}-${num}`;
+    }
+
+    document.getElementById('prCategory').addEventListener('change', generateProductCode);
+
+    document.getElementById('prImages').addEventListener('change', (e) => {
+      const preview = document.getElementById('prImagesPreview');
+      preview.innerHTML = '';
+      Array.from(e.target.files).slice(0, 5).forEach(file => {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `<img src="${url}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #FFD700;">`;
+      });
+    });
+
+    async function saveProduct() {
+      const name = document.getElementById('prName').value.trim();
+      const weight = parseFloat(document.getElementById('prWeight').value) || 0;
+      const cost = parseFloat(document.getElementById('prCost').value) || 0;
+      const sale = parseFloat(document.getElementById('prSale').value) || 0;
+      const code = document.getElementById('prCode').value;
+      const images = document.getElementById('prImages').files;
+      
+      if (!name || weight <= 0 || cost <= 0 || sale <= 0) { alert('❌ Fill all required fields correctly'); return; }
+      if (images.length === 0) { alert('❌ Please upload at least 1 image'); return; }
+
+      const btn = event.target;
+      btn.textContent = 'Uploading Images...'; btn.disabled = true;
+
+      try {
+        // Upload all images
+        const imageUrls = [];
+        for (const file of Array.from(images).slice(0, 5)) {
+          const url = await uploadImage(file);
+          imageUrls.push(url);
+        }
+
+        // Upload video if provided
+        let videoUrl = null;
+        if (document.getElementById('prVideo').files[0]) {
+          videoUrl = await uploadVideo(document.getElementById('prVideo').files[0]);
+        }
+
+        await addRecord('products', {
+          product_code: code,
+          name: name,
+          category: document.getElementById('prCategory').value,
+          weight: weight,
+          cost_price: cost,
+          sale_price: sale,
+          images: imageUrls,
+          video: videoUrl
+        });
+
+        alert('✅ Product saved with ID: ' + code);
+        clearForm();
+        await generateProductCode();
+        loadProducts();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      } finally {
+        btn.textContent = 'Save Product'; btn.disabled = false;
+      }
+    }
+
+    function clearForm() {
+      ['prName','prWeight','prCost','prSale'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('prImages').value = '';
+      document.getElementById('prVideo').value = '';
+      document.getElementById('prImagesPreview').innerHTML = '';
+    }
+
+    async function loadProducts() {
+      const products = await getRecordsFast('products');
+      const container = document.getElementById('productsList');
+      if (products.length === 0) { container.innerHTML = '<div class="empty-state"><p>No products yet</p></div>'; return; }
+
+      container.innerHTML = products.map(p => `
+        <div class="data-item">
+          <div style="display:flex; gap:15px; align-items:center;">
+            ${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #FFD700;">` : '<div style="width:60px; height:60px; background:#2A2A2A; border-radius:8px;"></div>'}
+            <div>
+              <div class="data-item-title">${p.name}</div>
+              <div class="data-item-sub" style="color:#FFD700; font-weight:600;">ID: ${p.product_code}</div>
+              <div class="data-item-sub">${p.category.toUpperCase()} • ${p.weight}g</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div class="data-item-value">${formatPKR(p.sale_price)}</div>
+            <div class="data-item-sub">Cost: ${formatPKR(p.cost_price)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

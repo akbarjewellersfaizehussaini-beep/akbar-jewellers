@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://bilalmarghoobboutique-cmyk.github.io/shah-rehan-jewellers/sitemap.xml

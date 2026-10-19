@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .about-hero { position: relative; height: 50vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .about-hero-bg { position: absolute; inset: 0; background: radial-gradient(circle at 30% 40%, rgba(255,215,0,0.4), transparent 60%), radial-gradient(circle at 70% 60%, rgba(107,15,26,0.4), transparent 60%), linear-gradient(135deg, #1A1A1A, #0A0A0A); }
+    .about-hero-content { position: relative; z-index: 10; text-align: center; }
+    .about-hero h1 { font-family: 'Playfair Display', serif; font-size: 3.5rem; color: #FFD700; }
+    .about-container { max-width: 1100px; margin: 0 auto; padding: 60px 20px; }
+    .about-section { margin-bottom: 60px; }
+    .about-section h2 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #FFD700; margin-bottom: 20px; }
+    .about-section p { color: #FFF8DC; line-height: 1.9; margin-bottom: 15px; font-size: 1.05rem; }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-top: 30px; }
+    .team-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 25px; text-align: center; transition: all 0.3s ease; }
+    .team-card:hover { border-color: #FFD700; transform: translateY(-8px); box-shadow: 0 15px 50px rgba(255,215,0,0.2); }
+    .team-photo { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 15px; object-fit: cover; border: 3px solid #FFD700; }
+    .team-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #FFD700; margin-bottom: 5px; }
+    .team-role { color: #B8B8B8; font-size: 0.85rem; margin-bottom: 8px; }
+    .team-exp { display: inline-block; background: rgba(255,215,0,0.15); color: #FFD700; font-size: 0.75rem; padding: 3px 12px; border-radius: 50px; font-weight: 600; }
+    .tagline-box { text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(107,15,26,0.1)); border: 2px solid #FFD700; border-radius: 20px; margin: 40px 0; }
+    .tagline-box p { font-family: 'Noto Nastaliq Urdu', serif; font-size: 1.4rem; color: #FFD700; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="about.html" class="nav-link active">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <a href="cart.html" style="position: relative; color: #FFD700; font-size: 1.5rem; text-decoration: none;">🛒</a>
+        <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="about-hero">
+    <div class="about-hero-bg"></div>
+    <div class="about-hero-content">
+      <h1>About Us</h1>
+      <p style="color: #FFF8DC; margin-top: 10px; letter-spacing: 3px;">OUR STORY, YOUR TRUST</p>
+    </div>
+  </section>
+
+  <div class="about-container">
+
+    <!-- Our Story -->
+    <section class="about-section">
+      <h2>Our Story</h2>
+      <p>SHAH REHAN JEWELLERS is a name of trust, quality, and elegance in the heart of Lahore Cantt. Located at Main Bazar #2, Ghaziabad, we have been serving our valued customers with pure gold, silver, diamond, and artificial jewellery for over two decades.</p>
+      <p>Our journey began with a simple promise – to provide 100% original, hallmarked jewellery at honest and transparent prices. Today, we are proud to be one of the most trusted jewellery shops in the region, with thousands of satisfied customers who consider us a part of their family.</p>
+      <p>Every piece of jewellery at SHAH REHAN JEWELLERS is crafted with love, precision, and dedication. From traditional bridal sets to modern designs, from pure gold coins to elegant diamond rings – we offer a wide range of collections to suit every occasion and every taste.</p>
+    </section>
+
+    <!-- Our Mission -->
+    <section class="about-section">
+      <h2>Our Mission</h2>
+      <p>Our mission is to make every customer's special moment even more memorable with our exquisite jewellery collection. We believe in:</p>
+      <ul style="list-style: none; padding: 0;">
+        <li style="padding: 10px 0; color: #FFF8DC; font-size: 1.05rem;">✨ <strong style="color: #FFD700;">100% Original Jewellery</strong> – Hallmark certified, purity guaranteed</li>
+        <li style="padding: 10px 0; color: #FFF8DC; font-size: 1.05rem;">🤝 <strong style="color: #FFD700;">Transparent Pricing</strong> – No hidden charges, ever</li>
+        <li style="padding: 10px 0; color: #FFF8DC; font-size: 1.05rem;">💎 <strong style="color: #FFD700;">Custom Design</strong> – Your choice, your style, your size</li>
+        <li style="padding: 10px 0; color: #FFF8DC; font-size: 1.05rem;">🚚 <strong style="color: #FFD700;">Safe Delivery</strong> – Delivered with complete secrecy & care</li>
+        <li style="padding: 10px 0; color: #FFF8DC; font-size: 1.05rem;">💯 <strong style="color: #FFD700;">Customer Satisfaction</strong> – Your trust, our guarantee</li>
+      </ul>
+    </section>
+
+    <!-- Team -->
+    <section class="about-section">
+      <h2 style="text-align: center;">Meet Our Team</h2>
+      <p style="text-align: center; color: #B8B8B8;">The people behind SHAH REHAN JEWELLERS</p>
+      
+      <div class="team-grid">
+        <div class="team-card">
+          <img class="team-photo" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop" alt="Owner">
+          <h3 class="team-name">Syed Ahmed Bilal</h3>
+          <p class="team-role">Owner & Founder</p>
+          <span class="team-exp">20+ Years Experience</span>
+        </div>
+        
+        <div class="team-card">
+          <img class="team-photo" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop" alt="Manager">
+          <h3 class="team-name">Muhammad Rehan</h3>
+          <p class="team-role">Shop Manager</p>
+          <span class="team-exp">10+ Years Experience</span>
+        </div>
+        
+        <div class="team-card">
+          <img class="team-photo" src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop" alt="Goldsmith">
+          <h3 class="team-name">Muhammad Asif</h3>
+          <p class="team-role">Master Goldsmith</p>
+          <span class="team-exp">15+ Years Experience</span>
+        </div>
+        
+        <div class="team-card">
+          <img class="team-photo" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop" alt="Designer">
+          <h3 class="team-name">Hassan Ali</h3>
+          <p class="team-role">Jewellery Designer</p>
+          <span class="team-exp">8+ Years Experience</span>
+        </div>
+        
+        <div class="team-card">
+          <img class="team-photo" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop" alt="Karigar">
+          <h3 class="team-name">Abdul Wahab</h3>
+          <p class="team-role">Senior Karigar</p>
+          <span class="team-exp">12+ Years Experience</span>
+        </div>
+        
+        <div class="team-card">
+          <img class="team-photo" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=300&fit=crop" alt="Sales">
+          <h3 class="team-name">Bilal Ahmed</h3>
+          <p class="team-role">Sales Consultant</p>
+          <span class="team-exp">5+ Years Experience</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tagline Box -->
+    <div class="tagline-box">
+      <p dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+      <p dir="rtl">آخر میں آپ کا اعتماد، ہماری ضمانت</p>
+      <p dir="rtl">ہر قدم مکمل شفافیت کے ساتھ</p>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-brand">SHAH REHAN JEWELLERS</h3>
+          <p>Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+          <p>📞 0092 326 6501314</p>
+          <p>✉️ shahrehanjewellers@google.com</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="disclaimer.html">Disclaimer</a>
+          <a href="faq.html">FAQ</a>
+          <a href="return.html">Return Policy</a>
+        </div>
+        <div>
+          <h4>Follow Us</h4>
+          <a href="https://wa.me/923266501314">WhatsApp</a>
+        </div>
+      </div>
+      <div class="footer-taglines">
+        <p dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+        <p dir="rtl">آخر میں آپ کا اعتماد، ہماری ضمانت</p>
+        <p dir="rtl">ہر قدم مکمل شفافیت کے ساتھ</p>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 SHAH REHAN JEWELLERS. All Rights Reserved.</p>
+        <p class="creator-credit">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/923266501314" class="floating-whatsapp">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+  </a>
+
+  <script src="js/supabase.js"></script>
+
+</body>
+</html>

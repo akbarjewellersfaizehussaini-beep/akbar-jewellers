@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .faq-container { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
+    .faq-title { font-family: 'Playfair Display', serif; font-size: 3rem; color: #FFD700; text-align: center; margin-bottom: 40px; }
+    .faq-item { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
+    .faq-question { padding: 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: #FFD700; font-weight: 600; font-size: 1.05rem; }
+    .faq-question:hover { background: rgba(255,215,0,0.05); }
+    .faq-answer { padding: 0 20px; max-height: 0; overflow: hidden; transition: all 0.3s ease; color: #FFF8DC; line-height: 1.8; }
+    .faq-item.open .faq-answer { padding: 0 20px 20px; max-height: 500px; }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-icon { color: #FFD700; font-size: 1.5rem; transition: transform 0.3s ease; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+    </div>
+  </header>
+
+  <div class="faq-container">
+    <h1 class="faq-title">Frequently Asked Questions</h1>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">What is the making charge? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Making charges are 15% of the gold value. This is clearly shown in the price breakdown when you calculate the price on any product.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Do you offer Cash on Delivery (COD)? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">No, we do not offer Cash on Delivery. Minimum 85% advance payment is required (100% default). The remaining 15% is payable on delivery.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">How do I make payment? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Payment is via Easypaisa: 03266501314 (Account Title: Syed Ahmed Bilal). After payment, share the Transaction ID (TID) and screenshot on our WhatsApp or through the checkout page.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Can I customize my jewellery? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Yes! You can select your preferred karat (24K to 8K), weight (grams, tola, masha, ratti), and size. Every order is custom-made to your specifications.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">How long does delivery take? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Since every piece is custom-made, production takes 7 days. Then delivery: 1-2 days in Lahore, 3-5 days for other cities in Pakistan.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">What is your return policy? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Returns are accepted within 7 days. A 25% deduction applies (for making charges, polish, and custom work). The remaining 75% is refunded.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-question">Is the gold certified? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">Yes, 100%. Every piece of gold and silver jewellery is hallmarked and comes with a purity certificate.</div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-item-open"></div>
+      <div class="faq-question">What if I am not satisfied with the product? <span class="faq-icon">+</span></div>
+      <div class="faq-answer">We are committed to your satisfaction. Contact us immediately via WhatsApp at 0092 326 6501314 and we will resolve any issue within 24 hours.</div>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12 text-center">
+      <p class="footer-brand">SHAH REHAN JEWELLERS</p>
+      <p style="color: #B8B8B8; margin: 15px 0;">Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+      <p style="font-size: 9px; color: #666; margin-top: 30px;">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+    </div>
+  </footer>
+
+  <script>
+    function toggleFaq(el) {
+      el.classList.toggle('open');
+    }
+  </script>
+
+</body>
+</html>

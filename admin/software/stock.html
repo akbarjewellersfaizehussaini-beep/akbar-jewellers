@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#FFD700">
+  <title>Stock – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .sw-header { background: #1C1C1C; border-bottom: 2px solid #FFD700; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .sw-logo { font-family: 'Playfair Display', serif; color: #FFD700; font-weight: 700; }
+    .sw-nav { display: flex; gap: 5px; padding: 10px 15px; background: #1C1C1C; overflow-x: auto; }
+    .nav-btn { padding: 10px 20px; background: transparent; border: 1px solid rgba(255,215,0,0.3); color: #FFF8DC; border-radius: 50px; cursor: pointer; white-space: nowrap; }
+    .nav-btn.active { background: #FFD700; color: #0A0A0A; }
+    .sw-content { padding: 20px; max-width: 1000px; margin: 0 auto; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #FFD700; margin-bottom: 15px; }
+    .coming-soon { text-align: center; padding: 80px 20px; background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; }
+    .coming-soon .icon { font-size: 4rem; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <div class="sw-header">
+    <div class="sw-logo">Stock Management</div>
+    <button onclick="window.location.href='index.html'" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+  <div class="sw-nav">
+    <button class="nav-btn" onclick="window.location.href='index.html'">🏠 Dashboard</button>
+    <button class="nav-btn" onclick="window.location.href='sales.html'">💰 Sales</button>
+    <button class="nav-btn active">📦 Stock</button>
+    <button class="nav-btn" onclick="window.location.href='customers.html'">👥 Customers</button>
+    <button class="nav-btn" onclick="window.location.href='reports.html'">📊 Reports</button>
+    <button class="nav-btn" onclick="window.location.href='settings.html'">⚙️ Settings</button>
+  </div>
+  <div class="sw-content">
+    <div class="coming-soon">
+      <div class="icon">📦</div>
+      <h2 class="section-title">Stock Management</h2>
+      <p style="color: #B8B8B8;">Track your gold, silver, and diamond stock here.</p>
+      <p style="color: #B8B8B8; margin-top: 10px;">Coming soon with full features.</p>
+    </div>
+  </div>
+</body>
+</html>

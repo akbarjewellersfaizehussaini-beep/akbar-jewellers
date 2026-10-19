@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+  <style>
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; color: #FFD700; }
+    .action-card.expense { border-color: #FCA5A5; background: linear-gradient(135deg, rgba(220,38,38,0.1), #1C1C1C); }
+    .action-card.expense .action-name { color: #FCA5A5; }
+  </style>
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">SRJ Dashboard</div>
+    <div style="display: flex; gap: 15px; align-items: center;">
+      <span id="userRole" style="color:#FFD700; font-size:0.9rem;"></span>
+      <button onclick="logout()" style="background: transparent; color: #FCA5A5; border: 1px solid #DC2626; padding: 6px 15px; border-radius: 50px; cursor: pointer;">Logout</button>
+    </div>
+  </div>
+
+  <div class="sw-nav" id="navMenu"></div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Welcome, <span id="welcomeName" style="color:#FFD700;"></span></h1>
+    <p class="page-subtitle" id="currentDate"></p>
+
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="stat-label">Today's Sales</div>
+        <div class="stat-value" id="todaySales">Rs 0</div>
+      </div>
+      <div class="stat-card silver">
+        <div class="stat-label">This Month Purchases</div>
+        <div class="stat-value" id="monthPurchases">Rs 0</div>
+      </div>
+      <div class="stat-card diamond">
+        <div class="stat-label">Total Customers</div>
+        <div class="stat-value" id="totalCustomers">0</div>
+      </div>
+    </div>
+
+    <div class="action-grid">
+      <a href="sales.html" class="action-card"><div class="action-name">New Sale</div></a>
+      <a href="expenses.html" class="action-card expense"><div class="action-name">Add Expense</div></a>
+      <a href="purchase.html" class="action-card"><div class="action-name">New Purchase</div></a>
+      <a href="reports.html" class="action-card"><div class="action-name">View Reports</div></a>
+    </div>
+
+    <h2 class="section-title">Recent Sales (Click to view Invoice)</h2>
+    <div class="data-list" id="recentSales"></div>
+  </div>
+
+  <!-- Professional Invoice Modal -->
+  <div id="invoiceModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableInvoice"></div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">Print Invoice</button>
+        <button class="btn-secondary" onclick="sendInvoiceWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">Send WhatsApp</button>
+        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let currentUser = null;
+    let currentInvoiceData = null;
+
+    async function loadDashboard() {
+      currentUser = checkAuth();
+      if (!currentUser) return;
+      
+      document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
+      document.getElementById('welcomeName').textContent = currentUser.username;
+      document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      
+      // Build Nav Menu based on Role
+      let navHtml = '<button class="nav-btn active">Dashboard</button>';
+      if (currentUser.role === 'admin' || currentUser.role === 'sales') navHtml += '<button class="nav-btn" onclick="navigate(\'sales.html\')">Sales</button>';
+      if (currentUser.role === 'admin' || currentUser.role === 'purchase') navHtml += '<button class="nav-btn" onclick="navigate(\'purchase.html\')">Purchase</button>';
+      navHtml += '<button class="nav-btn" onclick="navigate(\'reports.html\')">Reports</button>';
+      if (currentUser.role === 'admin') navHtml += '<button class="nav-btn" onclick="navigate(\'settings.html\')">Settings</button>';
+      document.getElementById('navMenu').innerHTML = navHtml;
+
+      // Load Stats (Fast via Memory Cache)
+      const sales = await getRecordsFast('sales');
+      const purchases = await getRecordsFast('purchases');
+      const customers = await getRecordsFast('customers');
+      
+      const today = new Date().toISOString().slice(0,10);
+      const thisMonth = new Date().toISOString().slice(0,7);
+      
+      document.getElementById('todaySales').textContent = formatPKR(sales.filter(s => s.date?.startsWith(today)).reduce((sum, s) => sum + (Number(s.total)||0), 0));
+      document.getElementById('monthPurchases').textContent = formatPKR(purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0));
+      document.getElementById('totalCustomers').textContent = customers.length;
+
+      // Recent Sales
+      const recent = sales.slice(0, 5);
+      const container = document.getElementById('recentSales');
+      container.innerHTML = recent.length === 0 ? '<p style="color:#B8B8B8;">No sales yet</p>' : recent.map(s => `
+        <div class="data-item" style="cursor:pointer;" onclick='viewInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
+          <div>
+            <div class="data-item-title">${s.customer_name}</div>
+            <div class="data-item-sub">${s.items_summary || 'Sale'} • ${formatDate(s.date)}</div>
+          </div>
+          <div class="data-item-value">${formatPKR(s.total)}</div>
+        </div>
+      `).join('');
+    }
+
+    async function viewInvoice(sale) {
+      currentInvoiceData = sale;
+      const shop = await getShopSettings();
+      
+      const html = `
+        <div class="invoice-container">
+          <div class="invoice-header" style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+            <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.date)}</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
+            </div>
+          </div>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+              <tr style="background:#FAF7F0;">
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.weight}g</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.rate)}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
+            <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
+            <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
+          </div>
+          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
+            TOTAL: ${formatPKR(sale.total)}
+          </div>
+          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
+            Thank you for shopping with ${shop.name}
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('printableInvoice').innerHTML = html;
+      document.getElementById('invoiceModal').classList.add('active');
+    }
+
+    function sendInvoiceWhatsApp() {
+      if (!currentInvoiceData) return;
+      const msg = `*INVOICE: ${currentInvoiceData.invoice_number}*\nCustomer: ${currentInvoiceData.customer_name}\nItem: ${currentInvoiceData.items_summary}\nTotal: ${formatPKR(currentInvoiceData.total)}\nReceived: ${formatPKR(currentInvoiceData.received)}\nBalance: ${formatPKR(currentInvoiceData.balance)}\n\nThank you!`;
+      openWhatsApp(currentInvoiceData.customer_phone, msg);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDashboard);
+  </script>
+</body>
+</html>

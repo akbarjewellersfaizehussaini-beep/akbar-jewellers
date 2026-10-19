@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .cart-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .cart-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #FFD700; text-align: center; margin-bottom: 40px; }
+    .cart-item { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 20px; margin-bottom: 15px; display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center; }
+    .cart-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; }
+    .cart-item-info h3 { color: #FFD700; font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 5px; }
+    .cart-item-info p { color: #B8B8B8; font-size: 0.85rem; margin: 2px 0; }
+    .cart-item-price { color: #FFD700; font-size: 1.2rem; font-weight: 700; }
+    .btn-remove { background: rgba(220,38,38,0.2); color: #FCA5A5; border: 1px solid #DC2626; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-top: 8px; }
+    .cart-summary { background: #1C1C1C; border: 2px solid #FFD700; border-radius: 16px; padding: 25px; margin-top: 30px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .summary-row.total { border-top: 2px solid #FFD700; border-bottom: none; font-size: 1.3rem; font-weight: 700; color: #FFD700; padding-top: 15px; margin-top: 10px; }
+    .btn-checkout { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 20px; transition: all 0.3s ease; }
+    .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.4); }
+    .empty-cart { text-align: center; padding: 80px 20px; }
+    .empty-cart .icon { font-size: 5rem; margin-bottom: 20px; }
+    .empty-cart h2 { color: #FFD700; font-family: 'Playfair Display', serif; margin-bottom: 10px; }
+    .empty-cart a { display: inline-block; margin-top: 20px; padding: 12px 30px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border-radius: 50px; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+    </div>
+  </header>
+
+  <div class="cart-container">
+    <h1 class="cart-title">Your Cart</h1>
+    
+    <div id="cartContent"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12 text-center">
+      <p class="footer-brand">SHAH REHAN JEWELLERS</p>
+      <p style="color: #B8B8B8; margin: 10px 0;">Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+      <p style="color: #B8B8B8;">📞 0092 326 6501314</p>
+      <div class="footer-taglines" style="margin-top: 30px;">
+        <p dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+      </div>
+      <p style="font-size: 9px; color: #666; margin-top: 20px;">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+    </div>
+  </footer>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    // Parse price from string like "Rs 1,234"
+    function parsePrice(str) {
+      if (typeof str === 'number') return str;
+      return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0;
+    }
+    
+    function formatPKR(amount) {
+      return 'Rs ' + Math.round(amount).toLocaleString('en-PK');
+    }
+    
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('srj_cart') || '[]');
+      const container = document.getElementById('cartContent');
+      
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="empty-cart">
+            <div class="icon">🛒</div>
+            <h2>Your Cart is Empty</h2>
+            <p style="color: #B8B8B8;">Add some beautiful jewellery to your cart</p>
+            <a href="collections.html">Browse Collections</a>
+          </div>
+        `;
+        return;
+      }
+      
+      let subtotal = 0;
+      const itemsHtml = cart.map((item, index) => {
+        const price = parsePrice(item.total);
+        subtotal += price;
+        
+        return `
+          <div class="cart-item">
+            <img src="${item.image || 'images/placeholder.jpg'}" alt="${item.name}">
+            <div class="cart-item-info">
+              <h3>${item.name}</h3>
+              <p>Karat: ${item.karat}</p>
+              <p>Weight: ${item.weight} ${item.unit}</p>
+              <p>Size: ${item.size || 'Standard'}</p>
+              <button class="btn-remove" onclick="removeItem(${index})">Remove</button>
+            </div>
+            <div class="cart-item-price">${item.total}</div>
+          </div>
+        `;
+      }).join('');
+      
+      const gst = subtotal * 0.03;
+      const total = subtotal + gst;
+      
+      container.innerHTML = `
+        ${itemsHtml}
+        
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>${formatPKR(subtotal)}</span>
+          </div>
+          <div class="summary-row">
+            <span>GST (3%)</span>
+            <span>${formatPKR(gst)}</span>
+          </div>
+          <div class="summary-row total">
+            <span>TOTAL</span>
+            <span>${formatPKR(total)}</span>
+          </div>
+          <button class="btn-checkout" onclick="goToCheckout()">Proceed to Checkout</button>
+        </div>
+      `;
+    }
+    
+    function removeItem(index) {
+      const cart = JSON.parse(localStorage.getItem('srj_cart') || '[]');
+      cart.splice(index, 1);
+      localStorage.setItem('srj_cart', JSON.stringify(cart));
+      renderCart();
+    }
+    
+    function goToCheckout() {
+      window.location.href = 'checkout.html';
+    }
+    
+    document.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart – SHAH REHAN JEWELLERS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .cart-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+    .cart-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: #FFD700; text-align: center; margin-bottom: 40px; }
+    .cart-item { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 16px; padding: 20px; margin-bottom: 15px; display: grid; grid-template-columns: 100px 1fr auto; gap: 20px; align-items: center; }
+    .cart-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 12px; }
+    .cart-item-info h3 { color: #FFD700; font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 5px; }
+    .cart-item-info p { color: #B8B8B8; font-size: 0.85rem; margin: 2px 0; }
+    .cart-item-price { color: #FFD700; font-size: 1.2rem; font-weight: 700; }
+    .btn-remove { background: rgba(220,38,38,0.2); color: #FCA5A5; border: 1px solid #DC2626; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; margin-top: 8px; }
+    .cart-summary { background: #1C1C1C; border: 2px solid #FFD700; border-radius: 16px; padding: 25px; margin-top: 30px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .summary-row.total { border-top: 2px solid #FFD700; border-bottom: none; font-size: 1.3rem; font-weight: 700; color: #FFD700; padding-top: 15px; margin-top: 10px; }
+    .btn-checkout { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 20px; transition: all 0.3s ease; }
+    .btn-checkout:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.4); }
+    .empty-cart { text-align: center; padding: 80px 20px; }
+    .empty-cart .icon { font-size: 5rem; margin-bottom: 20px; }
+    .empty-cart h2 { color: #FFD700; font-family: 'Playfair Display', serif; margin-bottom: 10px; }
+    .empty-cart a { display: inline-block; margin-top: 20px; padding: 12px 30px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border-radius: 50px; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+    </div>
+  </header>
+
+  <div class="cart-container">
+    <h1 class="cart-title">Your Cart</h1>
+    
+    <div id="cartContent"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12 text-center">
+      <p class="footer-brand">SHAH REHAN JEWELLERS</p>
+      <p style="color: #B8B8B8; margin: 10px 0;">Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+      <p style="color: #B8B8B8;">📞 0092 326 6501314</p>
+      <div class="footer-taglines" style="margin-top: 30px;">
+        <p dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+      </div>
+      <p style="font-size: 9px; color: #666; margin-top: 20px;">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+    </div>
+  </footer>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    // Parse price from string like "Rs 1,234"
+    function parsePrice(str) {
+      if (typeof str === 'number') return str;
+      return parseFloat(String(str).replace(/[^0-9.]/g, '')) || 0;
+    }
+    
+    function formatPKR(amount) {
+      return 'Rs ' + Math.round(amount).toLocaleString('en-PK');
+    }
+    
+    function renderCart() {
+      const cart = JSON.parse(localStorage.getItem('srj_cart') || '[]');
+      const container = document.getElementById('cartContent');
+      
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="empty-cart">
+            <div class="icon">🛒</div>
+            <h2>Your Cart is Empty</h2>
+            <p style="color: #B8B8B8;">Add some beautiful jewellery to your cart</p>
+            <a href="collections.html">Browse Collections</a>
+          </div>
+        `;
+        return;
+      }
+      
+      let subtotal = 0;
+      const itemsHtml = cart.map((item, index) => {
+        const price = parsePrice(item.total);
+        subtotal += price;
+        
+        return `
+          <div class="cart-item">
+            <img src="${item.image || 'images/placeholder.jpg'}" alt="${item.name}">
+            <div class="cart-item-info">
+              <h3>${item.name}</h3>
+              <p>Karat: ${item.karat}</p>
+              <p>Weight: ${item.weight} ${item.unit}</p>
+              <p>Size: ${item.size || 'Standard'}</p>
+              <button class="btn-remove" onclick="removeItem(${index})">Remove</button>
+            </div>
+            <div class="cart-item-price">${item.total}</div>
+          </div>
+        `;
+      }).join('');
+      
+      const gst = subtotal * 0.03;
+      const total = subtotal + gst;
+      
+      container.innerHTML = `
+        ${itemsHtml}
+        
+        <div class="cart-summary">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>${formatPKR(subtotal)}</span>
+          </div>
+          <div class="summary-row">
+            <span>GST (3%)</span>
+            <span>${formatPKR(gst)}</span>
+          </div>
+          <div class="summary-row total">
+            <span>TOTAL</span>
+            <span>${formatPKR(total)}</span>
+          </div>
+          <button class="btn-checkout" onclick="goToCheckout()">Proceed to Checkout</button>
+        </div>
+      `;
+    }
+    
+    function removeItem(index) {
+      const cart = JSON.parse(localStorage.getItem('srj_cart') || '[]');
+      cart.splice(index, 1);
+      localStorage.setItem('srj_cart', JSON.stringify(cart));
+      renderCart();
+    }
+    
+    function goToCheckout() {
+      window.location.href = 'checkout.html';
+    }
+    
+    document.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+
+</body>
+</html>

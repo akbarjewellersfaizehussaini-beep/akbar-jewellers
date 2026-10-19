@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Post – SHAH REHAN JEWELLERS</title>
+  <meta name="description" content="Read full blog post from Shah Rehan Jewellers">
+  <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    
+    .post-hero {
+      height: 50vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .post-hero-bg {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 50% 50%, rgba(255,215,0,0.3), transparent 60%),
+        linear-gradient(135deg, #1A1A2E, #0F0F1E);
+    }
+    
+    .post-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 20px;
+      max-width: 900px;
+    }
+    
+    .post-category {
+      display: inline-block;
+      background: rgba(255,215,0,0.2);
+      color: #FFD700;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+    
+    .post-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      color: #FFD700;
+      text-shadow: 0 0 30px rgba(255,215,0,0.5);
+      margin-bottom: 15px;
+      line-height: 1.2;
+    }
+    
+    .post-meta {
+      color: #B8B8B8;
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .post-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+    
+    .post-featured-image {
+      width: 100%;
+      max-height: 500px;
+      object-fit: cover;
+      border-radius: 20px;
+      border: 2px solid rgba(255,215,0,0.3);
+      margin-bottom: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    
+    .post-content {
+      color: #FFF8DC;
+      font-size: 1.05rem;
+      line-height: 1.9;
+    }
+    
+    .post-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #FFD700;
+      margin: 40px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(255,215,0,0.3);
+    }
+    
+    .post-content h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: #FFD700;
+      margin: 30px 0 15px;
+    }
+    
+    .post-content p {
+      margin-bottom: 20px;
+      color: #FFF8DC;
+    }
+    
+    .post-content strong {
+      color: #FFD700;
+      font-weight: 700;
+    }
+    
+    .post-content ul, .post-content ol {
+      margin: 20px 0;
+      padding-right: 25px;
+      padding-left: 25px;
+    }
+    
+    .post-content li {
+      margin-bottom: 10px;
+      color: #FFF8DC;
+    }
+    
+    .post-content img {
+      width: 100%;
+      border-radius: 12px;
+      margin: 25px 0;
+      border: 2px solid rgba(255,215,0,0.2);
+    }
+    
+    .post-content a {
+      color: #FFD700;
+      text-decoration: underline;
+    }
+    
+    .post-tags {
+      margin-top: 40px;
+      padding-top: 25px;
+      border-top: 1px solid rgba(255,215,0,0.2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .post-tag {
+      background: rgba(255,215,0,0.1);
+      color: #FFD700;
+      padding: 6px 15px;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(255,215,0,0.3);
+    }
+    
+    .cta-box {
+      background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.03));
+      border: 2px solid #FFD700;
+      border-radius: 20px;
+      padding: 35px;
+      text-align: center;
+      margin: 50px 0;
+    }
+    
+    .cta-box h3 {
+      font-family: 'Playfair Display', serif;
+      color: #FFD700;
+      font-size: 1.6rem;
+      margin-bottom: 15px;
+    }
+    
+    .loading-post {
+      text-align: center;
+      padding: 100px 20px;
+      color: #FFD700;
+      font-size: 1.2rem;
+    }
+    
+    .post-navigation {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-top: 50px;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,215,0,0.2);
+    }
+    
+    .nav-btn {
+      flex: 1;
+      padding: 15px 20px;
+      background: transparent;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      border-radius: 50px;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .nav-btn:hover {
+      background: #FFD700;
+      color: #0A0A0A;
+    }
+    
+    @media (max-width: 768px) {
+      .post-title { font-size: 1.8rem; }
+      .post-content h2 { font-size: 1.5rem; }
+      .post-content h3 { font-size: 1.2rem; }
+      .post-content { font-size: 0.95rem; }
+      .post-navigation { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="images/srj-logo.svg" alt="SRJ Logo" class="header-logo rotating-logo" onerror="this.style.display='none'">
+        <h1 class="brand-name">SHAH REHAN JEWELLERS</h1>
+      </div>
+      <nav class="hidden md:flex gap-8 font-medium">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="collections.html" class="nav-link">Collections</a>
+        <a href="vlogs.html" class="nav-link">Vlogs</a>
+        <a href="blog.html" class="nav-link active">Blog</a>
+        <a href="about.html" class="nav-link">About</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+      </nav>
+      <a href="https://wa.me/923266501314" class="whatsapp-btn">WhatsApp</a>
+    </div>
+  </header>
+
+  <!-- Dynamic Content -->
+  <div id="postContent">
+    <div class="loading-post">📖 Loading blog post...</div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container mx-auto px-4 py-12">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-brand">SHAH REHAN JEWELLERS</h3>
+          <p>Main Bazar #2, Ghaziabad, Lahore Cantt</p>
+          <p>📞 0092 326 6501314</p>
+          <p>✉️ shahrehanjewellers@google.com</p>
+        </div>
+        <div>
+          <h4>Quick Links</h4>
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact</a>
+          <a href="blog.html">Blog</a>
+          <a href="vlogs.html">Vlogs</a>
+        </div>
+        <div>
+          <h4>Follow Us</h4>
+          <a href="https://wa.me/923266501314">WhatsApp</a>
+          <a href="#">Instagram</a>
+          <a href="#">Facebook</a>
+        </div>
+      </div>
+      <div class="footer-taglines">
+        <p dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+        <p dir="rtl">آخر میں آپ کا اعتماد، ہماری ضمانت</p>
+        <p dir="rtl">ہر قدم مکمل شفافیت کے ساتھ</p>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 SHAH REHAN JEWELLERS. All Rights Reserved.</p>
+        <p class="creator-credit">Designed by Bilal Marghoob Creations | 0092 326 69501314</p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/923266501314" class="floating-whatsapp">
+    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+  </a>
+
+  <script src="js/supabase.js"></script>
+  <script>
+    async function loadBlogPost() {
+      const container = document.getElementById('postContent');
+      
+      // Get slug from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const slug = urlParams.get('slug');
+      
+      if (!slug) {
+        container.innerHTML = `
+          <div class="loading-post">
+            <h2 style="color:#DC2626;">❌ Blog Not Found</h2>
+            <p style="margin-top:20px;">No blog slug provided</p>
+            <a href="blog.html" style="color:#FFD700; margin-top:20px; display:inline-block;">← Back to Blog</a>
+          </div>
+        `;
+        return;
+      }
+      
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/blogs?select=*&slug=eq.${slug}&is_published=eq.true`,
+          {
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+          }
+        );
+        
+        const blogs = await res.json();
+        
+        if (!blogs || blogs.length === 0) {
+          container.innerHTML = `
+            <div class="loading-post">
+              <h2 style="color:#DC2626;">❌ Blog Not Found</h2>
+              <p style="margin-top:20px;">The blog you're looking for doesn't exist.</p>
+              <a href="blog.html" style="color:#FFD700; margin-top:20px; display:inline-block;">← Back to Blog</a>
+            </div>
+          `;
+          return;
+        }
+        
+        const blog = blogs[0];
+        
+        // Update page title for SEO
+        document.title = blog.meta_title || blog.title + ' – SHAH REHAN JEWELLERS';
+        
+        // Update meta description
+        let metaDesc = document.querySelector('meta[name="description"]');
+        if (!metaDesc) {
+          metaDesc = document.createElement('meta');
+          metaDesc.name = 'description';
+          document.head.appendChild(metaDesc);
+        }
+        metaDesc.content = blog.meta_description || blog.excerpt || '';
+        
+        // Update meta keywords
+        if (blog.keywords && blog.keywords.length > 0) {
+          let metaKeywords = document.querySelector('meta[name="keywords"]');
+          if (!metaKeywords) {
+            metaKeywords = document.createElement('meta');
+            metaKeywords.name = 'keywords';
+            document.head.appendChild(metaKeywords);
+          }
+          metaKeywords.content = blog.keywords.join(', ');
+        }
+        
+        // Format date
+        const date = new Date(blog.created_at);
+        const formattedDate = date.toLocaleDateString('en-PK', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric'
+        });
+        
+        // Render blog
+        container.innerHTML = `
+          <section class="post-hero">
+            <div class="post-hero-bg"></div>
+            <div class="post-hero-content">
+              <span class="post-category">${blog.category || 'Blog'}</span>
+              <h1 class="post-title">${blog.title}</h1>
+              <div class="post-meta">
+                <span>📅 ${formattedDate}</span>
+                <span>✍️ ${blog.author || 'Shah Rehan Jewellers'}</span>
+                <span>👁️ ${blog.views || 0} views</span>
+              </div>
+            </div>
+          </section>
+          
+          <div class="post-container">
+            ${blog.featured_image ? `
+              <img src="${blog.featured_image}" alt="${blog.title}" class="post-featured-image" onerror="this.style.display='none'">
+            ` : ''}
+            
+            <div class="post-content">
+              ${blog.content}
+            </div>
+            
+            ${blog.tags && blog.tags.length > 0 ? `
+              <div class="post-tags">
+                ${blog.tags.map(t => `<span class="post-tag">#${t}</span>`).join('')}
+              </div>
+            ` : ''}
+            
+            <!-- CTA BOX -->
+            <div class="cta-box">
+              <h3>💎 Interested in Our Jewellery?</h3>
+              <p style="color: #FFF8DC; margin-bottom: 20px;">Visit our shop in Main Bazar #2, Ghaziabad, Lahore Cantt or contact us on WhatsApp for exclusive designs.</p>
+              <a href="https://wa.me/923266501314" class="btn-gold" style="display: inline-block; padding: 14px 40px;">📱 WhatsApp Us</a>
+              <a href="collections.html" class="btn-outline" style="display: inline-block; padding: 14px 40px; margin-left: 10px;">Browse Collections</a>
+            </div>
+            
+            <!-- NAVIGATION -->
+            <div class="post-navigation">
+              <a href="blog.html" class="nav-btn">← Back to All Blogs</a>
+              <a href="https://wa.me/923266501314" class="nav-btn">📱 Order Now</a>
+            </div>
+          </div>
+        `;
+        
+        // Increment view count (optional)
+        fetch(`${SUPABASE_URL}/rest/v1/blogs?id=eq.${blog.id}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ views: (blog.views || 0) + 1 })
+        }).catch(() => {});
+        
+      } catch (error) {
+        console.error('Error:', error);
+        container.innerHTML = `
+          <div class="loading-post">
+            <h2 style="color:#DC2626;">⚠️ Error Loading Blog</h2>
+            <p style="margin-top:20px;">Please try again later.</p>
+            <a href="blog.html" style="color:#FFD700; margin-top:20px; display:inline-block;">← Back to Blog</a>
+          </div>
+        `;
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadBlogPost);
+  </script>
+
+</body>
+</html>

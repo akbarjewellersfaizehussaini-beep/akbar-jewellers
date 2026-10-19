@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store – SRJ Software</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
+</head>
+<body>
+  <div class="sw-header">
+    <div class="sw-logo"><img src="images/store.png" onerror="this.style.display='none'" style="width:24px; margin-right:8px;">Store</div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer; font-family: 'Poppins', sans-serif;">← Back</button>
+  </div>
+
+  <div class="sw-nav">
+    <button class="nav-btn" onclick="navigate('index.html')">Dashboard</button>
+    <button class="nav-btn" onclick="navigate('sales.html')">Sales</button>
+    <button class="nav-btn" onclick="navigate('purchase.html')">Purchase</button>
+    <button class="nav-btn active">Store</button>
+    <button class="nav-btn" onclick="navigate('reports.html')">Reports</button>
+  </div>
+
+  <div class="sw-content">
+    <h1 class="page-title">Store Inventory</h1>
+    
+    <div class="form-card">
+      <h3 class="form-card-title">Add Stock Item</h3>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Category</label>
+          <select id="stCategory" class="form-select">
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="diamond">Diamond</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Item Name *</label><input type="text" id="stItem" class="form-input" placeholder="e.g., Gold Chain"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Weight (g)</label><input type="number" id="stWeight" class="form-input" placeholder="0.00"></div>
+        <div class="form-group"><label class="form-label">Cost Price (Rs)</label><input type="number" id="stCost" class="form-input" placeholder="0"></div>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Product Images (Min 5)</label>
+        <input type="file" id="stImages" class="form-input" accept="image/*" multiple style="padding:10px;">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Video (1)</label>
+        <input type="file" id="stVideo" class="form-input" accept="video/*" style="padding:10px;">
+      </div>
+
+      <button class="btn-primary" onclick="saveStock()" style="width:100%;">Save Item</button>
+    </div>
+
+    <h2 class="section-title">Inventory List</h2>
+    <div class="data-list" id="storeList"></div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    async function saveStock() {
+      const item = document.getElementById('stItem').value.trim();
+      if (!item) { alert('❌ Enter item name'); return; }
+
+      const btn = event.target;
+      btn.textContent = 'Uploading Images...'; btn.disabled = true;
+
+      try {
+        const imgFiles = document.getElementById('stImages').files;
+        const vidFile = document.getElementById('stVideo').files[0];
+        
+        const imageUrls = await uploadMultipleImages(imgFiles);
+        let videoUrl = null;
+        if (vidFile) videoUrl = await uploadVideo(vidFile);
+
+        await addRecord('stock', {
+          category: document.getElementById('stCategory').value,
+          item: item,
+          weight: parseFloat(document.getElementById('stWeight').value) || 0,
+          cost: parseFloat(document.getElementById('stCost').value) || 0,
+          images: imageUrls,
+          video: videoUrl
+        });
+
+        alert('✅ Stock added!');
+        clearForm(); loadStore();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      } finally {
+        btn.textContent = 'Save Item'; btn.disabled = false;
+      }
+    }
+
+    function clearForm() {
+      ['stItem','stWeight','stCost'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('stImages').value = '';
+      document.getElementById('stVideo').value = '';
+    }
+
+    async function loadStore() {
+      const stock = await getAllRecords('stock') || [];
+      const container = document.getElementById('storeList');
+      if (stock.length === 0) { container.innerHTML = '<div class="empty-state"><p>No items yet</p></div>'; return; }
+      
+      container.innerHTML = stock.map(s => `
+        <div class="data-item">
+          <div style="display:flex; gap:10px;">
+            ${s.images && s.images.length > 0 ? `<img src="${s.images[0]}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<img src="images/placeholder.png" onerror="this.style.display='none'" style="width:50px; height:50px; border-radius:8px;">`}
+            <div>
+              <div class="data-item-title">${s.item}</div>
+              <div class="data-item-sub">${s.category.toUpperCase()} • ${s.weight}g</div>
+            </div>
+          </div>
+          <div class="data-item-value">${formatPKR(s.cost)}</div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => { await initDB(); loadStore(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders – SHAH REHAN JEWELLERS Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    body { background: #0A0A0A; color: #FFF8DC; font-family: 'Poppins', sans-serif; }
+    .admin-header { background: #1C1C1C; border-bottom: 2px solid #FFD700; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+    .admin-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #FFD700; font-weight: 700; }
+    .admin-nav { display: flex; gap: 20px; align-items: center; }
+    .admin-nav a { color: #FFF8DC; text-decoration: none; font-size: 0.9rem; }
+    .admin-nav a:hover, .admin-nav a.active { color: #FFD700; }
+    .logout-btn { background: rgba(220,38,38,0.2); color: #FCA5A5; padding: 8px 18px; border-radius: 50px; border: 1px solid #DC2626; cursor: pointer; font-size: 0.85rem; }
+    .orders-table { width: 100%; background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; overflow: hidden; margin-top: 20px; }
+    .orders-table table { width: 100%; border-collapse: collapse; }
+    .orders-table th { background: rgba(255,215,0,0.1); color: #FFD700; padding: 15px; text-align: left; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+    .orders-table td { padding: 15px; border-bottom: 1px solid rgba(255,215,0,0.1); font-size: 0.9rem; }
+    .orders-table tr:hover { background: rgba(255,215,0,0.05); }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+    .status-pending { background: rgba(251,191,36,0.2); color: #FCD34D; }
+    .status-confirmed { background: rgba(59,130,246,0.2); color: #93C5FD; }
+    .status-processing { background: rgba(168,85,247,0.2); color: #C4B5FD; }
+    .status-shipped { background: rgba(34,197,94,0.2); color: #86EFAC; }
+    .status-delivered { background: rgba(34,197,94,0.3); color: #4ADE80; }
+    .status-cancelled { background: rgba(220,38,38,0.2); color: #FCA5A5; }
+    .btn-view { background: rgba(59,130,246,0.2); color: #93C5FD; border: 1px solid #3B82F6; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+    .btn-view:hover { background: #3B82F6; color: white; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #FFD700; }
+    .empty-state { text-align: center; padding: 60px 20px; color: #B8B8B8; }
+    .empty-state .icon { font-size: 4rem; margin-bottom: 15px; }
+    .admin-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .admin-modal.active { display: flex; }
+    .admin-modal-content { background: #1C1C1C; border: 2px solid #FFD700; border-radius: 20px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 30px; }
+    .order-detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,215,0,0.1); }
+    .order-detail-label { color: #B8B8B8; }
+    .order-detail-value { color: #FFF8DC; font-weight: 600; }
+    .status-select { width: 100%; padding: 12px; background: #0A0A0A; border: 1px solid rgba(255,215,0,0.3); border-radius: 8px; color: #FFF8DC; font-size: 0.95rem; margin-top: 10px; }
+    .btn-update { width: 100%; padding: 12px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 50px; font-weight: 700; cursor: pointer; margin-top: 15px; }
+    @media (max-width: 768px) {
+      .admin-nav a:not(.logout-btn) { display: none; }
+      .admin-nav a.mobile-show { display: block; }
+      .orders-table { overflow-x: auto; }
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="../images/favicon-admin.svg">
+<link rel="icon" type="image/svg+xml" href="../images/favicon-admin.svg">
+</head>
+<body>
+
+  <div class="admin-header">
+    <div class="admin-logo">SHAH REHAN JEWELLERS – Admin</div>
+    <nav class="admin-nav">
+      <a href="dashboard.html" class="mobile-show">Dashboard</a>
+      <a href="products.html" class="mobile-show">Products</a>
+      <a href="orders.html" class="active mobile-show">Orders</a>
+     <a href="vlogs.html" class="mobile-show">Vlogs</a>
+      <a href="settings.html" class="mobile-show">Settings</a>
+      <a href="software.html" class="mobile-show">Software</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </nav>
+  </div>
+
+  <div style="max-width: 1400px; margin: 0 auto; padding: 25px;">
+    <h1 class="section-title">Orders Management</h1>
+    
+    <div id="ordersContainer" class="orders-table">
+      <div class="empty-state">
+        <div class="icon">⏳</div>
+        <p>Loading orders...</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="orderModal" class="admin-modal">
+    <div class="admin-modal-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 id="orderModalTitle" style="color: #FFD700; font-family: 'Playfair Display', serif; font-size: 1.5rem;">Order Details</h2>
+        <button onclick="closeOrderModal()" style="background: none; border: none; color: #FFD700; font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      
+      <div id="orderDetailContent"></div>
+    </div>
+  </div>
+
+  <script src="../js/supabase.js"></script>
+  <script src="../js/orders.js"></script>
+
+</body>
+</html>
