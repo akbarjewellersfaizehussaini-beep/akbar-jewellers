@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karigar Services – SRJ Software</title>
+  <title>Karigar Services – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
@@ -23,7 +24,6 @@
       <button class="cat-tab silver" onclick="switchTab('job', this)">New Job Entry</button>
     </div>
 
-    <!-- KARIGAR LIST -->
     <div id="karigarTab">
       <div class="form-card">
         <h3 class="form-card-title">Add New Karigar</h3>
@@ -42,7 +42,6 @@
       <div class="data-list" id="karigarsList"></div>
     </div>
 
-    <!-- JOB ENTRY TAB -->
     <div id="jobTab" style="display:none;">
       <div class="form-card">
         <h3 class="form-card-title">New Job Entry</h3>
@@ -96,7 +95,6 @@
       if (!checkAuth(['admin', 'purchase'])) return;
       document.getElementById('jDate').value = new Date().toISOString().slice(0,10);
       loadKarigars();
-      loadJobs();
     });
 
     function switchTab(tab, btn) {
@@ -132,7 +130,6 @@
       const services = await getRecordsFast('services');
       const payments = await getRecordsFast('payments');
       
-      // Populate job dropdown
       const select = document.getElementById('jKarigar');
       select.innerHTML = '<option value="">-- Select --</option>';
       karigars.forEach(k => {
@@ -205,13 +202,9 @@
         alert('✅ Job saved!');
         ['jItem','jGoldGiven','jGoldReturned','jCharges','jPaid','jBalance'].forEach(id => document.getElementById(id).value = '');
         document.getElementById('jKarigar').value = '';
-        loadKarigars(); loadJobs();
+        loadKarigars();
       } catch (e) { alert('❌ ' + e.message); }
       finally { btn.textContent = 'Save Job'; btn.disabled = false; }
-    }
-
-    async function loadJobs() {
-      // Jobs are listed inside karigar ledger, no separate list needed
     }
 
     function openLedger(type, name) {
