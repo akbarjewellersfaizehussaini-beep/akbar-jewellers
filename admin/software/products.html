@@ -3,179 +3,243 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Products – SRJ Software</title>
+  <title>Payments – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Products & Inventory</div>
+    <div class="sw-logo">Payments & Receipts</div>
     <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
-    <h1 class="page-title">Product Management</h1>
-    <p class="page-subtitle">Add products with unique IDs, images, and video.</p>
+    <h1 class="page-title">Payment Receipt</h1>
+    <p class="page-subtitle">Receive advance from customers or pay suppliers/karigars.</p>
 
     <div class="form-card">
-      <h3 class="form-card-title">Add New Product</h3>
+      <h3 class="form-card-title">New Payment Entry</h3>
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Product Name *</label>
-          <input type="text" id="prName" class="form-input" placeholder="e.g., Gold Necklace Set">
+          <label class="form-label">Person Type *</label>
+          <select id="pType" class="form-select" onchange="loadPersons()">
+            <option value="customer">Customer (Receive Payment)</option>
+            <option value="supplier">Supplier (Give Payment)</option>
+            <option value="karigar">Karigar (Give Payment)</option>
+          </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Category *</label>
-          <select id="prCategory" class="form-select">
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-            <option value="diamond">Diamond</option>
-            <option value="artificial">Artificial</option>
+          <label class="form-label">Select Name *</label>
+          <select id="pPerson" class="form-select">
+            <option value="">-- Select --</option>
           </select>
         </div>
       </div>
 
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Weight (grams) *</label><input type="number" id="prWeight" class="form-input" step="0.001" placeholder="0.000"></div>
-        <div class="form-group"><label class="form-label">Cost Price (Rs) *</label><input type="number" id="prCost" class="form-input" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Amount (Rs) *</label><input type="number" id="pAmount" class="form-input" placeholder="0"></div>
+        <div class="form-group">
+          <label class="form-label">Payment Type</label>
+          <select id="pPayType" class="form-select">
+            <option value="advance">Advance</option>
+            <option value="due">Against Due</option>
+            <option value="full">Full & Final</option>
+          </select>
+        </div>
       </div>
 
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Sale Price (Rs) *</label><input type="number" id="prSale" class="form-input" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Product ID (Auto)</label><input type="text" id="prCode" class="form-input" readonly style="background:#2A2A2A; color:#FFD700; font-weight:700;"></div>
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select id="pMode" class="form-select">
+            <option value="cash">Cash</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="easypaisa">Easypaisa</option>
+            <option value="jazzcash">JazzCash</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Payment Date</label><input type="date" id="pDate" class="form-input"></div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Product Images (Select up to 5) *</label>
-        <input type="file" id="prImages" class="form-input" accept="image/*" multiple style="padding:10px;">
-        <div id="prImagesPreview" style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;"></div>
+        <label class="form-label">Notes (Optional)</label>
+        <input type="text" id="pNotes" class="form-input" placeholder="Any details...">
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Product Video (Optional)</label>
-        <input type="file" id="prVideo" class="form-input" accept="video/*" style="padding:10px;">
+      <div style="display: flex; gap: 12px; margin-top: 15px;">
+        <button class="btn-primary" onclick="savePayment(false)" style="flex: 1;">Save & View Receipt</button>
+        <button class="btn-secondary" onclick="savePayment(true)" style="flex: 1; background: #25D366; color: white; border: none;">Save & WhatsApp</button>
       </div>
-
-      <button class="btn-primary" onclick="saveProduct()" style="width:100%;">Save Product</button>
     </div>
 
-    <h2 class="section-title">All Products</h2>
-    <div class="data-list" id="productsList"></div>
+    <h2 class="section-title">Recent Payments (Click to view Receipt)</h2>
+    <div class="data-list" id="paymentsList"></div>
+  </div>
+
+  <div id="receiptModal" class="modal">
+    <div class="modal-content" style="max-width: 600px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableReceipt"></div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="printElement('printableReceipt')" style="flex:1;">Print Receipt</button>
+        <button class="btn-secondary" onclick="sendReceiptWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+        <button class="btn-danger" onclick="document.getElementById('receiptModal').classList.remove('active')" style="flex:1;">Close</button>
+      </div>
+    </div>
   </div>
 
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
+    let currentReceipt = null;
+
     document.addEventListener('DOMContentLoaded', async () => {
-      if (!checkAuth(['admin'])) return; // Sirf admin products add kar sakta hai
-      generateProductCode();
-      loadProducts();
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
+      await loadPersons();
+      loadPayments();
     });
 
-    // Auto Unique Code Generator (e.g. SRJ-GLD-001)
-    async function generateProductCode() {
-      const cat = document.getElementById('prCategory').value.toUpperCase().slice(0, 3);
-      const products = await getRecordsFast('products');
+    async function loadPersons() {
+      const type = document.getElementById('pType').value;
+      const select = document.getElementById('pPerson');
+      select.innerHTML = '<option value="">-- Select --</option>';
       
-      // Count products in this category
-      const catCount = products.filter(p => p.category === document.getElementById('prCategory').value).length;
-      const num = String(catCount + 1).padStart(3, '0');
-      
-      document.getElementById('prCode').value = `SRJ-${cat}-${num}`;
+      let data = [];
+      if (type === 'customer') data = await getRecordsFast('customers');
+      else if (type === 'supplier') data = await getRecordsFast('suppliers');
+      else if (type === 'karigar') data = await getRecordsFast('karigars');
+
+      data.forEach(p => {
+        select.innerHTML += `<option value="${p.name}|${p.phone || ''}">${p.name}</option>`;
+      });
     }
 
-    document.getElementById('prCategory').addEventListener('change', generateProductCode);
-
-    document.getElementById('prImages').addEventListener('change', (e) => {
-      const preview = document.getElementById('prImagesPreview');
-      preview.innerHTML = '';
-      Array.from(e.target.files).slice(0, 5).forEach(file => {
-        const url = URL.createObjectURL(file);
-        preview.innerHTML += `<img src="${url}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #FFD700;">`;
-      });
-    });
-
-    async function saveProduct() {
-      const name = document.getElementById('prName').value.trim();
-      const weight = parseFloat(document.getElementById('prWeight').value) || 0;
-      const cost = parseFloat(document.getElementById('prCost').value) || 0;
-      const sale = parseFloat(document.getElementById('prSale').value) || 0;
-      const code = document.getElementById('prCode').value;
-      const images = document.getElementById('prImages').files;
+    async function savePayment(sendWA) {
+      const personType = document.getElementById('pType').value;
+      const personVal = document.getElementById('pPerson').value;
+      const amount = parseFloat(document.getElementById('pAmount').value) || 0;
       
-      if (!name || weight <= 0 || cost <= 0 || sale <= 0) { alert('❌ Fill all required fields correctly'); return; }
-      if (images.length === 0) { alert('❌ Please upload at least 1 image'); return; }
+      if (!personVal || amount <= 0) { alert('❌ Select person and enter valid amount'); return; }
 
+      const [personName, personPhone] = personVal.split('|');
       const btn = event.target;
-      btn.textContent = 'Uploading Images...'; btn.disabled = true;
+      btn.textContent = 'Saving...'; btn.disabled = true;
 
       try {
-        // Upload all images
-        const imageUrls = [];
-        for (const file of Array.from(images).slice(0, 5)) {
-          const url = await uploadImage(file);
-          imageUrls.push(url);
+        const payment = {
+          receipt_number: 'RCV-' + Date.now(),
+          person_type: personType,
+          person_name: personName,
+          person_phone: personPhone,
+          amount: amount,
+          payment_type: document.getElementById('pPayType').value,
+          payment_mode: document.getElementById('pMode').value,
+          notes: document.getElementById('pNotes').value.trim(),
+          payment_date: document.getElementById('pDate').value || new Date().toISOString().slice(0,10)
+        };
+
+        const saved = await addRecord('payments', payment);
+        currentReceipt = saved;
+        
+        if (sendWA) {
+          const action = personType === 'customer' ? 'Received from' : 'Paid to';
+          const msg = `*PAYMENT RECEIPT*\nReceipt #: ${payment.receipt_number}\n${action}: ${personName}\nAmount: ${formatPKR(amount)}\nDate: ${formatDate(payment.payment_date)}\nMode: ${payment.payment_mode.toUpperCase()}`;
+          openWhatsApp(personPhone, msg);
         }
-
-        // Upload video if provided
-        let videoUrl = null;
-        if (document.getElementById('prVideo').files[0]) {
-          videoUrl = await uploadVideo(document.getElementById('prVideo').files[0]);
-        }
-
-        await addRecord('products', {
-          product_code: code,
-          name: name,
-          category: document.getElementById('prCategory').value,
-          weight: weight,
-          cost_price: cost,
-          sale_price: sale,
-          images: imageUrls,
-          video: videoUrl
-        });
-
-        alert('✅ Product saved with ID: ' + code);
-        clearForm();
-        await generateProductCode();
-        loadProducts();
+        
+        showReceipt(saved);
+        clearForm(); loadPayments();
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = 'Save Product'; btn.disabled = false;
+        btn.textContent = sendWA ? 'Save & WhatsApp' : 'Save & View Receipt';
+        btn.disabled = false;
       }
     }
 
-    function clearForm() {
-      ['prName','prWeight','prCost','prSale'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('prImages').value = '';
-      document.getElementById('prVideo').value = '';
-      document.getElementById('prImagesPreview').innerHTML = '';
-    }
-
-    async function loadProducts() {
-      const products = await getRecordsFast('products');
-      const container = document.getElementById('productsList');
-      if (products.length === 0) { container.innerHTML = '<div class="empty-state"><p>No products yet</p></div>'; return; }
-
-      container.innerHTML = products.map(p => `
-        <div class="data-item">
-          <div style="display:flex; gap:15px; align-items:center;">
-            ${p.images && p.images[0] ? `<img src="${p.images[0]}" style="width:60px; height:60px; border-radius:8px; object-fit:cover; border:2px solid #FFD700;">` : '<div style="width:60px; height:60px; background:#2A2A2A; border-radius:8px;"></div>'}
-            <div>
-              <div class="data-item-title">${p.name}</div>
-              <div class="data-item-sub" style="color:#FFD700; font-weight:600;">ID: ${p.product_code}</div>
-              <div class="data-item-sub">${p.category.toUpperCase()} • ${p.weight}g</div>
-            </div>
+    async function showReceipt(p) {
+      const shop = await getShopSettings();
+      const action = p.person_type === 'customer' ? 'RECEIVED FROM' : 'PAID TO';
+      
+      document.getElementById('printableReceipt').innerHTML = `
+        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:24px;">${shop.name}</h1>
+          <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+        </div>
+        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PAYMENT RECEIPT</h2>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px;">
+          <div>
+            <p style="margin:5px 0;"><strong>Receipt #:</strong> ${p.receipt_number}</p>
+            <p style="margin:5px 0;"><strong>Date:</strong> ${formatDate(p.payment_date || p.created_at)}</p>
           </div>
           <div style="text-align:right;">
-            <div class="data-item-value">${formatPKR(p.sale_price)}</div>
-            <div class="data-item-sub">Cost: ${formatPKR(p.cost_price)}</div>
+            <p style="margin:5px 0;"><strong>Mode:</strong> ${(p.payment_mode||'').toUpperCase()}</p>
+            <p style="margin:5px 0;"><strong>Type:</strong> ${(p.payment_type||'').toUpperCase()}</p>
           </div>
         </div>
-      `).join('');
+
+        <div style="background:#FAF7F0; padding:15px; border-radius:8px; margin-bottom:20px;">
+          <p style="margin:5px 0; font-size:12px; color:#888;">${action}</p>
+          <h3 style="margin:5px 0; color:#D4AF37;">${p.person_name}</h3>
+          ${p.person_phone ? `<p style="margin:5px 0; font-size:12px; color:#666;">${p.person_phone}</p>` : ''}
+        </div>
+
+        <div style="text-align:center; border-top:2px solid #D4AF37; border-bottom:2px solid #D4AF37; padding:20px 0; margin-bottom:20px;">
+          <p style="margin:0; font-size:12px; color:#888;">AMOUNT</p>
+          <h2 style="margin:5px 0; color:#D4AF37; font-family:'Playfair Display',serif; font-size:36px;">${formatPKR(p.amount)}</h2>
+        </div>
+
+        ${p.notes ? `<p style="font-size:12px; color:#666;"><strong>Notes:</strong> ${p.notes}</p>` : ''}
+
+        <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
+          Thank you! ${shop.name}
+          <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
+        </div>
+      `;
+      document.getElementById('receiptModal').classList.add('active');
+    }
+
+    function sendReceiptWhatsApp() {
+      if (!currentReceipt) return;
+      const action = currentReceipt.person_type === 'customer' ? 'Received from' : 'Paid to';
+      const msg = `*PAYMENT RECEIPT*\nReceipt #: ${currentReceipt.receipt_number}\n${action}: ${currentReceipt.person_name}\nAmount: ${formatPKR(currentReceipt.amount)}\nDate: ${formatDate(currentReceipt.payment_date)}\nMode: ${currentReceipt.payment_mode.toUpperCase()}`;
+      openWhatsApp(currentReceipt.person_phone, msg);
+    }
+
+    function clearForm() {
+      ['pAmount','pNotes'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pPerson').value = '';
+      document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
+    }
+
+    async function loadPayments() {
+      const payments = await getRecordsFast('payments');
+      const container = document.getElementById('paymentsList');
+      if (payments.length === 0) { container.innerHTML = '<div class="empty-state"><p>No payments yet</p></div>'; return; }
+
+      container.innerHTML = payments.slice(0, 20).map(p => {
+        const isReceive = p.person_type === 'customer';
+        const color = isReceive ? '#86EFAC' : '#FCA5A5';
+        const sign = isReceive ? '+' : '-';
+        return `
+          <div class="data-item" style="cursor:pointer;" onclick='showReceipt(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+            <div>
+              <div class="data-item-title">${p.person_name} <span style="font-size:0.7rem; color:#888;">(${p.person_type})</span></div>
+              <div class="data-item-sub">${p.receipt_number} • ${formatDate(p.payment_date || p.created_at)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="data-item-value" style="color:${color};">${sign} ${formatPKR(p.amount)}</div>
+              <div class="data-item-sub">${(p.payment_mode||'').toUpperCase()}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
   </script>
 </body>

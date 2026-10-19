@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sales – SRJ Software</title>
+  <title>Sales – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
@@ -75,7 +76,6 @@
     <div class="data-list" id="salesList"></div>
   </div>
 
-  <!-- Invoice Modal -->
   <div id="invoiceModal" class="modal">
     <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableInvoice"></div>
@@ -99,12 +99,12 @@
       
       document.getElementById('sDate').value = new Date().toISOString().slice(0, 10);
       shopRules = await getShopSettings();
-      document.getElementById('sGST').value = shopRules.gst_pct;
+      document.getElementById('sGST').value = shopRules.gst_pct || 3;
       
       allProducts = await getRecordsFast('products');
       const prodSelect = document.getElementById('sProductId');
       allProducts.forEach(p => {
-        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name}</option>`;
+        prodSelect.innerHTML += `<option value="${p.product_code || p.id}">${p.product_code || ''} - ${p.name}</option>`;
       });
       
       loadSales();
@@ -114,7 +114,7 @@
     function autoFillProduct() {
       const code = document.getElementById('sProductId').value;
       if (!code) return;
-      const prod = allProducts.find(p => p.product_code === code);
+      const prod = allProducts.find(p => (p.product_code || p.id) === code);
       if (prod) {
         document.getElementById('sItem').value = prod.name;
         document.getElementById('sWeight').value = prod.weight;
@@ -128,12 +128,11 @@
       const rate = parseFloat(document.getElementById('sRate').value) || 0;
       const making = parseFloat(document.getElementById('sMaking').value) || 0;
       
-      // Total metal = Qty * Weight * Rate
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
-      const makingTotal = making * qty; // Making per piece
+      const makingTotal = making * qty;
       const subtotal = metal + makingTotal;
-      const gst = subtotal * (shopRules.gst_pct / 100);
+      const gst = subtotal * ((shopRules.gst_pct || 3) / 100);
       const total = subtotal + gst;
       
       document.getElementById('calTotal').textContent = formatPKR(total);
@@ -157,7 +156,7 @@
         const weight = parseFloat(document.getElementById('sWeight').value) || 0;
         
         const sale = {
-          invoice_number: 'SRJ-' + Date.now(),
+          invoice_number: 'AKBAR-' + Date.now(),
           product_id: document.getElementById('sProductId').value || null,
           customer_name: customer,
           customer_phone: document.getElementById('cPhone').value.trim(),
@@ -165,10 +164,10 @@
           items_summary: item,
           qty: qty,
           weight: weight,
-          total_weight: qty * weight, // Total weight save karein
+          total_weight: qty * weight,
           rate: parseFloat(document.getElementById('sRate').value) || 0,
           making: parseFloat(document.getElementById('sMaking').value) || 0,
-          gst_pct: shopRules.gst_pct,
+          gst_pct: shopRules.gst_pct || 3,
           total: total,
           received: parseFloat(document.getElementById('sPaid').value) || 0,
           balance: parseFloat(document.getElementById('sRemaining').value) || 0,
@@ -200,6 +199,7 @@
         <div class="invoice-container">
           <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
             <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
           </div>
@@ -242,6 +242,8 @@
           </div>
           <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
             Thank you for shopping with ${shop.name}
+            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
+            <div style="font-size:9px; color:#999; margin-top:10px;">Designed by Bilal Marghoob Creations | 0326 6501314</div>
           </div>
         </div>
       `;

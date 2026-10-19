@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Purchase – SRJ Software</title>
+  <title>Purchase – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
@@ -102,7 +103,7 @@
       allProducts = await getRecordsFast('products');
       const prodSelect = document.getElementById('pProductId');
       allProducts.forEach(p => {
-        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name}</option>`;
+        prodSelect.innerHTML += `<option value="${p.product_code || p.id}">${p.product_code || ''} - ${p.name}</option>`;
       });
       
       loadPurchases();
@@ -112,11 +113,11 @@
     function autoFillProduct() {
       const code = document.getElementById('pProductId').value;
       if (!code) return;
-      const prod = allProducts.find(p => p.product_code === code);
+      const prod = allProducts.find(p => (p.product_code || p.id) === code);
       if (prod) {
         document.getElementById('pItem').value = prod.name;
         document.getElementById('pWeight').value = prod.weight;
-        document.getElementById('pRate').value = prod.cost_price;
+        document.getElementById('pRate').value = prod.cost_price || 0;
         autoCalc();
       }
     }
@@ -126,7 +127,6 @@
       const weight = parseFloat(document.getElementById('pWeight').value) || 0;
       const rate = parseFloat(document.getElementById('pRate').value) || 0;
       
-      // Total cost = Qty * Weight * Rate
       const total = Math.round(qty * weight * rate);
       document.getElementById('pTotal').value = total;
       const paid = parseFloat(document.getElementById('pPaid').value) || 0;
@@ -198,6 +198,7 @@
         <div class="invoice-container">
           <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
             <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
           </div>
@@ -240,6 +241,7 @@
           </div>
           <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
             ${shop.name} - Purchase Bill
+            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
           </div>
         </div>
       `;
