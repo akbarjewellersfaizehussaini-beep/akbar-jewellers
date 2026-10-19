@@ -1,14 +1,12 @@
-// ===== AKBAR JEWELLERS – SOFTWARE DATABASE (CLOUD) =====
+// ===== AKBAR JEWELLERS – SOFTWARE DATABASE =====
+// IMPORTANT: SUPABASE_URL aur SUPABASE_KEY js/supabase.js se aate hain
+// Yahan declare NAHI karni
 
-const SUPABASE_URL = 'https://cvuqtmmlewaudtxzpnyg.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_of8TMEfEPDsVg21MfSSmBQ_CbwtRqRk';
 const CLOUD_NAME = 'olpbssol';
 const CLOUDINARY_PRESET = 'akbar-jewellers';
 
-// In-Memory Cache (Fast Performance)
 const dbCache = {};
 
-// ---------- Supabase Core ----------
 async function sbFetch(path, options = {}) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
@@ -28,18 +26,21 @@ async function sbFetch(path, options = {}) {
   return res.json();
 }
 
-// ---------- FAST FETCH (Cache Logic) ----------
 async function getRecordsFast(storeName, forceRefresh = false) {
-  if (!forceRefresh && dbCache[storeName]) {
-    return dbCache[storeName];
+  if (!forceRefresh && dbCache[storeName]) return dbCache[storeName];
+  
+  try {
+    const rows = await sbFetch(`${storeName}?select=*&order=created_at.desc`);
+    const data = (rows || []).map(r => ({ 
+      ...r, 
+      date: r.sale_date || r.purchase_date || r.expense_date || r.payment_date || r.service_date || r.created_at 
+    }));
+    dbCache[storeName] = data;
+    return data;
+  } catch (e) {
+    console.error('getRecordsFast error for', storeName, ':', e);
+    return [];
   }
-  const rows = await sbFetch(`${storeName}?select=*&order=created_at.desc`);
-  const data = (rows || []).map(r => ({ 
-    ...r, 
-    date: r.sale_date || r.purchase_date || r.expense_date || r.payment_date || r.service_date || r.created_at 
-  }));
-  dbCache[storeName] = data;
-  return data;
 }
 
 function clearCache(storeName) {
@@ -47,12 +48,9 @@ function clearCache(storeName) {
   else Object.keys(dbCache).forEach(k => delete dbCache[k]);
 }
 
-// ---------- CRUD Operations ----------
 async function addRecord(storeName, data) {
   const clean = { ...data };
-  delete clean.id; 
-  delete clean.date; 
-  delete clean.created_at;
+  delete clean.id; delete clean.date; delete clean.created_at;
   const result = await sbFetch(storeName, { method: 'POST', body: JSON.stringify(clean) });
   clearCache(storeName);
   return Array.isArray(result) ? result[0] : result;
@@ -60,9 +58,7 @@ async function addRecord(storeName, data) {
 
 async function updateRecord(storeName, id, data) {
   const clean = { ...data };
-  delete clean.id; 
-  delete clean.date; 
-  delete clean.created_at;
+  delete clean.id; delete clean.date; delete clean.created_at;
   const result = await sbFetch(`${storeName}?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(clean) });
   clearCache(storeName);
   return result;
@@ -73,7 +69,6 @@ async function deleteRecord(storeName, id) {
   clearCache(storeName);
 }
 
-// ---------- Settings (Cloud) ----------
 async function getShopSettings() {
   const defaults = { 
     name: 'AKBAR JEWELLERS', 
@@ -114,7 +109,6 @@ async function saveSetting(key, value) {
   }
 }
 
-// ---------- Cloudinary ----------
 async function uploadToCloudinary(file, resourceType = 'image') {
   const form = new FormData();
   form.append('file', file);
