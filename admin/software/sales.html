@@ -137,7 +137,9 @@
       
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
-      const subtotal = metal + (making * qty) + (polish * qty);
+      const makingTotal = making * qty;
+      const polishTotal = polish * qty;
+      const subtotal = metal + makingTotal + polishTotal;
       const gst = subtotal * ((shopRules.gst_pct || 3) / 100);
       const total = subtotal + gst - discount;
       
@@ -276,12 +278,12 @@
             </div>
             
             <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Making Charges</span>
+              <span style="font-size:13px; color:#666;">Making Charges (Rs)</span>
               <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
             </div>
             
             <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Polish Charges</span>
+              <span style="font-size:13px; color:#666;">Polish Charges (Rs)</span>
               <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
             </div>
             
