@@ -165,7 +165,7 @@
             <hr style="border:none; border-top:1px solid #D4AF37; margin:10px 0;">
             <h3 style="font-family:'Playfair Display',serif; color:#1A1A1A; margin:5px 0;">${title}</h3>
             <p style="font-size:11px;">Period: ${rangeText} | Generated: ${formatDate(new Date())}</p>
-            <p style="font-size:10px; color:#888;">💡 Click on any row to view invoice</p>
+            <p style="font-size:10px; color:#888;">💡 Click on any row to view full invoice</p>
           </div>
           <table class="letterpad-table">
             <thead>${tableHeaders}</thead>
@@ -223,14 +223,26 @@
       currentInvoice = sale;
       const shop = shopInfo || await getShopSettings();
       
+      const qty = sale.qty || 1;
+      const weight = sale.weight || 0;
+      const rate = sale.rate || 0;
+      const making = sale.making || 0;
+      const totalWeight = qty * weight;
+      const metal = totalWeight * rate;
+      const makingTotal = making * qty;
+      const polish = Math.round(metal * 0.10);
+      const subtotal = metal + makingTotal + polish;
+      const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
+      
       document.getElementById('printableInvoice').innerHTML = `
         <div class="invoice-container">
           <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
             <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
           </div>
+          
           <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
             <div>
               <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
@@ -241,33 +253,65 @@
               <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
             </div>
           </div>
+          
           <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
             <thead>
               <tr style="background:#FAF7F0;">
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.qty || 1}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${((sale.qty || 1) * (sale.weight || 0)).toFixed(3)}g</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.rate)}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.total)}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${totalWeight.toFixed(3)}g</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td>
               </tr>
             </tbody>
           </table>
+          
+          <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
+            <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
+            
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+              <span style="font-size:13px; color:#666;">Metal Value (${totalWeight.toFixed(3)}g × ${formatPKR(rate)})</span>
+              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+              <span style="font-size:13px; color:#666;">Making Charges</span>
+              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+              <span style="font-size:13px; color:#666;">Polish Charges (10%)</span>
+              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polish)}</strong>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
+              <span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span>
+              <strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+              <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
+              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
+              <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
+              <strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong>
+            </div>
+          </div>
+          
           <div style="text-align:right; font-size:14px; margin-bottom:10px;">
             <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
             <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
           </div>
-          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
-            TOTAL: ${formatPKR(sale.total)}
-          </div>
+          
           <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
             Thank you for shopping with ${shop.name}
             <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || ''}</div>
@@ -285,7 +329,7 @@
         <div class="invoice-container">
           <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
             <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
           </div>
           <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PURCHASE BILL</h2>
@@ -305,7 +349,7 @@
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
                 <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
               </tr>
             </thead>
@@ -334,12 +378,24 @@
     function sendInvoiceWhatsApp() {
       if (!currentInvoice) return;
       
-      let msg = '';
-      if (currentReport === 'sales' || currentInvoice.invoice_number) {
-        msg = `*INVOICE: ${currentInvoice.invoice_number}*\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+      if (currentInvoice.invoice_number) {
+        // Sale invoice
+        const qty = currentInvoice.qty || 1;
+        const weight = currentInvoice.weight || 0;
+        const rate = currentInvoice.rate || 0;
+        const making = currentInvoice.making || 0;
+        const totalWeight = qty * weight;
+        const metal = totalWeight * rate;
+        const makingTotal = making * qty;
+        const polish = Math.round(metal * 0.10);
+        const subtotal = metal + makingTotal + polish;
+        const gst = Math.round(subtotal * ((currentInvoice.gst_pct || 3) / 100));
+        
+        const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish (10%): ${formatPKR(polish)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
         openWhatsApp(currentInvoice.customer_phone, msg);
-      } else if (currentReport === 'purchases' || currentInvoice.invoice_no) {
-        msg = `*PURCHASE BILL: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+      } else if (currentInvoice.invoice_no) {
+        // Purchase invoice
+        const msg = `*PURCHASE BILL: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
         openWhatsApp(currentInvoice.supplier_phone, msg);
       }
     }
