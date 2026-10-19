@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reports – SRJ Software</title>
+  <title>Reports – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
   <style>
@@ -12,6 +13,7 @@
     .letterpad { background: #FFFDF5; color: #1A1A1A; padding: 30px; border-radius: 8px; border: 2px solid #D4AF37; margin-top: 20px; font-family: 'Poppins', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-x: auto; }
     .letterpad-header { text-align: center; border-bottom: 3px double #D4AF37; padding-bottom: 20px; margin-bottom: 20px; }
     .letterpad-header h1 { font-family: 'Playfair Display', serif; color: #D4AF37; margin: 0; font-size: 26px; letter-spacing: 1px; }
+    .letterpad-header .urdu { font-family: 'Noto Nastaliq Urdu', serif; color: #D4AF37; font-size: 18px; margin: 5px 0; direction: rtl; }
     .letterpad-header p { margin: 3px 0; font-size: 11px; color: #666; }
     .letterpad-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .letterpad-table th { background: #FAF7F0; color: #D4AF37; padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #D4AF37; white-space: nowrap; }
@@ -129,7 +131,6 @@
 
       const rangeText = document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text;
 
-      // Build table header based on report type
       let tableHeaders = '';
       if (type === 'sales') {
         tableHeaders = `
@@ -166,6 +167,7 @@
         <div class="letterpad" id="printableReport">
           <div class="letterpad-header">
             <h1>${shopInfo.name}</h1>
+            <p class="urdu">${shopInfo.name_urdu || 'فیض حسینی'}</p>
             <p>${shopInfo.address}</p>
             <p>Phone: ${shopInfo.phone}</p>
             <hr style="border:none; border-top:1px solid #D4AF37; margin:10px 0;">
@@ -220,6 +222,8 @@
           <div class="letterpad-footer">
             This is a computer-generated report. Thank you for your business!<br>
             ${shopInfo.name} © ${new Date().getFullYear()}
+            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:8px;">${shopInfo.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
+            <div style="font-size:9px; margin-top:5px;">Designed by Bilal Marghoob Creations | 0326 6501314</div>
           </div>
         </div>
       `;

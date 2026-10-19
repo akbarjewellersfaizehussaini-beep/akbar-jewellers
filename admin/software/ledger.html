@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Khata / Ledger – SRJ Software</title>
+  <title>Khata / Ledger – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
   <style>
@@ -63,7 +64,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
       
-      // URL Parameters check (agar customer/supplier/karigar page se click hua hai)
       const params = new URLSearchParams(window.location.search);
       const preType = params.get('type');
       const preName = params.get('name');
@@ -151,10 +151,8 @@
         });
       }
 
-      // Sort by date
       transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
       
-      // Calculate running balance
       let running = 0;
       transactions.forEach(t => { running += t.debit - t.credit; t.balance = running; });
 
@@ -165,6 +163,7 @@
         <div class="ledger-card" id="printableLedger">
           <div style="text-align:center; border-bottom:2px solid #FFD700; padding-bottom:15px; margin-bottom:20px;">
             <h1 style="font-family:'Playfair Display',serif; color:#FFD700; margin:0; font-size:1.5rem;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:1rem; color:#FFD700; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
             <p style="margin:5px 0; font-size:0.8rem; color:#B8B8B8;">${shop.address}</p>
             <h2 style="margin:15px 0 5px; color:#FFD700; font-family:'Playfair Display',serif;">${name} - ${type.toUpperCase()} LEDGER</h2>
             <p style="margin:0; font-size:0.75rem; color:#B8B8B8;">Generated: ${formatDate(new Date())}</p>

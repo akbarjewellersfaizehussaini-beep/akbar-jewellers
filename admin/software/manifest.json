@@ -1,13 +1,27 @@
 {
-  "name": "SRJ Jeweller Software",
-  "short_name": "SRJ Software",
-  "description": "SHAH REHAN JEWELLERS - Business Management Software for Jewellers",
+  "name": "Akbar Jewellers Software",
+  "short_name": "Akbar Software",
+  "description": "Akbar Jewellers - Business Management Software",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0A0A0A",
   "theme_color": "#FFD700",
   "orientation": "portrait-primary",
   "scope": "./",
-  "icons": [],
-  "categories": ["business", "productivity", "finance"]
+  "icons": [
+    {
+      "src": "../images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "finance"],
+  "lang": "en-PK"
 }

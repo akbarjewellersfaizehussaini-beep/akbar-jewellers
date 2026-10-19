@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Store – SRJ Software</title>
+  <title>Store – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
 <body>
   <div class="sw-header">
-    <div class="sw-logo"><img src="images/store.png" onerror="this.style.display='none'" style="width:24px; margin-right:8px;">Store</div>
+    <div class="sw-logo">Store</div>
     <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer; font-family: 'Poppins', sans-serif;">← Back</button>
   </div>
 
@@ -101,17 +102,17 @@
     }
 
     async function loadStore() {
-      const stock = await getAllRecords('stock') || [];
+      const stock = await getRecordsFast('stock');
       const container = document.getElementById('storeList');
-      if (stock.length === 0) { container.innerHTML = '<div class="empty-state"><p>No items yet</p></div>'; return; }
+      if (!stock || stock.length === 0) { container.innerHTML = '<div class="empty-state"><p>No items yet</p></div>'; return; }
       
       container.innerHTML = stock.map(s => `
         <div class="data-item">
           <div style="display:flex; gap:10px;">
-            ${s.images && s.images.length > 0 ? `<img src="${s.images[0]}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<img src="images/placeholder.png" onerror="this.style.display='none'" style="width:50px; height:50px; border-radius:8px;">`}
+            ${s.images && s.images.length > 0 ? `<img src="${s.images[0]}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<img src="../images/placeholder.svg" style="width:50px; height:50px; border-radius:8px;">`}
             <div>
               <div class="data-item-title">${s.item}</div>
-              <div class="data-item-sub">${s.category.toUpperCase()} • ${s.weight}g</div>
+              <div class="data-item-sub">${(s.category||'').toUpperCase()} • ${s.weight}g</div>
             </div>
           </div>
           <div class="data-item-value">${formatPKR(s.cost)}</div>

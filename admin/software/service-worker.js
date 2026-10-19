@@ -1,12 +1,9 @@
-// ===== SHAH REHAN JEWELLERS – SERVICE WORKER =====
-// Offline-first caching for PWA
-
-const CACHE_NAME = 'srj-software-v1';
+// ===== AKBAR JEWELLERS – SERVICE WORKER =====
+const CACHE_NAME = 'akbar-software-v1';
 const urlsToCache = [
   './',
   './index.html',
   './sales.html',
-  './stock.html',
   './customers.html',
   './reports.html',
   './settings.html',

@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings – SRJ Software</title>
+  <title>Settings – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
   <style>
     .sw-content { max-width: 800px; margin: 0 auto; padding: 20px; }
@@ -16,25 +17,26 @@
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo"><img src="images/settings.png" onerror="this.style.display='none'" style="width:24px; margin-right:8px;">Settings</div>
+    <div class="sw-logo">Settings</div>
     <button onclick="window.location.href='index.html'" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h2 class="section-title">Software Settings (Cloud)</h2>
 
-    <!-- SHOP INFO -->
     <div class="settings-card">
-      <h3>Shop Information</h3>
+      <h3>🏪 Shop Information</h3>
       <div class="form-group"><label class="form-label">Shop Name</label><input type="text" id="setShopName" class="form-input" placeholder="Loading..."></div>
+      <div class="form-group"><label class="form-label">Urdu Name</label><input type="text" id="setShopNameUrdu" class="form-input" dir="rtl" style="font-family:'Noto Nastaliq Urdu',serif;"></div>
+      <div class="form-group"><label class="form-label">Tagline</label><input type="text" id="setShopTagline" class="form-input"></div>
       <div class="form-group"><label class="form-label">Address</label><input type="text" id="setShopAddress" class="form-input"></div>
       <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="text" id="setShopPhone" class="form-input"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" id="setShopEmail" class="form-input"></div>
       <button class="btn-primary" onclick="saveShopInfo()" style="width:100%; margin-top:10px;">Save to Cloud</button>
     </div>
 
-    <!-- BUSINESS RULES -->
     <div class="settings-card">
-      <h3>Business Rules</h3>
+      <h3>📊 Business Rules</h3>
       <div class="form-row">
         <div class="form-group"><label class="form-label">GST %</label><input type="number" id="setGST" class="form-input"></div>
         <div class="form-group"><label class="form-label">Making %</label><input type="number" id="setMaking" class="form-input"></div>
@@ -42,9 +44,8 @@
       <button class="btn-primary" onclick="saveRules()" style="width:100%; margin-top:10px;">Save Rules to Cloud</button>
     </div>
 
-    <!-- DANGER ZONE -->
     <div class="settings-card">
-      <h3>Danger Zone</h3>
+      <h3>⚠️ Danger Zone</h3>
       <button class="btn-danger" onclick="clearAllData()" style="width:100%;">Clear All Cloud Data</button>
     </div>
   </div>
@@ -52,13 +53,14 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    // ===== YEH FUNCTIONS AB SUPABASE SE DATA LAATE HAIN =====
-    
     async function getCloudSettings() {
       const defaults = {
-        name: 'SHAH REHAN JEWELLERS',
-        address: 'Main Bazar #2, Ghaziabad, Lahore Cantt',
-        phone: '0092 326 6501314',
+        name: 'AKBAR JEWELLERS',
+        name_urdu: 'فیض حسینی',
+        tagline: 'Diamond aur Kundan Antique Jewellery ke Expert',
+        address: 'New Canal Park, Ali Plaza Tajbagh, Lahore',
+        phone: '03234086439',
+        email: 'akbarjewellersfaizehussaini@gmail.com',
         gst_pct: 3,
         making_pct: 15
       };
@@ -69,156 +71,8 @@
         
         const settings = { ...defaults };
         rows.forEach(r => {
-          const isNum = ['gst_pct', 'making_pct'].includes(r.key);
-          settings[r.key] = isNum ? parseFloat(r.value) : r.value;
-        });
-        return settings;
-      } catch (e) {
-        console.warn('Settings fetch error:', e);
-        return defaults;
-      }
-    }
-
-    // Yeh function ab direct Upsert karega
-    async function saveCloudSetting(key, value) {
-      await sbFetch('settings', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ key: key, value: String(value) })
-      });
-    }
-
-    // ===== PAGE LOAD =====
-    document.addEventListener('DOMContentLoaded', async () => {
-      await initDB();
-      const s = await getCloudSettings();
-      
-      document.getElementById('setShopName').value = s.name;
-      document.getElementById('setShopAddress').value = s.address;
-      document.getElementById('setShopPhone').value = s.phone;
-      document.getElementById('setGST').value = s.gst_pct;
-      document.getElementById('setMaking').value = s.making_pct;
-    });
-
-    // ===== SAVE SHOP INFO =====
-    async function saveShopInfo() {
-      const btn = event.target;
-      btn.textContent = 'Saving to Cloud...'; btn.disabled = true;
-      
-      try {
-        await saveCloudSetting('name', document.getElementById('setShopName').value.trim());
-        await saveCloudSetting('address', document.getElementById('setShopAddress').value.trim());
-        await saveCloudSetting('phone', document.getElementById('setShopPhone').value.trim());
-        
-        alert('✅ Shop info saved to Supabase Cloud!');
-      } catch (e) {
-        alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = 'Save to Cloud'; btn.disabled = false;
-      }
-    }
-
-    // ===== SAVE RULES =====
-    async function saveRules() {
-      const btn = event.target;
-      btn.textContent = 'Saving to Cloud...'; btn.disabled = true;
-      
-      try {
-        await saveCloudSetting('gst_pct', document.getElementById('setGST').value);
-        await saveCloudSetting('making_pct', document.getElementById('setMaking').value);
-        
-        alert('✅ Business rules saved to Supabase Cloud!');
-      } catch (e) {
-        alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = 'Save Rules to Cloud'; btn.disabled = false;
-      }
-    }
-
-    // ===== CLEAR DATA =====
-    async function clearAllData() {
-      if (!confirm('⚠️ Delete ALL data from cloud?')) return;
-      if (!confirm('⚠️ Are you absolutely sure?')) return;
-      
-      const tables = ['sales','stock','customers','expenses','purchases','services','old_gold','suppliers'];
-      for (const t of tables) {
-        try { await clearStore(t); } catch (e) { console.warn(t, e.message); }
-      }
-      alert('✅ All data cleared from Cloud');
-    }
-  </script>
-</body>
-</html>a<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings – SRJ Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-software.css">
-  <style>
-    .sw-content { max-width: 800px; margin: 0 auto; padding: 20px; }
-    .settings-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .settings-card h3 { color: #FFD700; margin-bottom: 15px; font-family: 'Playfair Display', serif; }
-  </style>
-</head>
-<body>
-
-  <div class="sw-header">
-    <div class="sw-logo"><img src="images/settings.png" onerror="this.style.display='none'" style="width:24px; margin-right:8px;">Settings</div>
-    <button onclick="window.location.href='index.html'" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
-  </div>
-
-  <div class="sw-content">
-    <h2 class="section-title">Software Settings (Cloud)</h2>
-
-    <!-- SHOP INFO -->
-    <div class="settings-card">
-      <h3>Shop Information</h3>
-      <div class="form-group"><label class="form-label">Shop Name</label><input type="text" id="setShopName" class="form-input" placeholder="Loading..."></div>
-      <div class="form-group"><label class="form-label">Address</label><input type="text" id="setShopAddress" class="form-input"></div>
-      <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="text" id="setShopPhone" class="form-input"></div>
-      <button class="btn-primary" onclick="saveShopInfo()" style="width:100%; margin-top:10px;">Save to Cloud</button>
-    </div>
-
-    <!-- BUSINESS RULES -->
-    <div class="settings-card">
-      <h3>Business Rules</h3>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">GST %</label><input type="number" id="setGST" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Making %</label><input type="number" id="setMaking" class="form-input"></div>
-      </div>
-      <button class="btn-primary" onclick="saveRules()" style="width:100%; margin-top:10px;">Save Rules to Cloud</button>
-    </div>
-
-    <!-- DANGER ZONE -->
-    <div class="settings-card">
-      <h3>Danger Zone</h3>
-      <button class="btn-danger" onclick="clearAllData()" style="width:100%;">Clear All Cloud Data</button>
-    </div>
-  </div>
-
-  <script src="db.js"></script>
-  <script src="app.js"></script>
-  <script>
-    async function getCloudSettings() {
-      const defaults = {
-        name: 'SHAH REHAN JEWELLERS',
-        address: 'Main Bazar #2, Ghaziabad, Lahore Cantt',
-        phone: '0092 326 6501314',
-        gst_pct: 3,
-        making_pct: 15
-      };
-      
-      try {
-        const rows = await sbFetch('settings?select=*', { method: 'GET' });
-        if (!rows || rows.length === 0) return defaults;
-        
-        const settings = { ...defaults };
-        rows.forEach(r => {
-          const isNum = ['gst_pct', 'making_pct'].includes(r.key);
-          settings[r.key] = isNum ? parseFloat(r.value) : r.value;
+          const isNum = ['gst_pct', 'making_pct'].includes(r.setting_key);
+          settings[r.setting_key] = isNum ? parseFloat(r.setting_value) : r.setting_value;
         });
         return settings;
       } catch (e) {
@@ -231,11 +85,14 @@
       await initDB();
       const s = await getCloudSettings();
       
-      document.getElementById('setShopName').value = s.name;
-      document.getElementById('setShopAddress').value = s.address;
-      document.getElementById('setShopPhone').value = s.phone;
-      document.getElementById('setGST').value = s.gst_pct;
-      document.getElementById('setMaking').value = s.making_pct;
+      document.getElementById('setShopName').value = s.shop_name || s.name || 'AKBAR JEWELLERS';
+      document.getElementById('setShopNameUrdu').value = s.shop_name_urdu || s.name_urdu || 'فیض حسینی';
+      document.getElementById('setShopTagline').value = s.shop_tagline || s.tagline || '';
+      document.getElementById('setShopAddress').value = s.shop_address || s.address || '';
+      document.getElementById('setShopPhone').value = s.shop_phone || s.phone || '';
+      document.getElementById('setShopEmail').value = s.shop_email || s.email || '';
+      document.getElementById('setGST').value = s.gst_pct || 3;
+      document.getElementById('setMaking').value = s.making_pct || 15;
     });
 
     async function saveShopInfo() {
@@ -243,10 +100,12 @@
       btn.textContent = 'Saving to Cloud...'; btn.disabled = true;
       
       try {
-        // Yahan hum db.js wala naya function use kar rahe hain
-        await saveSetting('name', document.getElementById('setShopName').value.trim());
-        await saveSetting('address', document.getElementById('setShopAddress').value.trim());
-        await saveSetting('phone', document.getElementById('setShopPhone').value.trim());
+        await saveSetting('shop_name', document.getElementById('setShopName').value.trim());
+        await saveSetting('shop_name_urdu', document.getElementById('setShopNameUrdu').value.trim());
+        await saveSetting('shop_tagline', document.getElementById('setShopTagline').value.trim());
+        await saveSetting('shop_address', document.getElementById('setShopAddress').value.trim());
+        await saveSetting('shop_phone', document.getElementById('setShopPhone').value.trim());
+        await saveSetting('shop_email', document.getElementById('setShopEmail').value.trim());
         
         alert('✅ Shop info saved to Supabase Cloud!');
       } catch (e) {
@@ -276,11 +135,11 @@
       if (!confirm('⚠️ Delete ALL data from cloud?')) return;
       if (!confirm('⚠️ Are you absolutely sure?')) return;
       
-      const tables = ['sales','stock','customers','expenses','purchases','services','old_gold','suppliers'];
+      const tables = ['sales','stock','customers','expenses','purchases','services','suppliers'];
       for (const t of tables) {
-        try { await clearStore(t); } catch (e) { console.warn(t, e.message); }
+        try { clearCache(t); } catch (e) { console.warn(t, e.message); }
       }
-      alert('✅ All data cleared from Cloud');
+      alert('✅ Cache cleared. Cloud data safe.');
     }
   </script>
 </body>
