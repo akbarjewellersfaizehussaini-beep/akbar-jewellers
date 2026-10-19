@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reports – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
   <style>
@@ -18,6 +18,8 @@
     .letterpad-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .letterpad-table th { background: #FAF7F0; color: #D4AF37; padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #D4AF37; white-space: nowrap; }
     .letterpad-table td { padding: 10px 8px; border-bottom: 1px solid #EEE; font-size: 12px; vertical-align: top; }
+    .letterpad-table tr { cursor: pointer; }
+    .letterpad-table tr:hover { background: #FDFBF7; }
     .letterpad-total { text-align: right; padding-top: 15px; border-top: 2px solid #D4AF37; font-size: 16px; font-weight: 700; color: #D4AF37; }
     .letterpad-footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #EEE; font-size: 10px; color: #999; }
   </style>
@@ -65,6 +67,18 @@
     <div id="reportContent"></div>
   </div>
 
+  <div id="invoiceModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableInvoice"></div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">Print Invoice</button>
+        <button class="btn-secondary" onclick="sendInvoiceWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">Send WhatsApp</button>
+        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
@@ -72,6 +86,7 @@
     let currentData = [];
     let currentTotal = 0;
     let shopInfo = null;
+    let currentInvoice = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
@@ -133,55 +148,33 @@
 
       let tableHeaders = '';
       if (type === 'sales') {
-        tableHeaders = `
-          <tr>
-            <th>Date</th>
-            <th>Customer / Item</th>
-            <th>Qty</th>
-            <th>Weight (g)</th>
-            <th>Rate/g</th>
-            <th style="text-align:right;">Total</th>
-          </tr>
-        `;
+        tableHeaders = `<tr><th>Date</th><th>Customer / Item</th><th>Qty</th><th>Weight</th><th>Rate</th><th style="text-align:right;">Total</th></tr>`;
       } else if (type === 'purchases') {
-        tableHeaders = `
-          <tr>
-            <th>Date</th>
-            <th>Supplier / Item</th>
-            <th>Weight (g)</th>
-            <th>Rate/g</th>
-            <th style="text-align:right;">Total</th>
-          </tr>
-        `;
+        tableHeaders = `<tr><th>Date</th><th>Supplier / Item</th><th>Weight</th><th>Rate</th><th style="text-align:right;">Total</th></tr>`;
       } else {
-        tableHeaders = `
-          <tr>
-            <th>Date</th>
-            <th>Details</th>
-            <th style="text-align:right;">Amount</th>
-          </tr>
-        `;
+        tableHeaders = `<tr><th>Date</th><th>Details</th><th style="text-align:right;">Amount</th></tr>`;
       }
 
       container.innerHTML = `
         <div class="letterpad" id="printableReport">
           <div class="letterpad-header">
-            <h1>${shopInfo.name}</h1>
+            <h1>${shopInfo.name || 'AKBAR JEWELLERS'}</h1>
             <p class="urdu">${shopInfo.name_urdu || 'فیض حسینی'}</p>
-            <p>${shopInfo.address}</p>
-            <p>Phone: ${shopInfo.phone}</p>
+            <p>${shopInfo.address || ''}</p>
+            <p>Phone: ${shopInfo.phone || ''}</p>
             <hr style="border:none; border-top:1px solid #D4AF37; margin:10px 0;">
             <h3 style="font-family:'Playfair Display',serif; color:#1A1A1A; margin:5px 0;">${title}</h3>
             <p style="font-size:11px;">Period: ${rangeText} | Generated: ${formatDate(new Date())}</p>
+            <p style="font-size:10px; color:#888;">💡 Click on any row to view invoice</p>
           </div>
           <table class="letterpad-table">
             <thead>${tableHeaders}</thead>
             <tbody>
-              ${currentData.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px; color:#999;">No records found for this period</td></tr>' : 
-                currentData.map(x => {
+              ${currentData.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px; color:#999;">No records found</td></tr>' : 
+                currentData.map((x, idx) => {
                   if (type === 'sales') {
                     return `
-                      <tr>
+                      <tr onclick='viewSaleInvoice(${JSON.stringify(x).replace(/'/g, "&#39;")})'>
                         <td>${formatDate(x.date)}</td>
                         <td><strong>${x.customer_name}</strong><br><span style="font-size:11px; color:#666;">${x.items_summary}</span></td>
                         <td>${x.qty || 1}</td>
@@ -192,7 +185,7 @@
                     `;
                   } else if (type === 'purchases') {
                     return `
-                      <tr>
+                      <tr onclick='viewPurchaseInvoice(${JSON.stringify(x).replace(/'/g, "&#39;")})'>
                         <td>${formatDate(x.date)}</td>
                         <td><strong>${x.supplier_name}</strong><br><span style="font-size:11px; color:#666;">${x.item}</span></td>
                         <td>${x.weight || 0}g</td>
@@ -216,17 +209,139 @@
                 }).join('')}
             </tbody>
           </table>
-          <div class="letterpad-total">
-            TOTAL: ${formatPKR(currentTotal)}
-          </div>
+          <div class="letterpad-total">TOTAL: ${formatPKR(currentTotal)}</div>
           <div class="letterpad-footer">
-            This is a computer-generated report. Thank you for your business!<br>
-            ${shopInfo.name} © ${new Date().getFullYear()}
+            This is a computer-generated report. Thank you!<br>
+            ${shopInfo.name || 'AKBAR JEWELLERS'} © ${new Date().getFullYear()}
             <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:8px;">${shopInfo.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
-            <div style="font-size:9px; margin-top:5px;">Designed by Bilal Marghoob Creations | 0326 6501314</div>
           </div>
         </div>
       `;
+    }
+
+    async function viewSaleInvoice(sale) {
+      currentInvoice = sale;
+      const shop = shopInfo || await getShopSettings();
+      
+      document.getElementById('printableInvoice').innerHTML = `
+        <div class="invoice-container">
+          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+            <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date || sale.created_at)}</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
+            </div>
+          </div>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+              <tr style="background:#FAF7F0;">
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.qty || 1}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${((sale.qty || 1) * (sale.weight || 0)).toFixed(3)}g</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.rate)}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(sale.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
+            <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
+            <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
+          </div>
+          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
+            TOTAL: ${formatPKR(sale.total)}
+          </div>
+          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
+            Thank you for shopping with ${shop.name}
+            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || ''}</div>
+          </div>
+        </div>
+      `;
+      document.getElementById('invoiceModal').classList.add('active');
+    }
+
+    async function viewPurchaseInvoice(purchase) {
+      currentInvoice = purchase;
+      const shop = shopInfo || await getShopSettings();
+      
+      document.getElementById('printableInvoice').innerHTML = `
+        <div class="invoice-container">
+          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+          </div>
+          <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PURCHASE BILL</h2>
+          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <div>
+              <p style="margin:0; font-size:14px;"><strong>Purchase #:</strong> ${purchase.invoice_no}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(purchase.purchase_date || purchase.created_at)}</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="margin:0; font-size:14px;"><strong>Supplier:</strong> ${purchase.supplier_name}</p>
+              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${purchase.supplier_phone || '—'}</p>
+            </div>
+          </div>
+          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+            <thead>
+              <tr style="background:#FAF7F0;">
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate</th>
+                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.item}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.qty || 1}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${((purchase.qty || 1) * (purchase.weight || 0)).toFixed(3)}g</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.rate)}</td>
+                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
+            <p style="margin:5px 0;">Paid: <strong>${formatPKR(purchase.paid)}</strong></p>
+            <p style="margin:5px 0;">Balance: <strong style="color:${purchase.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(purchase.balance)}</strong></p>
+          </div>
+          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
+            TOTAL: ${formatPKR(purchase.total)}
+          </div>
+        </div>
+      `;
+      document.getElementById('invoiceModal').classList.add('active');
+    }
+
+    function sendInvoiceWhatsApp() {
+      if (!currentInvoice) return;
+      
+      let msg = '';
+      if (currentReport === 'sales' || currentInvoice.invoice_number) {
+        msg = `*INVOICE: ${currentInvoice.invoice_number}*\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+        openWhatsApp(currentInvoice.customer_phone, msg);
+      } else if (currentReport === 'purchases' || currentInvoice.invoice_no) {
+        msg = `*PURCHASE BILL: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+        openWhatsApp(currentInvoice.supplier_phone, msg);
+      }
     }
 
     function sendReportWhatsApp() {
@@ -240,22 +355,18 @@
       
       currentData.forEach((x, i) => {
         let desc = '';
-        if (currentReport === 'sales') {
-          desc = `${x.customer_name} - ${x.items_summary} | Qty: ${x.qty||1}, Wt: ${x.weight||0}g, Rate: ${formatPKR(x.rate)}`;
-        }
-        else if (currentReport === 'purchases') {
-          desc = `${x.supplier_name} - ${x.item} | Wt: ${x.weight||0}g, Rate: ${formatPKR(x.rate)}`;
-        }
-        else if (currentReport === 'expenses') desc = `${(x.category||'').toUpperCase()}`;
-        else if (currentReport === 'debtors') desc = `${x.customer_name}`;
-        else if (currentReport === 'creditors') desc = `${x.person}`;
+        if (currentReport === 'sales') desc = `${x.customer_name} - ${x.items_summary} | Total: ${formatPKR(x.total)}`;
+        else if (currentReport === 'purchases') desc = `${x.supplier_name} - ${x.item} | Total: ${formatPKR(x.total)}`;
+        else if (currentReport === 'expenses') desc = `${(x.category||'').toUpperCase()}: ${formatPKR(x.amount)}`;
+        else if (currentReport === 'debtors') desc = `${x.customer_name}: ${formatPKR(x.balance)}`;
+        else if (currentReport === 'creditors') desc = `${x.person}: ${formatPKR(x.balance)}`;
         
-        msg += `${i+1}. ${desc}\n   Amount: ${formatPKR(x[amountKey])}\n`;
+        msg += `${i+1}. ${desc}\n`;
       });
       
       msg += `\n*TOTAL: ${formatPKR(currentTotal)}*`;
       
-      const phone = prompt('Enter WhatsApp number to send report:', '');
+      const phone = prompt('Enter WhatsApp number:', '');
       if (phone) openWhatsApp(phone, msg);
     }
   </script>
