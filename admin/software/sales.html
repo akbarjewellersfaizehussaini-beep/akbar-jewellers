@@ -48,10 +48,14 @@
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Rate/gram (Rs) *</label><input type="number" id="sRate" class="form-input" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Making Charges (Rs)</label><input type="number" id="sMaking" class="form-input" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Making Charges (Rs) — Manual</label><input type="number" id="sMaking" class="form-input" placeholder="0"></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">GST % (Auto)</label><input type="number" id="sGST" class="form-input" readonly style="background:#2A2A2A; color:#FFD700;"></div>
+        <div class="form-group"><label class="form-label">Polish Charges (Rs) — Manual</label><input type="number" id="sPolish" class="form-input" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Discount (Rs) — Manual</label><input type="number" id="sDiscount" class="form-input" placeholder="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tax/GST % (Auto)</label><input type="number" id="sGST" class="form-input" readonly style="background:#2A2A2A; color:#FFD700;"></div>
       </div>
     </div>
 
@@ -91,7 +95,7 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    let shopRules = { gst_pct: 3, making_pct: 15 };
+    let shopRules = { gst_pct: 3 };
     let allProducts = [];
     let currentInvoice = null;
 
@@ -128,19 +132,20 @@
       const weight = parseFloat(document.getElementById('sWeight').value) || 0;
       const rate = parseFloat(document.getElementById('sRate').value) || 0;
       const making = parseFloat(document.getElementById('sMaking').value) || 0;
+      const polish = parseFloat(document.getElementById('sPolish').value) || 0;
+      const discount = parseFloat(document.getElementById('sDiscount').value) || 0;
       
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
-      const makingTotal = making * qty;
-      const subtotal = metal + makingTotal;
+      const subtotal = metal + (making * qty) + (polish * qty);
       const gst = subtotal * ((shopRules.gst_pct || 3) / 100);
-      const total = subtotal + gst;
+      const total = subtotal + gst - discount;
       
       document.getElementById('calTotal').textContent = formatPKR(total);
       const paid = parseFloat(document.getElementById('sPaid').value) || 0;
       document.getElementById('sRemaining').value = Math.max(0, Math.round(total - paid));
     }
-    ['sQty', 'sWeight', 'sRate', 'sMaking', 'sPaid'].forEach(id => document.getElementById(id)?.addEventListener('input', autoCalc));
+    ['sQty', 'sWeight', 'sRate', 'sMaking', 'sPolish', 'sDiscount', 'sPaid'].forEach(id => document.getElementById(id)?.addEventListener('input', autoCalc));
 
     async function saveSale(sendWA) {
       const customer = document.getElementById('cName').value.trim();
@@ -157,13 +162,8 @@
         const weight = parseFloat(document.getElementById('sWeight').value) || 0;
         const rate = parseFloat(document.getElementById('sRate').value) || 0;
         const making = parseFloat(document.getElementById('sMaking').value) || 0;
-        
-        const totalWeight = qty * weight;
-        const metal = totalWeight * rate;
-        const makingTotal = making * qty;
-        const polish = Math.round(metal * 0.10);
-        const subtotal = metal + makingTotal + polish;
-        const gst = Math.round(subtotal * ((shopRules.gst_pct || 3) / 100));
+        const polish = parseFloat(document.getElementById('sPolish').value) || 0;
+        const discount = parseFloat(document.getElementById('sDiscount').value) || 0;
         
         const sale = {
           invoice_number: 'AKBAR-' + Date.now(),
@@ -177,6 +177,8 @@
           total_weight: qty * weight,
           rate: rate,
           making: making,
+          polish: polish,
+          discount: discount,
           gst_pct: shopRules.gst_pct || 3,
           total: total,
           received: parseFloat(document.getElementById('sPaid').value) || 0,
@@ -188,7 +190,14 @@
         
         if (sendWA) {
           const shop = await getShopSettings();
-          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal: ${formatPKR(metal)}\nMaking: ${formatPKR(makingTotal)}\nPolish: ${formatPKR(polish)}\nGST (${shopRules.gst_pct}%): ${formatPKR(gst)}\n*TOTAL: ${formatPKR(total)}*\n\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
+          const totalWeight = qty * weight;
+          const metal = totalWeight * rate;
+          const makingTotal = making * qty;
+          const polishTotal = polish * qty;
+          const subtotal = metal + makingTotal + polishTotal;
+          const gst = Math.round(subtotal * ((shopRules.gst_pct || 3) / 100));
+          
+          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal: ${formatPKR(metal)}\nMaking: ${formatPKR(makingTotal)}\nPolish: ${formatPKR(polishTotal)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${shopRules.gst_pct}%): ${formatPKR(gst)}\n${discount > 0 ? 'Discount: -' + formatPKR(discount) + '\n' : ''}*TOTAL: ${formatPKR(total)}*\n\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
           openWhatsApp(sale.customer_phone, msg);
         }
         
@@ -206,16 +215,17 @@
     async function showInvoice(sale) {
       const shop = await getShopSettings();
       
-      // Calculate breakdown
       const qty = sale.qty || 1;
       const weight = sale.weight || 0;
       const rate = sale.rate || 0;
       const making = sale.making || 0;
+      const polish = sale.polish || 0;
+      const discount = sale.discount || 0;
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
       const makingTotal = making * qty;
-      const polish = Math.round(metal * 0.10);
-      const subtotal = metal + makingTotal + polish;
+      const polishTotal = polish * qty;
+      const subtotal = metal + makingTotal + polishTotal;
       const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
       
       document.getElementById('printableInvoice').innerHTML = `
@@ -257,7 +267,6 @@
             </tbody>
           </table>
           
-          <!-- PRICE BREAKDOWN -->
           <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
             <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
             
@@ -272,8 +281,8 @@
             </div>
             
             <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Polish Charges (10%)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polish)}</strong>
+              <span style="font-size:13px; color:#666;">Polish Charges</span>
+              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
             </div>
             
             <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
@@ -285,6 +294,13 @@
               <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
               <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
             </div>
+            
+            ${discount > 0 ? `
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
+              <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
+              <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
+            </div>
+            ` : ''}
             
             <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
               <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
@@ -313,19 +329,21 @@
       const weight = currentInvoice.weight || 0;
       const rate = currentInvoice.rate || 0;
       const making = currentInvoice.making || 0;
+      const polish = currentInvoice.polish || 0;
+      const discount = currentInvoice.discount || 0;
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
       const makingTotal = making * qty;
-      const polish = Math.round(metal * 0.10);
-      const subtotal = metal + makingTotal + polish;
+      const polishTotal = polish * qty;
+      const subtotal = metal + makingTotal + polishTotal;
       const gst = Math.round(subtotal * ((currentInvoice.gst_pct || 3) / 100));
       
-      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish (10%): ${formatPKR(polish)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish Charges: ${formatPKR(polishTotal)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n${discount > 0 ? 'Discount: -' + formatPKR(discount) + '\n' : ''}*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
       openWhatsApp(currentInvoice.customer_phone, msg);
     }
 
     function clearForm() {
-      ['cName','cPhone','cAddress','sItem','sWeight','sRate','sMaking','sPaid','sRemaining'].forEach(id => document.getElementById(id).value = '');
+      ['cName','cPhone','cAddress','sItem','sWeight','sRate','sMaking','sPolish','sDiscount','sPaid','sRemaining'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('sQty').value = '1';
       document.getElementById('sProductId').value = '';
       document.getElementById('sDate').value = new Date().toISOString().slice(0,10);

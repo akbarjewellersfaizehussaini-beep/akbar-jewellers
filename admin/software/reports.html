@@ -227,11 +227,13 @@
       const weight = sale.weight || 0;
       const rate = sale.rate || 0;
       const making = sale.making || 0;
+      const polish = sale.polish || 0;
+      const discount = sale.discount || 0;
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
       const makingTotal = making * qty;
-      const polish = Math.round(metal * 0.10);
-      const subtotal = metal + makingTotal + polish;
+      const polishTotal = polish * qty;
+      const subtotal = metal + makingTotal + polishTotal;
       const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
       
       document.getElementById('printableInvoice').innerHTML = `
@@ -287,8 +289,8 @@
             </div>
             
             <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Polish Charges (10%)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polish)}</strong>
+              <span style="font-size:13px; color:#666;">Polish Charges</span>
+              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
             </div>
             
             <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
@@ -300,6 +302,13 @@
               <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
               <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
             </div>
+            
+            ${discount > 0 ? `
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
+              <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
+              <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
+            </div>
+            ` : ''}
             
             <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
               <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
@@ -379,22 +388,22 @@
       if (!currentInvoice) return;
       
       if (currentInvoice.invoice_number) {
-        // Sale invoice
         const qty = currentInvoice.qty || 1;
         const weight = currentInvoice.weight || 0;
         const rate = currentInvoice.rate || 0;
         const making = currentInvoice.making || 0;
+        const polish = currentInvoice.polish || 0;
+        const discount = currentInvoice.discount || 0;
         const totalWeight = qty * weight;
         const metal = totalWeight * rate;
         const makingTotal = making * qty;
-        const polish = Math.round(metal * 0.10);
-        const subtotal = metal + makingTotal + polish;
+        const polishTotal = polish * qty;
+        const subtotal = metal + makingTotal + polishTotal;
         const gst = Math.round(subtotal * ((currentInvoice.gst_pct || 3) / 100));
         
-        const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish (10%): ${formatPKR(polish)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+        const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish Charges: ${formatPKR(polishTotal)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n${discount > 0 ? 'Discount: -' + formatPKR(discount) + '\n' : ''}*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
         openWhatsApp(currentInvoice.customer_phone, msg);
       } else if (currentInvoice.invoice_no) {
-        // Purchase invoice
         const msg = `*PURCHASE BILL: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
         openWhatsApp(currentInvoice.supplier_phone, msg);
       }
