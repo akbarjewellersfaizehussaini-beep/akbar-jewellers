@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payments – SRJ Software</title>
+  <title>Payments – Akbar Jewellers Software</title>
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
 <body>
@@ -79,7 +80,6 @@
     <div class="data-list" id="paymentsList"></div>
   </div>
 
-  <!-- Receipt Modal -->
   <div id="receiptModal" class="modal">
     <div class="modal-content" style="max-width: 600px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableReceipt"></div>
@@ -91,6 +91,7 @@
     </div>
   </div>
 
+  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
@@ -168,7 +169,9 @@
       document.getElementById('printableReceipt').innerHTML = `
         <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
           <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:24px;">${shop.name}</h1>
+          <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
           <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
         </div>
         <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PAYMENT RECEIPT</h2>
         
@@ -198,6 +201,7 @@
 
         <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
           Thank you! ${shop.name}
+          <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
         </div>
       `;
       document.getElementById('receiptModal').classList.add('active');

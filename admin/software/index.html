@@ -14,6 +14,11 @@
     .action-card.expense .action-name { color: #FCA5A5; }
     .action-card.product { border-color: #93C5FD; background: linear-gradient(135deg, rgba(59,130,246,0.1), #1C1C1C); }
     .action-card.product .action-name { color: #93C5FD; }
+    .profit-card { border-color: #25D366; background: linear-gradient(135deg, rgba(37,211,102,0.1), #1C1C1C); }
+    .profit-card::before { background: linear-gradient(90deg, #25D366, #128C7E) !important; }
+    .loss-card { border-color: #DC2626; background: linear-gradient(135deg, rgba(220,38,38,0.1), #1C1C1C); }
+    .loss-card::before { background: linear-gradient(90deg, #DC2626, #991B1B) !important; }
+    .payment-card { border-color: #93C5FD; background: linear-gradient(135deg, rgba(59,130,246,0.1), #1C1C1C); }
   </style>
 </head>
 <body>
@@ -36,6 +41,7 @@
     <p class="page-subtitle" id="currentDate"></p>
     <p style="color: #FFD700; font-family: 'Noto Nastaliq Urdu', serif; font-size: 1.1rem; margin-bottom: 20px;" dir="rtl">فیض حسینی</p>
 
+    <!-- MAIN STATS -->
     <div class="stats-grid">
       <div class="stat-card gold">
         <div class="stat-label">Today's Sales</div>
@@ -51,10 +57,60 @@
       </div>
     </div>
 
+    <!-- PROFIT / LOSS SECTION -->
+    <h2 class="section-title" style="margin-top: 30px;">📊 Business Summary</h2>
+    <div class="stats-grid">
+      <div class="stat-card profit-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Total Sales (All Time)</div>
+        <div class="stat-value" id="totalSalesAll" style="color:#25D366;">Rs 0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="stat-icon">📥</div>
+        <div class="stat-label">Total Purchases</div>
+        <div class="stat-value" id="totalPurchasesAll" style="color:#FCA5A5;">Rs 0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="stat-icon">💸</div>
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value" id="totalExpensesAll" style="color:#FCA5A5;">Rs 0</div>
+      </div>
+      <div class="stat-card" id="profitLossCard" style="border-color:#FFD700;">
+        <div class="stat-icon" id="profitIcon">📈</div>
+        <div class="stat-label" id="profitLabel">Net Profit / Loss</div>
+        <div class="stat-value" id="profitLoss">Rs 0</div>
+        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="profitSubtext">After all expenses</div>
+      </div>
+    </div>
+
+    <!-- THIS MONTH SUMMARY -->
+    <h2 class="section-title" style="margin-top: 30px;">📅 This Month Summary</h2>
+    <div class="stats-grid">
+      <div class="stat-card profit-card">
+        <div class="stat-label">Month Sales</div>
+        <div class="stat-value" id="monthSales" style="color:#25D366;">Rs 0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="stat-label">Month Purchases</div>
+        <div class="stat-value" id="monthPurchases2" style="color:#FCA5A5;">Rs 0</div>
+      </div>
+      <div class="stat-card expense">
+        <div class="stat-label">Month Expenses</div>
+        <div class="stat-value" id="monthExpenses" style="color:#FCA5A5;">Rs 0</div>
+      </div>
+      <div class="stat-card" id="monthProfitCard" style="border-color:#FFD700;">
+        <div class="stat-label" id="monthProfitLabel">Month Profit / Loss</div>
+        <div class="stat-value" id="monthProfit">Rs 0</div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <h2 class="section-title" style="margin-top: 30px;">Quick Actions</h2>
     <div class="action-grid">
       <a href="sales.html" class="action-card"><div class="action-name">New Sale</div></a>
-      <a href="expenses.html" class="action-card expense"><div class="action-name">Add Expense</div></a>
       <a href="purchase.html" class="action-card"><div class="action-name">New Purchase</div></a>
+      <a href="payments.html" class="action-card payment-card"><div class="action-name">💳 Payment Receipt</div></a>
+      <a href="expenses.html" class="action-card expense"><div class="action-name">Add Expense</div></a>
       <a href="products.html" class="action-card product"><div class="action-name">Add Product</div></a>
       <a href="reports.html" class="action-card"><div class="action-name">View Reports</div></a>
     </div>
@@ -92,23 +148,101 @@
       let navHtml = '<button class="nav-btn active">Dashboard</button>';
       if (currentUser.role === 'admin' || currentUser.role === 'sales') navHtml += '<button class="nav-btn" onclick="navigate(\'sales.html\')">Sales</button>';
       if (currentUser.role === 'admin' || currentUser.role === 'purchase') navHtml += '<button class="nav-btn" onclick="navigate(\'purchase.html\')">Purchase</button>';
+      navHtml += '<button class="nav-btn" onclick="navigate(\'payments.html\')">Payments</button>';
       navHtml += '<button class="nav-btn" onclick="navigate(\'products.html\')">Products</button>';
       navHtml += '<button class="nav-btn" onclick="navigate(\'customers.html\')">Customers</button>';
       navHtml += '<button class="nav-btn" onclick="navigate(\'reports.html\')">Reports</button>';
       navHtml += '<button class="nav-btn" onclick="navigate(\'settings.html\')">Settings</button>';
       document.getElementById('navMenu').innerHTML = navHtml;
 
+      // Fetch all data
       const sales = await getRecordsFast('sales');
       const purchases = await getRecordsFast('purchases');
       const customers = await getRecordsFast('customers');
+      const expenses = await getRecordsFast('expenses');
       
       const today = new Date().toISOString().slice(0,10);
       const thisMonth = new Date().toISOString().slice(0,7);
       
+      // Today's sales
       document.getElementById('todaySales').textContent = formatPKR(sales.filter(s => s.date?.startsWith(today)).reduce((sum, s) => sum + (Number(s.total)||0), 0));
       document.getElementById('monthPurchases').textContent = formatPKR(purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0));
       document.getElementById('totalCustomers').textContent = customers.length;
 
+      // ALL TIME TOTALS
+      const totalSalesAll = sales.reduce((sum, s) => sum + (Number(s.total)||0), 0);
+      const totalPurchasesAll = purchases.reduce((sum, p) => sum + (Number(p.total)||0), 0);
+      const totalExpensesAll = expenses.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+      
+      document.getElementById('totalSalesAll').textContent = formatPKR(totalSalesAll);
+      document.getElementById('totalPurchasesAll').textContent = formatPKR(totalPurchasesAll);
+      document.getElementById('totalExpensesAll').textContent = formatPKR(totalExpensesAll);
+      
+      // PROFIT/LOSS = Sales - (Purchases + Expenses)
+      const totalCost = totalPurchasesAll + totalExpensesAll;
+      const profitLoss = totalSalesAll - totalCost;
+      
+      const profitCard = document.getElementById('profitLossCard');
+      const profitIcon = document.getElementById('profitIcon');
+      const profitLabel = document.getElementById('profitLabel');
+      const profitLossEl = document.getElementById('profitLoss');
+      const profitSubtext = document.getElementById('profitSubtext');
+      
+      if (profitLoss > 0) {
+        profitCard.style.borderColor = '#25D366';
+        profitIcon.textContent = '📈';
+        profitLabel.textContent = 'Net Profit';
+        profitLossEl.textContent = '+ ' + formatPKR(profitLoss);
+        profitLossEl.style.color = '#25D366';
+        profitSubtext.textContent = 'Sales > Cost (Profit)';
+      } else if (profitLoss < 0) {
+        profitCard.style.borderColor = '#DC2626';
+        profitIcon.textContent = '📉';
+        profitLabel.textContent = 'Net Loss';
+        profitLossEl.textContent = '- ' + formatPKR(Math.abs(profitLoss));
+        profitLossEl.style.color = '#DC2626';
+        profitSubtext.textContent = 'Cost > Sales (Loss)';
+      } else {
+        profitCard.style.borderColor = '#FFD700';
+        profitIcon.textContent = '⚖️';
+        profitLabel.textContent = 'Break Even';
+        profitLossEl.textContent = formatPKR(0);
+        profitLossEl.style.color = '#FFD700';
+        profitSubtext.textContent = 'Sales = Cost';
+      }
+
+      // THIS MONTH TOTALS
+      const monthSales = sales.filter(s => s.date?.startsWith(thisMonth)).reduce((sum, s) => sum + (Number(s.total)||0), 0);
+      const monthPurchasesVal = purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0);
+      const monthExpensesVal = expenses.filter(e => e.date?.startsWith(thisMonth)).reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+      
+      document.getElementById('monthSales').textContent = formatPKR(monthSales);
+      document.getElementById('monthPurchases2').textContent = formatPKR(monthPurchasesVal);
+      document.getElementById('monthExpenses').textContent = formatPKR(monthExpensesVal);
+      
+      const monthProfitLoss = monthSales - (monthPurchasesVal + monthExpensesVal);
+      const monthProfitEl = document.getElementById('monthProfit');
+      const monthProfitCard = document.getElementById('monthProfitCard');
+      const monthProfitLabel = document.getElementById('monthProfitLabel');
+      
+      if (monthProfitLoss > 0) {
+        monthProfitEl.textContent = '+ ' + formatPKR(monthProfitLoss);
+        monthProfitEl.style.color = '#25D366';
+        monthProfitCard.style.borderColor = '#25D366';
+        monthProfitLabel.textContent = 'Month Profit';
+      } else if (monthProfitLoss < 0) {
+        monthProfitEl.textContent = '- ' + formatPKR(Math.abs(monthProfitLoss));
+        monthProfitEl.style.color = '#DC2626';
+        monthProfitCard.style.borderColor = '#DC2626';
+        monthProfitLabel.textContent = 'Month Loss';
+      } else {
+        monthProfitEl.textContent = formatPKR(0);
+        monthProfitEl.style.color = '#FFD700';
+        monthProfitCard.style.borderColor = '#FFD700';
+        monthProfitLabel.textContent = 'Month Break Even';
+      }
+
+      // Recent sales
       const recent = sales.slice(0, 5);
       const container = document.getElementById('recentSales');
       container.innerHTML = recent.length === 0 ? '<p style="color:#B8B8B8;">No sales yet</p>' : recent.map(s => `
