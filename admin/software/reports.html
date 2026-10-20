@@ -4,44 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reports – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="../../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
   <style>
-    .filter-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .letterpad { background: #FFFDF5; color: #1A1A1A; padding: 30px; border-radius: 8px; border: 2px solid #D4AF37; margin-top: 20px; font-family: 'Poppins', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-x: auto; }
+    .filter-card { background: var(--black-soft); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .letterpad { background: #FFFDF5; color: #1A1A1A; padding: 30px; border-radius: 8px; border: 2px solid #D4AF37; margin-top: 20px; font-family: var(--font-body); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow-x: auto; }
     .letterpad-header { text-align: center; border-bottom: 3px double #D4AF37; padding-bottom: 20px; margin-bottom: 20px; }
-    .letterpad-header h1 { font-family: 'Playfair Display', serif; color: #D4AF37; margin: 0; font-size: 26px; letter-spacing: 1px; }
-    .letterpad-header .urdu { font-family: 'Noto Nastaliq Urdu', serif; color: #D4AF37; font-size: 18px; margin: 5px 0; direction: rtl; }
+    .letterpad-header h1 { font-family: var(--font-heading); color: #D4AF37; margin: 0; font-size: 26px; letter-spacing: 1px; }
+    .letterpad-header .urdu { font-family: var(--font-urdu); color: #D4AF37; font-size: 18px; margin: 5px 0; direction: rtl; }
     .letterpad-header p { margin: 3px 0; font-size: 11px; color: #666; }
     .letterpad-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .letterpad-table th { background: #FAF7F0; color: #D4AF37; padding: 10px 8px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #D4AF37; white-space: nowrap; }
     .letterpad-table td { padding: 10px 8px; border-bottom: 1px solid #EEE; font-size: 12px; vertical-align: top; }
-    .letterpad-table tr { cursor: pointer; }
     .letterpad-table tr:hover { background: #FDFBF7; }
     .letterpad-total { text-align: right; padding-top: 15px; border-top: 2px solid #D4AF37; font-size: 16px; font-weight: 700; color: #D4AF37; }
     .letterpad-footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #EEE; font-size: 10px; color: #999; }
+    .report-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .report-tab { padding: 10px 18px; background: var(--black-royal); border: 2px solid rgba(255,215,0,0.3); color: var(--text-light); border-radius: 50px; cursor: pointer; font-size: 0.8rem; font-family: var(--font-body); transition: all 0.3s; }
+    .report-tab:hover { border-color: var(--gold-primary); }
+    .report-tab.active { background: linear-gradient(135deg, var(--gold-primary), var(--gold-deep)); color: var(--black-royal); border-color: var(--gold-primary); font-weight: 700; }
+    .summary-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .summary-item { background: #FAF7F0; padding: 12px; border-radius: 6px; text-align: center; border-left: 3px solid #D4AF37; }
+    .summary-item .label { font-size: 10px; color: #666; text-transform: uppercase; }
+    .summary-item .value { font-weight: 700; font-size: 14px; color: #D4AF37; margin-top: 3px; font-family: var(--font-mono); }
   </style>
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Reports</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Reports
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Business Reports</h1>
+    <p class="page-subtitle">Har report – Print + WhatsApp + Email</p>
 
-    <div class="category-tabs">
-      <button class="cat-tab gold active" onclick="switchReport('sales', this)">Sales</button>
-      <button class="cat-tab silver" onclick="switchReport('purchases', this)">Purchases</button>
-      <button class="cat-tab diamond" onclick="switchReport('expenses', this)">Expenses</button>
-      <button class="cat-tab artificial" onclick="switchReport('debtors', this)">Debtors</button>
-      <button class="cat-tab gold" onclick="switchReport('creditors', this)">Creditors</button>
+    <!-- Report Tabs -->
+    <div class="report-tabs">
+      <button class="report-tab active" onclick="switchReport('sales', this)">💰 Sales</button>
+      <button class="report-tab" onclick="switchReport('purchases', this)">📥 Purchases</button>
+      <button class="report-tab" onclick="switchReport('expenses', this)">💸 Expenses</button>
+      <button class="report-tab" onclick="switchReport('karigars', this)">👷 Karigars</button>
+      <button class="report-tab" onclick="switchReport('suppliers', this)">🏭 Suppliers</button>
+      <button class="report-tab" onclick="switchReport('customers', this)">👥 Customers</button>
+      <button class="report-tab" onclick="switchReport('debtors', this)">📥 Debtors</button>
+      <button class="report-tab" onclick="switchReport('creditors', this)">📤 Creditors</button>
+      <button class="report-tab" onclick="switchReport('inventory', this)">📦 Inventory</button>
+      <button class="report-tab" onclick="switchReport('profitloss', this)">📊 Profit/Loss</button>
+      <button class="report-tab" onclick="switchReport('cashflow', this)">💵 Cash Flow</button>
     </div>
 
+    <!-- Date Filter -->
     <div class="filter-card">
       <div class="form-row">
         <div class="form-group">
@@ -55,10 +72,11 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Action</label>
-          <div style="display:flex; gap:10px;">
-            <button class="btn-secondary" onclick="printElement('printableReport')" style="flex:1;">Print Report</button>
-            <button class="btn-secondary" onclick="sendReportWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+          <label class="form-label">Actions</label>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn-secondary" onclick="printElement('printableReport')" style="flex:1; padding:10px;">🖨 Print</button>
+            <button class="btn-success" onclick="sendReportWhatsApp()" style="flex:1; padding:10px;">📱 WhatsApp</button>
+            <button class="btn-secondary" onclick="sendReportEmail()" style="flex:1; padding:10px; background:#3B82F6; color:white; border:none;">📧 Email</button>
           </div>
         </div>
       </div>
@@ -67,18 +85,6 @@
     <div id="reportContent"></div>
   </div>
 
-  <div id="invoiceModal" class="modal">
-    <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
-      <div id="printableInvoice"></div>
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">Print Invoice</button>
-        <button class="btn-secondary" onclick="sendInvoiceWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">Send WhatsApp</button>
-        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
@@ -86,7 +92,6 @@
     let currentData = [];
     let currentTotal = 0;
     let shopInfo = null;
-    let currentInvoice = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
@@ -96,65 +101,409 @@
 
     async function switchReport(type, btn) {
       currentReport = type;
-      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       await loadReport(type);
     }
 
     async function loadReport(type) {
       const container = document.getElementById('reportContent');
-      container.innerHTML = '<p style="text-align:center; padding:30px; color:#FFD700;">Loading...</p>';
+      container.innerHTML = '<p style="text-align:center; padding:30px; color:var(--gold-primary);">Loading...</p>';
       
       const range = document.getElementById('dateFilter').value;
       let rawData = [];
       let title = '';
       let amountKey = 'total';
+      let tableHeaders = '';
+      let summaryHtml = '';
       
+      // ===== SALES REPORT =====
       if (type === 'sales') {
         rawData = await getRecordsFast('sales');
         title = 'SALES REPORT';
         amountKey = 'total';
+        currentData = filterByDate(rawData, range);
+        currentTotal = currentData.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
+        
+        const totalReceived = currentData.reduce((sum, x) => sum + (Number(x.received) || 0), 0);
+        const totalBalance = currentData.reduce((sum, x) => sum + (Number(x.balance) || 0), 0);
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Sales</div><div class="value">${formatPKR(currentTotal)}</div></div>
+            <div class="summary-item"><div class="label">Total Received</div><div class="value" style="color:#25D366;">${formatPKR(totalReceived)}</div></div>
+            <div class="summary-item"><div class="label">Total Balance</div><div class="value" style="color:#DC2626;">${formatPKR(totalBalance)}</div></div>
+            <div class="summary-item"><div class="label">Total Invoices</div><div class="value">${currentData.length}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Date</th><th>Customer / Item</th><th>Qty</th><th>Weight</th><th>Rate</th><th style="text-align:right;">Total</th><th style="text-align:right;">Received</th><th style="text-align:right;">Balance</th></tr>`;
       }
+      
+      // ===== PURCHASE REPORT =====
       else if (type === 'purchases') {
         rawData = await getRecordsFast('purchases');
         title = 'PURCHASE REPORT';
         amountKey = 'total';
+        currentData = filterByDate(rawData, range);
+        currentTotal = currentData.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
+        
+        const totalPaid = currentData.reduce((sum, x) => sum + (Number(x.paid) || 0), 0);
+        const totalBalance = currentData.reduce((sum, x) => sum + (Number(x.balance) || 0), 0);
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Purchases</div><div class="value">${formatPKR(currentTotal)}</div></div>
+            <div class="summary-item"><div class="label">Total Paid</div><div class="value" style="color:#25D366;">${formatPKR(totalPaid)}</div></div>
+            <div class="summary-item"><div class="label">Total Balance</div><div class="value" style="color:#DC2626;">${formatPKR(totalBalance)}</div></div>
+            <div class="summary-item"><div class="label">Total Bills</div><div class="value">${currentData.length}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Date</th><th>Supplier / Item</th><th>Weight</th><th>Karat</th><th>Rate</th><th style="text-align:right;">Total</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Balance</th></tr>`;
       }
+      
+      // ===== EXPENSE REPORT =====
       else if (type === 'expenses') {
         rawData = await getRecordsFast('expenses');
         title = 'EXPENSE REPORT';
         amountKey = 'amount';
+        currentData = filterByDate(rawData, range);
+        currentTotal = currentData.reduce((sum, x) => sum + (Number(x.amount) || 0), 0);
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Expenses</div><div class="value" style="color:#DC2626;">${formatPKR(currentTotal)}</div></div>
+            <div class="summary-item"><div class="label">Total Entries</div><div class="value">${currentData.length}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Date</th><th>Category</th><th>Paid To</th><th>Mode</th><th>Notes</th><th style="text-align:right;">Amount</th></tr>`;
       }
+      
+      // ===== KARIGAR REPORT =====
+      else if (type === 'karigars') {
+        const karigars = await getRecordsFast('karigars');
+        const services = await getRecordsFast('services');
+        
+        currentData = karigars.map(k => {
+          const kServices = services.filter(s => s.karigar_name === k.name);
+          let goldGiven = Number(k.opening_gold) || 0;
+          let goldReturned = 0;
+          let totalCharges = Number(k.opening_cash) || 0;
+          let totalPaid = 0;
+          
+          kServices.forEach(s => {
+            goldGiven += Number(s.gold_given_weight) || 0;
+            goldReturned += Number(s.gold_returned_weight) || 0;
+            totalCharges += Number(s.charges) || 0;
+            totalPaid += Number(s.paid) || 0;
+          });
+          
+          return {
+            ...k,
+            goldBalance: goldGiven - goldReturned,
+            cashBalance: totalCharges - totalPaid,
+            totalCharges,
+            totalPaid,
+            totalJobs: kServices.length
+          };
+        });
+        
+        currentTotal = currentData.reduce((sum, x) => sum + Math.abs(x.cashBalance), 0);
+        title = 'KARIGAR REPORT';
+        
+        const totalGoldBalance = currentData.reduce((sum, x) => sum + x.goldBalance, 0);
+        const totalGoldWithKarigar = currentData.filter(x => x.goldBalance > 0).reduce((sum, x) => sum + x.goldBalance, 0);
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Karigars</div><div class="value">${currentData.length}</div></div>
+            <div class="summary-item"><div class="label">Gold Balance</div><div class="value" style="color:#FCD34D;">${formatWeight(totalGoldWithKarigar)}</div></div>
+            <div class="summary-item"><div class="label">Total Payable</div><div class="value" style="color:#DC2626;">${formatPKR(currentData.filter(x => x.cashBalance > 0).reduce((sum, x) => sum + x.cashBalance, 0))}</div></div>
+            <div class="summary-item"><div class="label">Total Advance</div><div class="value" style="color:#25D366;">${formatPKR(Math.abs(currentData.filter(x => x.cashBalance < 0).reduce((sum, x) => sum + x.cashBalance, 0)))}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Name</th><th>Phone</th><th>Jobs</th><th style="text-align:right;">Gold Balance</th><th style="text-align:right;">Total Charges</th><th style="text-align:right;">Total Paid</th><th style="text-align:right;">Cash Balance</th></tr>`;
+      }
+      
+      // ===== SUPPLIER REPORT =====
+      else if (type === 'suppliers') {
+        const suppliers = await getRecordsFast('suppliers');
+        const purchases = await getRecordsFast('purchases');
+        
+        currentData = suppliers.map(s => {
+          const sPurch = purchases.filter(p => p.supplier_name === s.name);
+          let totalPurchased = Number(s.opening_cash) || 0;
+          let totalPaid = 0;
+          let totalGold = Number(s.opening_gold) || 0;
+          
+          sPurch.forEach(p => {
+            totalPurchased += Number(p.total) || 0;
+            totalPaid += Number(p.paid) || 0;
+            totalGold += Number(p.gold_weight) || Number(p.weight) || 0;
+          });
+          
+          return {
+            ...s,
+            totalPurchased,
+            totalPaid,
+            cashBalance: totalPurchased - totalPaid,
+            totalGold,
+            totalBills: sPurch.length
+          };
+        });
+        
+        currentTotal = currentData.reduce((sum, x) => sum + Math.abs(x.cashBalance), 0);
+        title = 'SUPPLIER REPORT';
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Suppliers</div><div class="value">${currentData.length}</div></div>
+            <div class="summary-item"><div class="label">Total Payable</div><div class="value" style="color:#DC2626;">${formatPKR(currentData.filter(x => x.cashBalance > 0).reduce((sum, x) => sum + x.cashBalance, 0))}</div></div>
+            <div class="summary-item"><div class="label">Total Advance</div><div class="value" style="color:#25D366;">${formatPKR(Math.abs(currentData.filter(x => x.cashBalance < 0).reduce((sum, x) => sum + x.cashBalance, 0)))}</div></div>
+            <div class="summary-item"><div class="label">Total Gold Purchased</div><div class="value" style="color:#FCD34D;">${formatWeight(currentData.reduce((sum, x) => sum + x.totalGold, 0))}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Name</th><th>Phone</th><th>Bills</th><th style="text-align:right;">Total Purchases</th><th style="text-align:right;">Total Paid</th><th style="text-align:right;">Balance</th></tr>`;
+      }
+      
+      // ===== CUSTOMER REPORT =====
+      else if (type === 'customers') {
+        const customers = await getRecordsFast('customers');
+        const sales = await getRecordsFast('sales');
+        const payments = await getRecordsFast('payments');
+        
+        currentData = customers.map(c => {
+          const cSales = sales.filter(s => s.customer_name === c.name);
+          const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+          let totalBill = Number(c.opening_balance) || 0;
+          let totalPaid = 0;
+          
+          cSales.forEach(s => totalBill += Number(s.total) || 0);
+          cPays.forEach(p => totalPaid += Number(p.amount) || 0);
+          
+          return {
+            ...c,
+            totalBill,
+            totalPaid,
+            balance: totalBill - totalPaid,
+            totalSales: cSales.length
+          };
+        });
+        
+        currentTotal = currentData.reduce((sum, x) => sum + Math.abs(x.balance), 0);
+        title = 'CUSTOMER REPORT';
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Customers</div><div class="value">${currentData.length}</div></div>
+            <div class="summary-item"><div class="label">Total Receivable</div><div class="value" style="color:#DC2626;">${formatPKR(currentData.filter(x => x.balance > 0).reduce((sum, x) => sum + x.balance, 0))}</div></div>
+            <div class="summary-item"><div class="label">Total Advance</div><div class="value" style="color:#25D366;">${formatPKR(Math.abs(currentData.filter(x => x.balance < 0).reduce((sum, x) => sum + x.balance, 0)))}</div></div>
+            <div class="summary-item"><div class="label">Total Sales</div><div class="value">${currentData.reduce((sum, x) => sum + x.totalBill, 0) ? formatPKR(currentData.reduce((sum, x) => sum + x.totalBill, 0)) : 'Rs 0'}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Name</th><th>Phone</th><th>Sales</th><th style="text-align:right;">Total Bill</th><th style="text-align:right;">Total Paid</th><th style="text-align:right;">Balance</th></tr>`;
+      }
+      
+      // ===== DEBTORS =====
       else if (type === 'debtors') {
-        const s = await getRecordsFast('sales');
-        rawData = s.filter(x => Number(x.balance) > 0);
+        const customers = await getRecordsFast('customers');
+        const sales = await getRecordsFast('sales');
+        const payments = await getRecordsFast('payments');
+        
+        currentData = customers.map(c => {
+          const cSales = sales.filter(s => s.customer_name === c.name);
+          const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+          let totalBill = Number(c.opening_balance) || 0;
+          let totalPaid = 0;
+          
+          cSales.forEach(s => totalBill += Number(s.total) || 0);
+          cPays.forEach(p => totalPaid += Number(p.amount) || 0);
+          
+          return { ...c, totalBill, totalPaid, balance: totalBill - totalPaid };
+        }).filter(x => x.balance > 0);
+        
+        currentTotal = currentData.reduce((sum, x) => sum + x.balance, 0);
         title = 'DEBTORS REPORT';
-        amountKey = 'balance';
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Debtors</div><div class="value">${currentData.length}</div></div>
+            <div class="summary-item"><div class="label">Total Receivable</div><div class="value" style="color:#DC2626;">${formatPKR(currentTotal)}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Name</th><th>Phone</th><th>CNIC</th><th>Address</th><th style="text-align:right;">Total Bill</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Balance</th></tr>`;
       }
+      
+      // ===== CREDITORS =====
       else if (type === 'creditors') {
-        const p = await getRecordsFast('purchases');
-        const s = await getRecordsFast('services');
-        const duePurchases = p.filter(x => Number(x.balance) > 0).map(x => ({...x, person: x.supplier_name, desc: 'Purchase - ' + x.item}));
-        const dueServices = s.filter(x => Number(x.balance) > 0).map(x => ({...x, person: x.karigar_name, desc: 'Job - ' + x.item, balance: x.balance}));
-        rawData = [...duePurchases, ...dueServices];
+        const suppliers = await getRecordsFast('suppliers');
+        const karigars = await getRecordsFast('karigars');
+        const purchases = await getRecordsFast('purchases');
+        const services = await getRecordsFast('services');
+        const payments = await getRecordsFast('payments');
+        
+        const supplierDebts = suppliers.map(s => {
+          const sPurch = purchases.filter(p => p.supplier_name === s.name);
+          const sPays = payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+          let totalBill = Number(s.opening_cash) || 0;
+          let totalPaid = 0;
+          
+          sPurch.forEach(p => totalBill += Number(p.total) || 0);
+          sPays.forEach(p => totalPaid += Number(p.amount) || 0);
+          
+          return { name: s.name, phone: s.phone, type: 'Supplier', totalBill, totalPaid, balance: totalBill - totalPaid };
+        }).filter(x => x.balance > 0);
+        
+        const karigarDebts = karigars.map(k => {
+          const kServices = services.filter(s => s.karigar_name === k.name);
+          const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
+          let totalBill = Number(k.opening_cash) || 0;
+          let totalPaid = 0;
+          
+          kServices.forEach(s => totalBill += Number(s.charges) || 0);
+          kPays.forEach(p => totalPaid += Number(p.amount) || 0);
+          
+          return { name: k.name, phone: k.phone, type: 'Karigar', totalBill, totalPaid, balance: totalBill - totalPaid };
+        }).filter(x => x.balance > 0);
+        
+        currentData = [...supplierDebts, ...karigarDebts];
+        currentTotal = currentData.reduce((sum, x) => sum + x.balance, 0);
         title = 'CREDITORS REPORT';
-        amountKey = 'balance';
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Creditors</div><div class="value">${currentData.length}</div></div>
+            <div class="summary-item"><div class="label">Total Payable</div><div class="value" style="color:#DC2626;">${formatPKR(currentTotal)}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Name</th><th>Type</th><th>Phone</th><th style="text-align:right;">Total Bill</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Balance</th></tr>`;
       }
-
-      currentData = filterByDate(rawData, range);
-      currentTotal = currentData.reduce((sum, x) => sum + (Number(x[amountKey]) || 0), 0);
+      
+      // ===== INVENTORY REPORT =====
+      else if (type === 'inventory') {
+        rawData = await getRecordsFast('products');
+        title = 'INVENTORY REPORT';
+        
+        currentData = rawData.filter(p => p.is_active !== false);
+        currentTotal = currentData.reduce((sum, p) => sum + ((Number(p.current_stock) || 0) * (Number(p.cost_price) || 0)), 0);
+        
+        const totalStock = currentData.reduce((sum, p) => sum + (Number(p.current_stock) || 0), 0);
+        const totalWeight = currentData.reduce((sum, p) => sum + ((Number(p.current_stock) || 0) * (Number(p.weight) || 0)), 0);
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Products</div><div class="value">${currentData.length}</div></div>
+            <div class="summary-item"><div class="label">Total Stock</div><div class="value">${totalStock}</div></div>
+            <div class="summary-item"><div class="label">Total Weight</div><div class="value" style="color:#FCD34D;">${formatWeight(totalWeight)}</div></div>
+            <div class="summary-item"><div class="label">Total Stock Value</div><div class="value" style="color:#25D366;">${formatPKR(currentTotal)}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Code</th><th>Name</th><th>Category</th><th>Karat</th><th style="text-align:right;">Weight</th><th style="text-align:right;">Stock</th><th style="text-align:right;">Cost</th><th style="text-align:right;">Sale</th><th style="text-align:right;">Total Value</th></tr>`;
+      }
+      
+      // ===== PROFIT/LOSS REPORT =====
+      else if (type === 'profitloss') {
+        const sales = await getRecordsFast('sales');
+        const purchases = await getRecordsFast('purchases');
+        const expenses = await getRecordsFast('expenses');
+        
+        const fSales = filterByDate(sales, range);
+        const fPurchases = filterByDate(purchases, range);
+        const fExpenses = filterByDate(expenses, range);
+        
+        const totalSales = fSales.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+        const totalPurchases = fPurchases.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+        const totalExpenses = fExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+        
+        currentTotal = totalSales - totalPurchases - totalExpenses;
+        title = 'PROFIT / LOSS REPORT';
+        currentData = [
+          { category: 'Sales', amount: totalSales, type: 'income' },
+          { category: 'Purchases', amount: totalPurchases, type: 'expense' },
+          { category: 'Expenses', amount: totalExpenses, type: 'expense' },
+          { category: 'Net Profit/Loss', amount: currentTotal, type: currentTotal >= 0 ? 'profit' : 'loss' }
+        ];
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Sales</div><div class="value" style="color:#25D366;">${formatPKR(totalSales)}</div></div>
+            <div class="summary-item"><div class="label">Total Purchases</div><div class="value" style="color:#FCA5A5;">${formatPKR(totalPurchases)}</div></div>
+            <div class="summary-item"><div class="label">Total Expenses</div><div class="value" style="color:#FCA5A5;">${formatPKR(totalExpenses)}</div></div>
+            <div class="summary-item"><div class="label">Net ${currentTotal >= 0 ? 'Profit' : 'Loss'}</div><div class="value" style="color:${currentTotal >= 0 ? '#25D366' : '#DC2626'};">${formatPKR(Math.abs(currentTotal))}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Category</th><th style="text-align:right;">Amount</th><th>Type</th></tr>`;
+      }
+      
+      // ===== CASH FLOW REPORT =====
+      else if (type === 'cashflow') {
+        const sales = await getRecordsFast('sales');
+        const purchases = await getRecordsFast('purchases');
+        const expenses = await getRecordsFast('expenses');
+        const payments = await getRecordsFast('payments');
+        const bankAccounts = await getRecordsFast('bank_accounts');
+        const bankTransactions = await getRecordsFast('bank_transactions');
+        
+        // Cash IN
+        const cashInSales = sales.filter(s => s.payment_mode === 'cash' || !s.payment_mode).reduce((sum, s) => sum + (Number(s.received) || 0), 0);
+        const cashInPayments = payments.filter(p => p.person_type === 'customer' && (p.payment_mode === 'cash' || !p.payment_mode)).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        
+        // Cash OUT
+        const cashOutPurchases = purchases.filter(p => p.payment_mode === 'cash' || !p.payment_mode).reduce((sum, p) => sum + (Number(p.paid) || 0), 0);
+        const cashOutExpenses = expenses.filter(e => e.payment_mode === 'cash' || !e.payment_mode).reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+        const cashOutPayments = payments.filter(p => (p.person_type === 'supplier' || p.person_type === 'karigar') && (p.payment_mode === 'cash' || !p.payment_mode)).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+        
+        // Bank
+        let bankIn = 0, bankOut = 0;
+        bankAccounts.forEach(acc => {
+          let balance = Number(acc.opening_balance) || 0;
+          const accTxns = bankTransactions.filter(t => t.account_id === acc.id);
+          accTxns.forEach(t => {
+            if (t.transaction_type === 'deposit') bankIn += Number(t.amount) || 0;
+            else bankOut += Number(t.amount) || 0;
+          });
+        });
+        
+        const totalCashIn = cashInSales + cashInPayments;
+        const totalCashOut = cashOutPurchases + cashOutExpenses + cashOutPayments;
+        const cashInHand = totalCashIn - totalCashOut;
+        
+        currentTotal = cashInHand;
+        title = 'CASH FLOW REPORT';
+        currentData = [
+          { category: 'Cash In - Sales', amount: cashInSales, type: 'in' },
+          { category: 'Cash In - Customer Payments', amount: cashInPayments, type: 'in' },
+          { category: 'Cash Out - Purchases', amount: cashOutPurchases, type: 'out' },
+          { category: 'Cash Out - Expenses', amount: cashOutExpenses, type: 'out' },
+          { category: 'Cash Out - Supplier/Karigar Payments', amount: cashOutPayments, type: 'out' },
+          { category: 'Bank Deposits', amount: bankIn, type: 'in' },
+          { category: 'Bank Withdrawals', amount: bankOut, type: 'out' },
+          { category: 'Cash in Hand', amount: cashInHand, type: 'total' }
+        ];
+        
+        summaryHtml = `
+          <div class="summary-box">
+            <div class="summary-item"><div class="label">Total Cash In</div><div class="value" style="color:#25D366;">${formatPKR(totalCashIn)}</div></div>
+            <div class="summary-item"><div class="label">Total Cash Out</div><div class="value" style="color:#DC2626;">${formatPKR(totalCashOut)}</div></div>
+            <div class="summary-item"><div class="label">Cash in Hand</div><div class="value" style="color:${cashInHand >= 0 ? '#25D366' : '#DC2626'};">${formatPKR(Math.abs(cashInHand))}</div></div>
+            <div class="summary-item"><div class="label">Bank Balance</div><div class="value">${formatPKR(bankIn - bankOut)}</div></div>
+          </div>
+        `;
+        
+        tableHeaders = `<tr><th>Category</th><th style="text-align:right;">Amount</th><th>Type</th></tr>`;
+      }
 
       const rangeText = document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text;
-
-      let tableHeaders = '';
-      if (type === 'sales') {
-        tableHeaders = `<tr><th>Date</th><th>Customer / Item</th><th>Qty</th><th>Weight</th><th>Rate</th><th style="text-align:right;">Total</th></tr>`;
-      } else if (type === 'purchases') {
-        tableHeaders = `<tr><th>Date</th><th>Supplier / Item</th><th>Weight</th><th>Rate</th><th style="text-align:right;">Total</th></tr>`;
-      } else {
-        tableHeaders = `<tr><th>Date</th><th>Details</th><th style="text-align:right;">Amount</th></tr>`;
-      }
-
+      
       container.innerHTML = `
         <div class="letterpad" id="printableReport">
           <div class="letterpad-header">
@@ -165,51 +514,132 @@
             <hr style="border:none; border-top:1px solid #D4AF37; margin:10px 0;">
             <h3 style="font-family:'Playfair Display',serif; color:#1A1A1A; margin:5px 0;">${title}</h3>
             <p style="font-size:11px;">Period: ${rangeText} | Generated: ${formatDate(new Date())}</p>
-            <p style="font-size:10px; color:#888;">💡 Click on any row to view full invoice</p>
           </div>
-          <table class="letterpad-table">
-            <thead>${tableHeaders}</thead>
-            <tbody>
-              ${currentData.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:20px; color:#999;">No records found</td></tr>' : 
-                currentData.map((x, idx) => {
-                  if (type === 'sales') {
-                    return `
-                      <tr onclick='viewSaleInvoice(${JSON.stringify(x).replace(/'/g, "&#39;")})'>
-                        <td>${formatDate(x.date)}</td>
-                        <td><strong>${x.customer_name}</strong><br><span style="font-size:11px; color:#666;">${x.items_summary}</span></td>
-                        <td>${x.qty || 1}</td>
-                        <td>${x.weight || 0}g</td>
-                        <td>${formatPKR(x.rate)}</td>
-                        <td style="text-align:right; font-weight:600;">${formatPKR(x.total)}</td>
-                      </tr>
-                    `;
-                  } else if (type === 'purchases') {
-                    return `
-                      <tr onclick='viewPurchaseInvoice(${JSON.stringify(x).replace(/'/g, "&#39;")})'>
-                        <td>${formatDate(x.date)}</td>
-                        <td><strong>${x.supplier_name}</strong><br><span style="font-size:11px; color:#666;">${x.item}</span></td>
-                        <td>${x.weight || 0}g</td>
-                        <td>${formatPKR(x.rate)}</td>
-                        <td style="text-align:right; font-weight:600;">${formatPKR(x.total)}</td>
-                      </tr>
-                    `;
-                  } else {
-                    return `
-                      <tr>
-                        <td>${formatDate(x.date)}</td>
-                        <td>
-                          ${type === 'debtors' ? `<strong>${x.customer_name}</strong> - ${x.items_summary}` : ''}
-                          ${type === 'creditors' ? `<strong>${x.person}</strong> - ${x.desc}` : ''}
-                          ${type === 'expenses' ? `<strong>${(x.category||'').toUpperCase()}</strong> ${x.paid_to ? '- ' + x.paid_to : ''}` : ''}
-                        </td>
-                        <td style="text-align:right; font-weight:600;">${formatPKR(x[amountKey])}</td>
-                      </tr>
-                    `;
-                  }
-                }).join('')}
-            </tbody>
-          </table>
-          <div class="letterpad-total">TOTAL: ${formatPKR(currentTotal)}</div>
+          
+          ${summaryHtml}
+          
+          <div style="overflow-x:auto;">
+            <table class="letterpad-table">
+              <thead>${tableHeaders}</thead>
+              <tbody>
+                ${currentData.length === 0 ? '<tr><td colspan="10" style="text-align:center; padding:20px; color:#999;">No records found</td></tr>' : 
+                  currentData.map(x => {
+                    if (type === 'sales') {
+                      return `
+                        <tr>
+                          <td>${formatDate(x.date)}</td>
+                          <td><strong>${x.customer_name}</strong><br><span style="font-size:11px; color:#666;">${x.items_summary}</span></td>
+                          <td>${x.qty || 1}</td>
+                          <td>${formatWeight((x.qty || 1) * (x.weight || 0))}</td>
+                          <td>${formatPKR(x.rate)}</td>
+                          <td style="text-align:right; font-weight:600;">${formatPKR(x.total)}</td>
+                          <td style="text-align:right; color:#25D366;">${formatPKR(x.received)}</td>
+                          <td style="text-align:right; color:${(x.balance || 0) > 0 ? '#DC2626' : '#25D366'};">${formatPKR(x.balance)}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'purchases') {
+                      return `
+                        <tr>
+                          <td>${formatDate(x.date)}</td>
+                          <td><strong>${x.supplier_name}</strong><br><span style="font-size:11px; color:#666;">${x.item}</span></td>
+                          <td>${formatWeight((x.qty || 1) * (x.weight || 0))}</td>
+                          <td>${x.gold_karat || '—'}</td>
+                          <td>${formatPKR(x.rate)}</td>
+                          <td style="text-align:right; font-weight:600;">${formatPKR(x.total)}</td>
+                          <td style="text-align:right; color:#25D366;">${formatPKR(x.paid)}</td>
+                          <td style="text-align:right; color:${(x.balance || 0) > 0 ? '#DC2626' : '#25D366'};">${formatPKR(x.balance)}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'expenses') {
+                      return `
+                        <tr>
+                          <td>${formatDate(x.date)}</td>
+                          <td><strong>${(x.category || '').toUpperCase()}</strong></td>
+                          <td>${x.paid_to || '—'}</td>
+                          <td>${x.payment_mode || '—'}</td>
+                          <td>${x.notes || '—'}</td>
+                          <td style="text-align:right; color:#DC2626; font-weight:600;">${formatPKR(x.amount)}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'karigars') {
+                      return `
+                        <tr>
+                          <td><strong>${x.name}</strong></td>
+                          <td>${x.phone}</td>
+                          <td>${x.totalJobs}</td>
+                          <td style="text-align:right; color:#FCD34D;">${formatWeight(x.goldBalance)}</td>
+                          <td style="text-align:right;">${formatPKR(x.totalCharges)}</td>
+                          <td style="text-align:right; color:#25D366;">${formatPKR(x.totalPaid)}</td>
+                          <td style="text-align:right; color:${x.cashBalance > 0 ? '#DC2626' : '#25D366'}; font-weight:600;">${formatPKR(Math.abs(x.cashBalance))}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'suppliers') {
+                      return `
+                        <tr>
+                          <td><strong>${x.name}</strong></td>
+                          <td>${x.phone}</td>
+                          <td>${x.totalBills}</td>
+                          <td style="text-align:right;">${formatPKR(x.totalPurchased)}</td>
+                          <td style="text-align:right; color:#25D366;">${formatPKR(x.totalPaid)}</td>
+                          <td style="text-align:right; color:${x.cashBalance > 0 ? '#DC2626' : '#25D366'}; font-weight:600;">${formatPKR(Math.abs(x.cashBalance))}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'customers' || type === 'debtors') {
+                      return `
+                        <tr>
+                          <td><strong>${x.name}</strong></td>
+                          <td>${x.phone}</td>
+                          ${type === 'debtors' ? `<td>${x.cnic || '—'}</td><td>${x.address || '—'}</td>` : `<td>${x.totalSales || 0}</td>`}
+                          <td style="text-align:right;">${formatPKR(x.totalBill)}</td>
+                          <td style="text-align:right; color:#25D366;">${formatPKR(x.totalPaid)}</td>
+                          <td style="text-align:right; color:${x.balance > 0 ? '#DC2626' : '#25D366'}; font-weight:600;">${formatPKR(Math.abs(x.balance))}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'creditors') {
+                      return `
+                        <tr>
+                          <td><strong>${x.name}</strong></td>
+                          <td>${x.type}</td>
+                          <td>${x.phone}</td>
+                          <td style="text-align:right;">${formatPKR(x.totalBill)}</td>
+                          <td style="text-align:right; color:#25D366;">${formatPKR(x.totalPaid)}</td>
+                          <td style="text-align:right; color:#DC2626; font-weight:600;">${formatPKR(x.balance)}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'inventory') {
+                      const stockValue = (Number(x.current_stock) || 0) * (Number(x.cost_price) || 0);
+                      return `
+                        <tr>
+                          <td>${x.product_code || '—'}</td>
+                          <td>${x.name}</td>
+                          <td>${(x.category || '').toUpperCase()}</td>
+                          <td>${x.karat || '—'}</td>
+                          <td style="text-align:right;">${formatWeight(x.weight)}</td>
+                          <td style="text-align:right;">${x.current_stock || 0}</td>
+                          <td style="text-align:right;">${formatPKR(x.cost_price)}</td>
+                          <td style="text-align:right;">${formatPKR(x.sale_price)}</td>
+                          <td style="text-align:right; font-weight:600;">${formatPKR(stockValue)}</td>
+                        </tr>
+                      `;
+                    } else if (type === 'profitloss' || type === 'cashflow') {
+                      const color = x.type === 'income' || x.type === 'in' || x.type === 'profit' ? '#25D366' : x.type === 'expense' || x.type === 'out' || x.type === 'loss' ? '#DC2626' : '#D4AF37';
+                      return `
+                        <tr>
+                          <td><strong>${x.category}</strong></td>
+                          <td style="text-align:right; color:${color}; font-weight:700;">${formatPKR(Math.abs(x.amount))}</td>
+                          <td style="text-transform:uppercase; font-size:10px; color:${color};">${x.type}</td>
+                        </tr>
+                      `;
+                    }
+                  }).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          ${type === 'sales' || type === 'purchases' || type === 'expenses' ? `
+            <div class="letterpad-total">TOTAL: ${formatPKR(currentTotal)}</div>
+          ` : ''}
+          
           <div class="letterpad-footer">
             This is a computer-generated report. Thank you!<br>
             ${shopInfo.name || 'AKBAR JEWELLERS'} © ${new Date().getFullYear()}
@@ -219,220 +649,58 @@
       `;
     }
 
-    async function viewSaleInvoice(sale) {
-      currentInvoice = sale;
-      const shop = shopInfo || await getShopSettings();
-      
-      const qty = sale.qty || 1;
-      const weight = sale.weight || 0;
-      const rate = sale.rate || 0;
-      const making = sale.making || 0;
-      const polish = sale.polish || 0;
-      const discount = sale.discount || 0;
-      const totalWeight = qty * weight;
-      const metal = totalWeight * rate;
-      const makingTotal = making * qty;
-      const polishTotal = polish * qty;
-      const subtotal = metal + makingTotal + polishTotal;
-      const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
-      
-      document.getElementById('printableInvoice').innerHTML = `
-        <div class="invoice-container">
-          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
-            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
-          </div>
-          
-          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <div>
-              <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date || sale.created_at)}</p>
-            </div>
-            <div style="text-align:right;">
-              <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
-            </div>
-          </div>
-          
-          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-            <thead>
-              <tr style="background:#FAF7F0;">
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${totalWeight.toFixed(3)}g</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
-            <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Metal Value (${totalWeight.toFixed(3)}g × ${formatPKR(rate)})</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Making Charges (Rs)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Polish Charges (Rs)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
-              <span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span>
-              <strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
-            </div>
-            
-            ${discount > 0 ? `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
-              <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
-              <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
-            </div>
-            ` : ''}
-            
-            <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
-              <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
-              <strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong>
-            </div>
-          </div>
-          
-          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
-            <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
-            <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
-          </div>
-          
-          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
-            Thank you for shopping with ${shop.name}
-            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || ''}</div>
-          </div>
-        </div>
-      `;
-      document.getElementById('invoiceModal').classList.add('active');
-    }
-
-    async function viewPurchaseInvoice(purchase) {
-      currentInvoice = purchase;
-      const shop = shopInfo || await getShopSettings();
-      
-      document.getElementById('printableInvoice').innerHTML = `
-        <div class="invoice-container">
-          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
-            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
-          </div>
-          <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PURCHASE BILL</h2>
-          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <div>
-              <p style="margin:0; font-size:14px;"><strong>Purchase #:</strong> ${purchase.invoice_no}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(purchase.purchase_date || purchase.created_at)}</p>
-            </div>
-            <div style="text-align:right;">
-              <p style="margin:0; font-size:14px;"><strong>Supplier:</strong> ${purchase.supplier_name}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${purchase.supplier_phone || '—'}</p>
-            </div>
-          </div>
-          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-            <thead>
-              <tr style="background:#FAF7F0;">
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.item}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.qty || 1}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${((purchase.qty || 1) * (purchase.weight || 0)).toFixed(3)}g</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.rate)}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.total)}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
-            <p style="margin:5px 0;">Paid: <strong>${formatPKR(purchase.paid)}</strong></p>
-            <p style="margin:5px 0;">Balance: <strong style="color:${purchase.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(purchase.balance)}</strong></p>
-          </div>
-          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
-            TOTAL: ${formatPKR(purchase.total)}
-          </div>
-        </div>
-      `;
-      document.getElementById('invoiceModal').classList.add('active');
-    }
-
-    function sendInvoiceWhatsApp() {
-      if (!currentInvoice) return;
-      
-      if (currentInvoice.invoice_number) {
-        const qty = currentInvoice.qty || 1;
-        const weight = currentInvoice.weight || 0;
-        const rate = currentInvoice.rate || 0;
-        const making = currentInvoice.making || 0;
-        const polish = currentInvoice.polish || 0;
-        const discount = currentInvoice.discount || 0;
-        const totalWeight = qty * weight;
-        const metal = totalWeight * rate;
-        const makingTotal = making * qty;
-        const polishTotal = polish * qty;
-        const subtotal = metal + makingTotal + polishTotal;
-        const gst = Math.round(subtotal * ((currentInvoice.gst_pct || 3) / 100));
-        
-        const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish Charges: ${formatPKR(polishTotal)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n${discount > 0 ? 'Discount: -' + formatPKR(discount) + '\n' : ''}*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
-        openWhatsApp(currentInvoice.customer_phone, msg);
-      } else if (currentInvoice.invoice_no) {
-        const msg = `*PURCHASE BILL: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
-        openWhatsApp(currentInvoice.supplier_phone, msg);
-      }
-    }
-
     function sendReportWhatsApp() {
       if (currentData.length === 0) { alert('No data to send'); return; }
       
       const rangeText = document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text;
       const title = currentReport.toUpperCase() + ' REPORT';
-      const amountKey = currentReport === 'expenses' ? 'amount' : (currentReport === 'debtors' || currentReport === 'creditors' ? 'balance' : 'total');
       
       let msg = `*${shopInfo.name}*\n*${title}*\nPeriod: ${rangeText}\nDate: ${formatDate(new Date())}\n\n`;
       
-      currentData.forEach((x, i) => {
-        let desc = '';
-        if (currentReport === 'sales') desc = `${x.customer_name} - ${x.items_summary} | Total: ${formatPKR(x.total)}`;
-        else if (currentReport === 'purchases') desc = `${x.supplier_name} - ${x.item} | Total: ${formatPKR(x.total)}`;
-        else if (currentReport === 'expenses') desc = `${(x.category||'').toUpperCase()}: ${formatPKR(x.amount)}`;
-        else if (currentReport === 'debtors') desc = `${x.customer_name}: ${formatPKR(x.balance)}`;
-        else if (currentReport === 'creditors') desc = `${x.person}: ${formatPKR(x.balance)}`;
-        
-        msg += `${i+1}. ${desc}\n`;
-      });
+      if (currentReport === 'sales') {
+        msg += `Total Sales: ${formatPKR(currentTotal)}\n`;
+        msg += `Total Invoices: ${currentData.length}\n`;
+      } else if (currentReport === 'purchases') {
+        msg += `Total Purchases: ${formatPKR(currentTotal)}\n`;
+        msg += `Total Bills: ${currentData.length}\n`;
+      } else if (currentReport === 'expenses') {
+        msg += `Total Expenses: ${formatPKR(currentTotal)}\n`;
+      } else if (currentReport === 'debtors') {
+        msg += `Total Debtors: ${currentData.length}\n`;
+        msg += `Total Receivable: ${formatPKR(currentTotal)}\n`;
+      } else if (currentReport === 'creditors') {
+        msg += `Total Creditors: ${currentData.length}\n`;
+        msg += `Total Payable: ${formatPKR(currentTotal)}\n`;
+      } else if (currentReport === 'profitloss') {
+        msg += `Net ${currentTotal >= 0 ? 'Profit' : 'Loss'}: ${formatPKR(Math.abs(currentTotal))}\n`;
+      } else if (currentReport === 'cashflow') {
+        msg += `Cash in Hand: ${formatPKR(Math.abs(currentTotal))}\n`;
+      }
       
-      msg += `\n*TOTAL: ${formatPKR(currentTotal)}*`;
+      msg += `\n*${shopInfo.name}*`;
       
       const phone = prompt('Enter WhatsApp number:', '');
       if (phone) openWhatsApp(phone, msg);
+    }
+
+    function sendReportEmail() {
+      if (currentData.length === 0) { alert('No data to send'); return; }
+      
+      const rangeText = document.getElementById('dateFilter').options[document.getElementById('dateFilter').selectedIndex].text;
+      const title = currentReport.toUpperCase() + ' REPORT';
+      
+      let body = `${title}\nPeriod: ${rangeText}\nDate: ${formatDate(new Date())}\n\n`;
+      
+      if (currentReport === 'sales') body += `Total Sales: ${formatPKR(currentTotal)}\nTotal Invoices: ${currentData.length}\n`;
+      else if (currentReport === 'purchases') body += `Total Purchases: ${formatPKR(currentTotal)}\nTotal Bills: ${currentData.length}\n`;
+      else if (currentReport === 'expenses') body += `Total Expenses: ${formatPKR(currentTotal)}\n`;
+      else if (currentReport === 'debtors') body += `Total Debtors: ${currentData.length}\nTotal Receivable: ${formatPKR(currentTotal)}\n`;
+      else if (currentReport === 'creditors') body += `Total Creditors: ${currentData.length}\nTotal Payable: ${formatPKR(currentTotal)}\n`;
+      else if (currentReport === 'profitloss') body += `Net ${currentTotal >= 0 ? 'Profit' : 'Loss'}: ${formatPKR(Math.abs(currentTotal))}\n`;
+      else if (currentReport === 'cashflow') body += `Cash in Hand: ${formatPKR(Math.abs(currentTotal))}\n`;
+      
+      const email = prompt('Enter email address:', '');
+      if (email) sendEmail(email, `${shopInfo.name} – ${title}`, body);
     }
   </script>
 </body>
