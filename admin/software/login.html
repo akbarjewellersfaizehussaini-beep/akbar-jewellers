@@ -5,47 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login – Akbar Jewellers Software</title>
   <link rel="icon" type="image/png" href="../../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-software.css">
   <style>
-    body { margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; background: #0A0A0A; font-family: 'Poppins', sans-serif; }
-    .login-box { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 40px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-    .login-box .logo { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #FFD700; margin-bottom: 15px; }
-    .login-box h1 { font-family: 'Playfair Display', serif; color: #FFD700; margin-bottom: 5px; font-size: 1.8rem; }
-    .login-box .urdu { font-family: 'Noto Nastaliq Urdu', serif; color: #FFD700; font-size: 1.1rem; margin-bottom: 10px; }
-    .login-box p { color: #B8B8B8; margin-bottom: 30px; font-size: 0.9rem; }
-    .form-input { width: 100%; padding: 14px; margin-bottom: 15px; background: #0A0A0A; border: 1px solid rgba(255,215,0,0.2); border-radius: 10px; color: #FFF8DC; font-size: 1rem; box-sizing: border-box; transition: all 0.3s; }
-    .form-input:focus { outline: none; border-color: #FFD700; box-shadow: 0 0 15px rgba(255,215,0,0.1); }
-    .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: all 0.3s; font-family: 'Poppins', sans-serif; }
-    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,215,0,0.3); }
-    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
-    .role-hint { color: #B8B8B8; font-size: 0.75rem; margin-top: 20px; border-top: 1px solid rgba(255,215,0,0.1); padding-top: 15px; line-height: 1.6; }
+    body { display: flex; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
+    .login-box { background: var(--black-soft); border: 2px solid var(--gold-primary); border-radius: 20px; padding: 40px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 20px 60px rgba(255,215,0,0.2); }
+    .login-logo { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--gold-primary); margin: 0 auto 20px; display: block; box-shadow: 0 0 30px rgba(255,215,0,0.5); }
+    .login-title { font-family: var(--font-heading); color: var(--gold-primary); font-size: 1.8rem; margin-bottom: 5px; }
+    .login-urdu { font-family: var(--font-urdu); color: var(--gold-primary); font-size: 1.1rem; margin-bottom: 10px; direction: rtl; }
+    .login-subtitle { color: var(--text-muted); margin-bottom: 30px; font-size: 0.9rem; letter-spacing: 2px; }
+    .login-input { width: 100%; padding: 14px; margin-bottom: 15px; background: var(--black-royal); border: 1px solid rgba(255,215,0,0.3); border-radius: 10px; color: var(--text-light); font-size: 1rem; box-sizing: border-box; font-family: var(--font-body); transition: all 0.3s; }
+    .login-input:focus { outline: none; border-color: var(--gold-primary); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+    .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--gold-primary), var(--gold-deep)); color: var(--black-royal); border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-top: 10px; font-family: var(--font-body); transition: all 0.3s; }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,215,0,0.4); }
+    .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .login-error { background: rgba(220,38,38,0.2); border: 1px solid var(--danger); color: #FCA5A5; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; text-align: left; }
+    .login-info { color: var(--text-muted); font-size: 0.8rem; margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255,215,0,0.1); line-height: 1.8; }
     .creator-credit { color: #666; font-size: 0.7rem; margin-top: 20px; }
-    .error-box { background: rgba(220,38,38,0.2); border: 1px solid #DC2626; color: #FCA5A5; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; display: none; text-align: left; }
-    .debug-box { background: rgba(59,130,246,0.1); border: 1px solid #3B82F6; color: #93C5FD; padding: 10px; border-radius: 8px; font-size: 0.7rem; margin-top: 15px; display: none; text-align: left; word-break: break-all; max-height: 150px; overflow-y: auto; }
   </style>
 </head>
 <body>
 
   <div class="login-box">
-    <img src="../../images/logo.png" class="logo" onerror="this.style.display='none'" alt="Logo">
-    <h1>AKBAR JEWELLERS</h1>
-    <p class="urdu" dir="rtl">فیض حسینی</p>
-    <p>Software Login</p>
+    <img src="../../images/logo.png" class="login-logo" onerror="this.style.display='none'" alt="Logo">
+    <h1 class="login-title">AKBAR JEWELLERS</h1>
+    <p class="login-urdu">فیض حسینی</p>
+    <p class="login-subtitle">BUSINESS SOFTWARE</p>
     
-    <div id="errorBox" class="error-box"></div>
+    <div id="loginError" class="login-error"></div>
     
-    <input type="text" id="loginUser" class="form-input" placeholder="Username">
-    <input type="password" id="loginPass" class="form-input" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
+    <input type="text" id="loginUser" class="login-input" placeholder="Username" autocomplete="username">
+    <input type="password" id="loginPass" class="login-input" placeholder="Password" autocomplete="current-password" onkeypress="if(event.key==='Enter') doLogin()">
     
-    <button class="btn-login" id="loginBtn" onclick="doLogin()">Login</button>
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">🔐 Login</button>
 
-    <div id="debugBox" class="debug-box"></div>
-
-    <div class="role-hint">
-      <strong>Demo Logins:</strong><br>
-      Admin: admin / admin123<br>
-      Sales: sales / sales123<br>
-      Purchase: purchase / purchase123
+    <div class="login-info">
+      <strong style="color: var(--gold-primary);">Demo Logins:</strong><br>
+      Admin: <code>admin</code> / <code>admin123</code><br>
+      Sales: <code>sales</code> / <code>sales123</code><br>
+      Purchase: <code>purchase</code> / <code>purchase123</code>
     </div>
 
     <div class="creator-credit">
@@ -53,16 +50,11 @@
     </div>
   </div>
 
+  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script>
     function showError(msg) {
-      const box = document.getElementById('errorBox');
-      box.textContent = msg;
-      box.style.display = 'block';
-    }
-
-    function showDebug(msg) {
-      const box = document.getElementById('debugBox');
+      const box = document.getElementById('loginError');
       box.textContent = msg;
       box.style.display = 'block';
     }
@@ -72,49 +64,36 @@
       const pass = document.getElementById('loginPass').value.trim();
       const btn = document.getElementById('loginBtn');
       
-      document.getElementById('errorBox').style.display = 'none';
-      document.getElementById('debugBox').style.display = 'none';
+      document.getElementById('loginError').style.display = 'none';
       
-      if (!user || !pass) { 
-        showError('❌ Please enter username and password'); 
-        return; 
-      }
+      if (!user || !pass) { showError('❌ Please enter username and password'); return; }
       
-      btn.textContent = 'Logging in...'; 
+      btn.textContent = '⏳ Logging in...';
       btn.disabled = true;
 
       try {
         if (typeof sbFetch === 'undefined') {
-          throw new Error('db.js not loaded. Check file exists in admin/software/ folder.');
+          throw new Error('Database not loaded. Check db.js file.');
         }
 
-        showDebug('Loading... Searching for: ' + user);
-        console.log('🔍 Login attempt:', user);
-        
         const rows = await sbFetch(`admin_users?email=eq.${user}&select=*`);
-        console.log('🔍 Supabase response:', rows);
         
         if (rows && rows.length > 0) {
           const dbUser = rows[0];
-          console.log('🔍 Found user:', dbUser);
           
           if (dbUser.password_hash === pass) {
             localStorage.setItem('akbar_user_session', JSON.stringify(dbUser));
             window.location.href = 'index.html';
           } else {
-            showError('❌ Wrong password');
-            showDebug('Input password: "' + pass + '"\nDB password: "' + dbUser.password_hash + '"');
+            showError('❌ Wrong password. Please try again.');
           }
         } else {
-          showError('❌ User "' + user + '" not found in admin_users table');
-          showDebug('Please add this user in Supabase Table Editor → admin_users\n\n1. Go to: supabase.com/dashboard\n2. Table Editor → admin_users\n3. Insert row:\n   email: ' + user + '\n   password_hash: ' + pass + '\n   role: admin\n   is_active: true');
+          showError('❌ User not found. Check username.');
         }
       } catch (e) {
-        console.error('❌ Login error:', e);
         showError('❌ Error: ' + e.message);
-        showDebug('Error details:\n' + e.message + '\n\nCheck:\n1. db.js exists in admin/software/\n2. Supabase URL & key correct\n3. admin_users table exists');
       } finally {
-        btn.textContent = 'Login'; 
+        btn.textContent = '🔐 Login';
         btn.disabled = false;
       }
     }

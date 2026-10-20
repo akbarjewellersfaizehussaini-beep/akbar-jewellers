@@ -1,18 +1,86 @@
 // ===== AKBAR JEWELLERS – SOFTWARE DATABASE =====
-// IMPORTANT: SUPABASE_URL aur SUPABASE_KEY js/supabase.js se aate hain
-// Yahan declare NAHI karni
+// FALLBACK: Agar supabase.js load na ho to yeh use hoga
+
+if (typeof window.SUPABASE_URL === 'undefined') {
+  window.SUPABASE_URL = 'https://cvuqtmmlewaudtxzpnyg.supabase.co';
+}
+if (typeof window.SUPABASE_KEY === 'undefined') {
+  window.SUPABASE_KEY = 'sb_publishable_of8TMEfEPDsVg21MfSSmBQ_CbwtRqRk';
+}
 
 const CLOUD_NAME = 'olpbssol';
 const CLOUDINARY_PRESET = 'akbar-jewellers';
 
+// ===== WEIGHT UNITS =====
+const WEIGHT_UNITS = {
+  gram: 1,
+  tola: 11.664,
+  masha: 0.972,
+  ratti: 0.1215
+};
+
+const KARAT_PURITY = {
+  '24K': 1.0, '22K': 0.9167, '21K': 0.875, '18K': 0.75,
+  '16K': 0.6667, '14K': 0.5833, '12K': 0.5, '10K': 0.4167, '8K': 0.3333
+};
+
+// ===== WEIGHT CONVERSION =====
+function toGrams(value, unit) {
+  return value * (WEIGHT_UNITS[unit] || 1);
+}
+
+function fromGrams(grams, unit) {
+  return grams / (WEIGHT_UNITS[unit] || 1);
+}
+
+function formatWeight(grams) {
+  if (!grams || grams <= 0) return '0g';
+  if (grams >= 11.664) {
+    const tola = Math.floor(grams / 11.664);
+    const remaining = grams - (tola * 11.664);
+    const masha = Math.floor(remaining / 0.972);
+    const ratti = ((remaining - (masha * 0.972)) / 0.1215).toFixed(1);
+    let result = '';
+    if (tola > 0) result += `${tola} tola `;
+    if (masha > 0) result += `${masha} masha `;
+    if (parseFloat(ratti) > 0) result += `${ratti} ratti`;
+    return result.trim() || `${grams.toFixed(2)}g`;
+  }
+  if (grams >= 0.972) {
+    const masha = Math.floor(grams / 0.972);
+    const ratti = ((grams - (masha * 0.972)) / 0.1215).toFixed(1);
+    return `${masha} masha ${ratti} ratti`;
+  }
+  return `${grams.toFixed(2)}g`;
+}
+
+function formatPKR(amount) {
+  return 'Rs ' + Math.round(amount || 0).toLocaleString('en-PK');
+}
+
+function formatNumber(num) {
+  return Math.round(num || 0).toLocaleString('en-PK');
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString('en-PK', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+// ===== CACHE =====
 const dbCache = {};
 
 async function sbFetch(path, options = {}) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+  const res = await fetch(`${window.SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
     headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'apikey': window.SUPABASE_KEY,
+      'Authorization': `Bearer ${window.SUPABASE_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
       ...(options.headers || {})
@@ -69,6 +137,7 @@ async function deleteRecord(storeName, id) {
   clearCache(storeName);
 }
 
+// ===== SETTINGS =====
 async function getShopSettings() {
   const defaults = { 
     name: 'AKBAR JEWELLERS', 
@@ -109,6 +178,7 @@ async function saveSetting(key, value) {
   }
 }
 
+// ===== CLOUDINARY =====
 async function uploadToCloudinary(file, resourceType = 'image') {
   const form = new FormData();
   form.append('file', file);
@@ -131,6 +201,51 @@ async function uploadMultipleImages(files) {
     urls.push(url);
   }
   return urls;
+}
+
+// ===== BUSINESS CALCULATIONS =====
+function calculateSaleTotal(sale) {
+  const qty = sale.qty || 1;
+  const weight = sale.weight || 0;
+  const rate = sale.rate || 0;
+  const making = sale.making || 0;
+  const polish = sale.polish || 0;
+  const discount = sale.discount || 0;
+  const gstPct = sale.gst_pct || 3;
+  
+  const totalWeight = qty * weight;
+  const metal = totalWeight * rate;
+  const makingTotal = making * qty;
+  const polishTotal = polish * qty;
+  const subtotal = metal + makingTotal + polishTotal;
+  const gst = subtotal * (gstPct / 100);
+  const total = subtotal + gst - discount;
+  
+  return { totalWeight, metal, makingTotal, polishTotal, subtotal, gst, total };
+}
+
+function calculatePurchaseTotal(purchase) {
+  const qty = purchase.qty || 1;
+  const weight = purchase.weight || 0;
+  const rate = purchase.rate || 0;
+  const totalWeight = qty * weight;
+  const total = totalWeight * rate;
+  
+  return { totalWeight, total };
+}
+
+// ===== WHATSAPP / EMAIL =====
+function openWhatsApp(phone, message) {
+  if (!phone) { alert('Phone number missing'); return; }
+  let num = phone.toString().replace(/[^0-9]/g, '');
+  if (num.startsWith('0')) num = '92' + num.slice(1);
+  if (!num.startsWith('92') && num.length === 10) num = '92' + num;
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(message)}`, '_blank');
+}
+
+async function sendEmail(to, subject, body) {
+  const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailto, '_blank');
 }
 
 async function initDB() { return true; }
