@@ -35,18 +35,15 @@
     .summary-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
     .summary-value { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 700; }
     
-    /* TABS */
     .money-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .money-tab { padding: 12px 24px; background: var(--black-royal); border: 2px solid rgba(255,215,0,0.3); color: var(--text-light); border-radius: 50px; cursor: pointer; font-size: 0.85rem; font-family: var(--font-body); font-weight: 600; transition: all 0.3s; }
     .money-tab:hover { border-color: var(--gold-primary); }
     .money-tab.active { background: linear-gradient(135deg, var(--gold-primary), var(--gold-deep)); color: var(--black-royal); border-color: var(--gold-primary); }
     
-    /* TAB CONTENT */
     .tab-content { display: none; }
     .tab-content.active { display: block; animation: fadeIn 0.3s; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     
-    /* GST TABLE */
     .gst-table { width: 100%; border-collapse: collapse; background: var(--black-soft); border-radius: 12px; overflow: hidden; }
     .gst-table th { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); color: var(--gold-primary); padding: 12px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid var(--gold-primary); }
     .gst-table td { padding: 10px 10px; border-bottom: 1px solid rgba(255,215,0,0.08); font-size: 0.85rem; }
@@ -76,7 +73,6 @@
     <p class="page-subtitle" id="currentDate"></p>
     <p style="color: #FFD700; font-family: 'Noto Nastaliq Urdu', serif; font-size: 1.1rem; margin-bottom: 20px;" dir="rtl">فیض حسینی</p>
 
-    <!-- MAIN STATS -->
     <div class="stats-grid">
       <div class="stat-card gold">
         <div class="stat-label">Today's Sales</div>
@@ -92,7 +88,6 @@
       </div>
     </div>
 
-    <!-- PROFIT / LOSS SECTION -->
     <h2 class="section-title" style="margin-top: 30px;">📊 Business Summary</h2>
     <div class="stats-grid">
       <div class="stat-card profit-card">
@@ -123,7 +118,6 @@
       </div>
     </div>
 
-    <!-- MONEY TABS -->
     <h2 class="section-title" style="margin-top: 30px;">💵 Money Summary</h2>
     
     <div class="money-tabs">
@@ -133,7 +127,6 @@
       <button class="money-tab" onclick="switchMoneyTab('gst', this)">🏛️ GST Collection</button>
     </div>
 
-    <!-- CASH TAB -->
     <div id="cashTab" class="tab-content active">
       <div class="summary-grid">
         <div class="summary-box green">
@@ -163,7 +156,6 @@
       </div>
     </div>
 
-    <!-- ONLINE TAB -->
     <div id="onlineTab" class="tab-content">
       <div class="summary-grid">
         <div class="summary-box green">
@@ -185,7 +177,6 @@
       </div>
     </div>
 
-    <!-- AVAILABLE TAB -->
     <div id="availableTab" class="tab-content">
       <div class="summary-grid">
         <div class="summary-box green">
@@ -203,7 +194,6 @@
       </div>
     </div>
 
-    <!-- GST TAB -->
     <div id="gstTab" class="tab-content">
       <div style="margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
@@ -239,18 +229,17 @@
       </div>
     </div>
 
-    <!-- QUICK ACTIONS -->
     <h2 class="section-title" style="margin-top: 30px;">Quick Actions</h2>
     <div class="action-grid">
-      <a href="sales.html" class="action-card"><div class="action-name">New Sale</div></a>
-      <a href="purchase.html" class="action-card"><div class="action-name">New Purchase</div></a>
-      <a href="payments.html" class="action-card payment-card"><div class="action-name">💳 Payment Receipt</div></a>
-      <a href="expenses.html" class="action-card expense"><div class="action-name">Add Expense</div></a>
-      <a href="bank-accounts.html" class="action-card bank"><div class="action-name">🏦 Bank Accounts</div></a>
-      <a href="karigars.html" class="action-card karigar"><div class="action-name">👷 Karigars</div></a>
-      <a href="suppliers.html" class="action-card"><div class="action-name">🏭 Suppliers</div></a>
-      <a href="products.html" class="action-card product"><div class="action-name">Add Product</div></a>
-      <a href="reports.html" class="action-card"><div class="action-name">View Reports</div></a>
+      <a href="sales.html" class="action-card" onclick="clearCacheBeforeNav(event, 'sales.html')"><div class="action-name">New Sale</div></a>
+      <a href="purchase.html" class="action-card" onclick="clearCacheBeforeNav(event, 'purchase.html')"><div class="action-name">New Purchase</div></a>
+      <a href="payments.html" class="action-card payment-card" onclick="clearCacheBeforeNav(event, 'payments.html')"><div class="action-name">💳 Payment Receipt</div></a>
+      <a href="expenses.html" class="action-card expense" onclick="clearCacheBeforeNav(event, 'expenses.html')"><div class="action-name">Add Expense</div></a>
+      <a href="bank-accounts.html" class="action-card bank" onclick="clearCacheBeforeNav(event, 'bank-accounts.html')"><div class="action-name">🏦 Bank Accounts</div></a>
+      <a href="karigars.html" class="action-card karigar" onclick="clearCacheBeforeNav(event, 'karigars.html')"><div class="action-name">👷 Karigars</div></a>
+      <a href="suppliers.html" class="action-card" onclick="clearCacheBeforeNav(event, 'suppliers.html')"><div class="action-name">🏭 Suppliers</div></a>
+      <a href="products.html" class="action-card product" onclick="clearCacheBeforeNav(event, 'products.html')"><div class="action-name">Add Product</div></a>
+      <a href="reports.html" class="action-card" onclick="clearCacheBeforeNav(event, 'reports.html')"><div class="action-name">View Reports</div></a>
     </div>
 
     <h2 class="section-title">Recent Sales (Click to view Invoice)</h2>
@@ -288,40 +277,66 @@
     let currentInvoiceData = null;
     let allData = { sales: [], purchases: [], expenses: [], payments: [], products: [], customers: [], karigars: [], suppliers: [], services: [], bankAccounts: [], bankTransactions: [] };
 
+    // Cache clear before navigation
+    function clearCacheBeforeNav(event, page) {
+      event.preventDefault();
+      if (typeof clearCache === 'function') clearCache();
+      window.location.href = page;
+    }
+
+    function calculateSaleGST(sale) {
+      const qty = Number(sale.qty) || 1;
+      const weight = Number(sale.weight) || 0;
+      const rate = Number(sale.rate) || 0;
+      const making = Number(sale.making) || 0;
+      const polish = Number(sale.polish) || 0;
+      const gstPct = Number(sale.gst_pct) || 3;
+      
+      const totalWeight = qty * weight;
+      const metal = totalWeight * rate;
+      const makingTotal = making * qty;
+      const polishTotal = polish * qty;
+      const subtotal = metal + makingTotal + polishTotal;
+      const gst = Math.round(subtotal * (gstPct / 100));
+      
+      return { gst, gstPct, subtotal };
+    }
+
     async function loadDashboard() {
       currentUser = checkAuth();
       if (!currentUser) return;
+      
+      // Cache clear on load (force fresh data)
+      if (typeof clearCache === 'function') clearCache();
       
       document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
       document.getElementById('welcomeName').textContent = currentUser.email;
       document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       
-      // Navigation
       let navHtml = '<button class="nav-btn active">Dashboard</button>';
-      if (currentUser.role === 'admin' || currentUser.role === 'sales') navHtml += '<button class="nav-btn" onclick="navigate(\'sales.html\')">Sales</button>';
-      if (currentUser.role === 'admin' || currentUser.role === 'purchase') navHtml += '<button class="nav-btn" onclick="navigate(\'purchase.html\')">Purchase</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'payments.html\')">Payments</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'bank-accounts.html\')">Bank</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'products.html\')">Products</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'customers.html\')">Customers</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'karigars.html\')">Karigars</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'suppliers.html\')">Suppliers</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'reports.html\')">Reports</button>';
-      navHtml += '<button class="nav-btn" onclick="navigate(\'settings.html\')">Settings</button>';
+      if (currentUser.role === 'admin' || currentUser.role === 'sales') navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'sales.html\')">Sales</button>';
+      if (currentUser.role === 'admin' || currentUser.role === 'purchase') navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'purchase.html\')">Purchase</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'payments.html\')">Payments</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'bank-accounts.html\')">Bank</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'products.html\')">Products</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'customers.html\')">Customers</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'karigars.html\')">Karigars</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'suppliers.html\')">Suppliers</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'reports.html\')">Reports</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'settings.html\')">Settings</button>';
       document.getElementById('navMenu').innerHTML = navHtml;
 
-      // Fetch all data
-      allData.sales = await getRecordsFast('sales');
-      allData.purchases = await getRecordsFast('purchases');
-      allData.customers = await getRecordsFast('customers');
-      allData.expenses = await getRecordsFast('expenses');
-      allData.products = await getRecordsFast('products');
-      allData.payments = await getRecordsFast('payments');
-      allData.karigars = await getRecordsFast('karigars');
-      allData.suppliers = await getRecordsFast('suppliers');
-      allData.services = await getRecordsFast('services');
-      allData.bankAccounts = await getRecordsFast('bank_accounts');
-      allData.bankTransactions = await getRecordsFast('bank_transactions');
+      allData.sales = await getRecordsFast('sales', true);
+      allData.purchases = await getRecordsFast('purchases', true);
+      allData.customers = await getRecordsFast('customers', true);
+      allData.expenses = await getRecordsFast('expenses', true);
+      allData.products = await getRecordsFast('products', true);
+      allData.payments = await getRecordsFast('payments', true);
+      allData.karigars = await getRecordsFast('karigars', true);
+      allData.suppliers = await getRecordsFast('suppliers', true);
+      allData.services = await getRecordsFast('services', true);
+      allData.bankAccounts = await getRecordsFast('bank_accounts', true);
+      allData.bankTransactions = await getRecordsFast('bank_transactions', true);
       
       const today = new Date().toISOString().slice(0,10);
       const thisMonth = new Date().toISOString().slice(0,7);
@@ -330,37 +345,20 @@
       const purchases = allData.purchases;
       const customers = allData.customers;
       const expenses = allData.expenses;
-      const products = allData.products;
       const payments = allData.payments;
-      const karigars = allData.karigars;
-      const suppliers = allData.suppliers;
-      const services = allData.services;
       const bankAccounts = allData.bankAccounts;
       const bankTransactions = allData.bankTransactions;
 
-      // Today's sales
       document.getElementById('todaySales').textContent = formatPKR(sales.filter(s => s.date?.startsWith(today)).reduce((sum, s) => sum + (Number(s.total)||0), 0));
       document.getElementById('monthPurchases').textContent = formatPKR(purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0));
       document.getElementById('totalCustomers').textContent = customers.length;
 
-      // ===== CALCULATE GST =====
       let totalGST = 0;
       sales.forEach(s => {
-        const qty = s.qty || 1;
-        const weight = s.weight || 0;
-        const rate = s.rate || 0;
-        const making = s.making || 0;
-        const polish = s.polish || 0;
-        const totalWeight = qty * weight;
-        const metal = totalWeight * rate;
-        const makingTotal = making * qty;
-        const polishTotal = polish * qty;
-        const subtotal = metal + makingTotal + polishTotal;
-        const gst = Math.round(subtotal * ((s.gst_pct || 3) / 100));
+        const { gst } = calculateSaleGST(s);
         totalGST += gst;
       });
 
-      // ALL TIME TOTALS
       const totalSalesAll = sales.reduce((sum, s) => sum + (Number(s.total)||0), 0);
       const totalPurchasesAll = purchases.reduce((sum, p) => sum + (Number(p.total)||0), 0);
       const totalExpensesAll = expenses.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
@@ -370,7 +368,6 @@
       document.getElementById('totalExpensesAll').textContent = formatPKR(totalExpensesAll);
       document.getElementById('totalGSTAll').textContent = formatPKR(totalGST);
       
-      // PROFIT/LOSS = Sales - Purchase - GST - Expense
       const profitLoss = totalSalesAll - totalPurchasesAll - totalGST - totalExpensesAll;
       
       const profitCard = document.getElementById('profitLossCard');
@@ -402,7 +399,6 @@
         profitSubtext.textContent = 'Sales = Cost';
       }
 
-      // ===== CASH CALCULATIONS =====
       let cashInSales = 0, cashInPayments = 0, cashOutPurchases = 0, cashOutExpenses = 0, cashOutPayments = 0;
       
       sales.forEach(s => {
@@ -439,7 +435,6 @@
       document.getElementById('cashPaymentsOut').textContent = formatPKR(cashOutPayments);
       document.getElementById('cashInHand').textContent = formatPKR(cashInHand);
 
-      // ===== ONLINE CALCULATIONS =====
       let bankTotal = 0, easypaisaTotal = 0, jazzcashTotal = 0;
       
       bankAccounts.forEach(acc => {
@@ -462,15 +457,12 @@
       document.getElementById('jazzcashBalance').textContent = formatPKR(jazzcashTotal);
       document.getElementById('onlineTotal').textContent = formatPKR(onlineTotal);
 
-      // ===== AVAILABLE =====
       document.getElementById('availCash').textContent = formatPKR(cashInHand);
       document.getElementById('availOnline').textContent = formatPKR(onlineTotal);
       document.getElementById('availTotal').textContent = formatPKR(cashInHand + onlineTotal);
 
-      // ===== LOAD GST TABLE =====
       loadGSTTable();
 
-      // Recent sales
       const recent = sales.slice(0, 5);
       const container = document.getElementById('recentSales');
       container.innerHTML = recent.length === 0 ? '<p style="color:#B8B8B8;">No sales yet</p>' : recent.map(s => `
@@ -484,11 +476,9 @@
       `).join('');
     }
 
-    // ===== MONEY TABS SWITCH =====
     function switchMoneyTab(tab, btn) {
       document.querySelectorAll('.money-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
-      
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
       
       if (tab === 'cash') document.getElementById('cashTab').classList.add('active');
@@ -500,7 +490,6 @@
       }
     }
 
-    // ===== LOAD GST TABLE =====
     function loadGSTTable() {
       const filter = document.getElementById('gstFilter')?.value || 'all';
       const sales = allData.sales;
@@ -519,26 +508,15 @@
       
       let totalGST = 0;
       const rows = filteredSales.map(s => {
-        const qty = s.qty || 1;
-        const weight = s.weight || 0;
-        const rate = s.rate || 0;
-        const making = s.making || 0;
-        const polish = s.polish || 0;
-        const totalWeight = qty * weight;
-        const metal = totalWeight * rate;
-        const makingTotal = making * qty;
-        const polishTotal = polish * qty;
-        const subtotal = metal + makingTotal + polishTotal;
-        const gst = Math.round(subtotal * ((s.gst_pct || 3) / 100));
+        const { gst, gstPct } = calculateSaleGST(s);
         totalGST += gst;
-        
         return `
           <tr>
             <td>${formatDate(s.sale_date || s.created_at)}</td>
             <td style="font-family: var(--font-mono); font-size: 0.8rem;">${s.invoice_number || '—'}</td>
             <td>${s.customer_name || '—'}</td>
             <td style="text-align: right;">${formatPKR(s.total)}</td>
-            <td style="text-align: right;">${s.gst_pct || 3}%</td>
+            <td style="text-align: right;">${gstPct}%</td>
             <td style="text-align: right; color: #25D366; font-weight: 700;">${formatPKR(gst)}</td>
           </tr>
         `;
@@ -673,6 +651,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', loadDashboard);
+
+    // Back button se aane par reload
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
   </script>
 
   <script>

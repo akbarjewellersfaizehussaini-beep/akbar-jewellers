@@ -1,15 +1,14 @@
-// ===== AKBAR JEWELLERS – SOFTWARE DATABASE =====
-// FALLBACK: Agar supabase.js load na ho to yeh use hoga
+// ===== AKBAR JEWELLERS – SOFTWARE DATABASE (FINAL) =====
+// Direct Supabase values + Cache timeout
 
-if (typeof window.SUPABASE_URL === 'undefined') {
-  window.SUPABASE_URL = 'https://cvuqtmmlewaudtxzpnyg.supabase.co';
-}
-if (typeof window.SUPABASE_KEY === 'undefined') {
-  window.SUPABASE_KEY = 'sb_publishable_of8TMEfEPDsVg21MfSSmBQ_CbwtRqRk';
-}
+const SUPABASE_URL = 'https://cvuqtmmlewaudtxzpnyg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_of8TMEfEPDsVg21MfSSmBQ_CbwtRqRk';
 
 const CLOUD_NAME = 'olpbssol';
 const CLOUDINARY_PRESET = 'akbar-jewellers';
+
+// ===== CACHE TIMEOUT (5 seconds) =====
+const CACHE_TIMEOUT = 5000;
 
 // ===== WEIGHT UNITS =====
 const WEIGHT_UNITS = {
@@ -76,11 +75,11 @@ function formatDateTime(dateStr) {
 const dbCache = {};
 
 async function sbFetch(path, options = {}) {
-  const res = await fetch(`${window.SUPABASE_URL}/rest/v1/${path}`, {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
     headers: {
-      'apikey': window.SUPABASE_KEY,
-      'Authorization': `Bearer ${window.SUPABASE_KEY}`,
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
       ...(options.headers || {})
@@ -94,8 +93,17 @@ async function sbFetch(path, options = {}) {
   return res.json();
 }
 
+// ===== GET RECORDS WITH CACHE TIMEOUT =====
 async function getRecordsFast(storeName, forceRefresh = false) {
-  if (!forceRefresh && dbCache[storeName]) return dbCache[storeName];
+  const now = Date.now();
+  
+  // Cache expire check (5 seconds)
+  if (!forceRefresh && dbCache[storeName]) {
+    const cacheTime = dbCache[storeName + '_time'] || 0;
+    if (now - cacheTime < CACHE_TIMEOUT) {
+      return dbCache[storeName];
+    }
+  }
   
   try {
     const rows = await sbFetch(`${storeName}?select=*&order=created_at.desc`);
@@ -104,6 +112,7 @@ async function getRecordsFast(storeName, forceRefresh = false) {
       date: r.sale_date || r.purchase_date || r.expense_date || r.payment_date || r.service_date || r.created_at 
     }));
     dbCache[storeName] = data;
+    dbCache[storeName + '_time'] = now;
     return data;
   } catch (e) {
     console.error('getRecordsFast error for', storeName, ':', e);
@@ -112,8 +121,12 @@ async function getRecordsFast(storeName, forceRefresh = false) {
 }
 
 function clearCache(storeName) {
-  if (storeName) delete dbCache[storeName];
-  else Object.keys(dbCache).forEach(k => delete dbCache[k]);
+  if (storeName) {
+    delete dbCache[storeName];
+    delete dbCache[storeName + '_time'];
+  } else {
+    Object.keys(dbCache).forEach(k => delete dbCache[k]);
+  }
 }
 
 async function addRecord(storeName, data) {

@@ -140,4 +140,35 @@ function printElement(elementId) {
   window.print();
   document.body.innerHTML = originalContent;
   window.location.reload();
+}// ===== AUTO CACHE CLEAR ON PAGE CHANGE =====
+// Jab bhi page load ho, cache clear karein
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    // Page back button se aaya hai — cache clear karein
+    if (typeof clearCache === 'function') {
+      clearCache();
+    }
+    // Auto reload
+    window.location.reload();
+  }
+});
+
+// Jab bhi tab/window focus ho, data refresh karein
+let lastFocusTime = Date.now();
+window.addEventListener('focus', () => {
+  const now = Date.now();
+  if (now - lastFocusTime > 2000) { // 2 second se zyada
+    if (typeof clearCache === 'function') {
+      clearCache();
+    }
+  }
+  lastFocusTime = now;
+});
+
+// Navigation helper — cache clear karke navigate karein
+function navigateFresh(page) {
+  if (typeof clearCache === 'function') {
+    clearCache();
+  }
+  window.location.href = page;
 }
