@@ -225,5 +225,12 @@
       window.location.href = `customer-ledger.html?name=${encodeURIComponent(name)}`;
     }
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
+    });
+  }
+</script>
 </body>
 </html>

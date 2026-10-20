@@ -1,27 +1,48 @@
 {
   "name": "Akbar Jewellers Software",
   "short_name": "Akbar Software",
-  "description": "Akbar Jewellers - Business Management Software",
+  "description": "Business Management Software for Akbar Jewellers – Tola, Masha, Ratti, Gold Ledger, Karigar, Supplier, Customer",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#0A0A0A",
   "theme_color": "#FFD700",
-  "orientation": "portrait-primary",
-  "scope": "./",
+  "lang": "en-PK",
+  "dir": "ltr",
   "icons": [
     {
-      "src": "../images/logo.png",
+      "src": "../../images/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "../images/logo.png",
+      "src": "../../images/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "categories": ["business", "productivity", "finance"],
-  "lang": "en-PK"
+  "shortcuts": [
+    {
+      "name": "New Sale",
+      "short_name": "Sale",
+      "url": "./sales.html",
+      "icons": [{ "src": "../../images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "New Purchase",
+      "short_name": "Purchase",
+      "url": "./purchase.html",
+      "icons": [{ "src": "../../images/logo.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Payment Receipt",
+      "short_name": "Payment",
+      "url": "./payments.html",
+      "icons": [{ "src": "../../images/logo.png", "sizes": "192x192" }]
+    }
+  ]
 }

@@ -484,5 +484,12 @@
       if (email) sendEmail(email, subject, body);
     }
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
+    });
+  }
+</script>
 </body>
 </html>

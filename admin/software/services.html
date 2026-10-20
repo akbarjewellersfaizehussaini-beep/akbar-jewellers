@@ -1,215 +1,146 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Karigar Services – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style-software.css">
-</head>
-<body>
+// ===== AKBAR JEWELLERS – SERVICE WORKER =====
+// Offline-first caching for PWA
 
-  <div class="sw-header">
-    <div class="sw-logo">Karigar Services</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
-  </div>
+const CACHE_NAME = 'akbar-software-v2';
+const CACHE_VERSION = '2.0.0';
 
-  <div class="sw-content">
-    <h1 class="page-title">Karigar Management</h1>
+// Local files (same origin) — inhein cache karna zaroori hai
+const LOCAL_FILES = [
+  './',
+  './index.html',
+  './login.html',
+  './sales.html',
+  './purchase.html',
+  './payments.html',
+  './expenses.html',
+  './customers.html',
+  './customer-ledger.html',
+  './karigars.html',
+  './karigar-ledger.html',
+  './suppliers.html',
+  './supplier-ledger.html',
+  './products.html',
+  './bank-accounts.html',
+  './ledger.html',
+  './reports.html',
+  './settings.html',
+  './offline.html',
+  './db.js',
+  './app.js',
+  './style-software.css',
+  './manifest.json'
+];
 
-    <div class="category-tabs">
-      <button class="cat-tab gold active" onclick="switchTab('karigar', this)">Karigar List</button>
-      <button class="cat-tab silver" onclick="switchTab('job', this)">New Job Entry</button>
-    </div>
+// External resources — inhein alag se handle karenge
+const EXTERNAL_FILES = [
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=JetBrains+Mono:wght@400;600;700&display=swap',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
+];
 
-    <div id="karigarTab">
-      <div class="form-card">
-        <h3 class="form-card-title">Add New Karigar</h3>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Name *</label><input type="text" id="kName" class="form-input" placeholder="Karigar Name"></div>
-          <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="kPhone" class="form-input" placeholder="03XXXXXXXXX"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">CNIC</label><input type="text" id="kCNIC" class="form-input" placeholder="XXXXX-XXXXXXX-X"></div>
-          <div class="form-group"><label class="form-label">Address</label><input type="text" id="kAddress" class="form-input" placeholder="Address"></div>
-        </div>
-        <button class="btn-primary" onclick="saveKarigar()" style="width:100%;">Save Karigar</button>
-      </div>
-
-      <h2 class="section-title">All Karigars (Click name for Khata)</h2>
-      <div class="data-list" id="karigarsList"></div>
-    </div>
-
-    <div id="jobTab" style="display:none;">
-      <div class="form-card">
-        <h3 class="form-card-title">New Job Entry</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Select Karigar *</label>
-            <select id="jKarigar" class="form-select">
-              <option value="">-- Select --</option>
-            </select>
-          </div>
-          <div class="form-group"><label class="form-label">Job Date</label><input type="date" id="jDate" class="form-input"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Job Description *</label><input type="text" id="jItem" class="form-input" placeholder="e.g., Ring Polish"></div>
-          <div class="form-group"><label class="form-label">Job Type</label>
-            <select id="jType" class="form-select">
-              <option value="making">Jewelry Making</option>
-              <option value="repair">Repair</option>
-              <option value="polish">Polish</option>
-              <option value="setting">Stone Setting</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Gold Given (g)</label><input type="number" id="jGoldGiven" class="form-input" step="0.001" placeholder="0.000"></div>
-          <div class="form-group"><label class="form-label">Gold Returned (g)</label><input type="number" id="jGoldReturned" class="form-input" step="0.001" placeholder="0.000"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Charges (Rs) *</label><input type="number" id="jCharges" class="form-input" placeholder="0"></div>
-          <div class="form-group"><label class="form-label">Paid (Rs)</label><input type="number" id="jPaid" class="form-input" placeholder="0"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">Balance (Rs)</label><input type="number" id="jBalance" class="form-input" readonly style="background:#2A2A2A; color:#FCD34D;"></div>
-          <div class="form-group"><label class="form-label">Status</label>
-            <select id="jStatus" class="form-select">
-              <option value="pending">Pending</option>
-              <option value="completed">Completed</option>
-              <option value="delivered">Delivered</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="saveJob()" style="width:100%;">Save Job</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="db.js"></script>
-  <script src="app.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (!checkAuth(['admin', 'purchase'])) return;
-      document.getElementById('jDate').value = new Date().toISOString().slice(0,10);
-      loadKarigars();
-    });
-
-    function switchTab(tab, btn) {
-      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('karigarTab').style.display = tab === 'karigar' ? 'block' : 'none';
-      document.getElementById('jobTab').style.display = tab === 'job' ? 'block' : 'none';
-    }
-
-    async function saveKarigar() {
-      const name = document.getElementById('kName').value.trim();
-      const phone = document.getElementById('kPhone').value.trim();
-      if (!name || !phone) { alert('❌ Name and phone required'); return; }
-
-      const btn = event.target;
-      btn.textContent = 'Saving...'; btn.disabled = true;
-
-      try {
-        await addRecord('karigars', {
-          name, phone,
-          cnic: document.getElementById('kCNIC').value.trim(),
-          address: document.getElementById('kAddress').value.trim()
-        });
-        alert('✅ Karigar saved!');
-        ['kName','kPhone','kCNIC','kAddress'].forEach(id => document.getElementById(id).value = '');
-        loadKarigars();
-      } catch (e) { alert('❌ ' + e.message); }
-      finally { btn.textContent = 'Save Karigar'; btn.disabled = false; }
-    }
-
-    async function loadKarigars() {
-      const karigars = await getRecordsFast('karigars');
-      const services = await getRecordsFast('services');
-      const payments = await getRecordsFast('payments');
+// Install — cache all files
+self.addEventListener('install', (event) => {
+  console.log('📦 Service Worker: Installing...');
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async (cache) => {
+      console.log('✅ Caching local files');
       
-      const select = document.getElementById('jKarigar');
-      select.innerHTML = '<option value="">-- Select --</option>';
-      karigars.forEach(k => {
-        select.innerHTML += `<option value="${k.name}|${k.phone}">${k.name}</option>`;
+      // Cache local files (normal mode — cacheable)
+      try {
+        await cache.addAll(LOCAL_FILES);
+        console.log('✅ Local files cached');
+      } catch (err) {
+        console.log('⚠️ Some local files failed:', err);
+      }
+      
+      // Cache external files (may fail if offline — that's OK)
+      for (const url of EXTERNAL_FILES) {
+        try {
+          await cache.add(new Request(url, { mode: 'cors' }));
+        } catch (err) {
+          console.log('⚠️ External file failed (will retry on fetch):', url);
+        }
+      }
+    })
+  );
+  self.skipWaiting();
+});
+
+// Activate — clean old caches
+self.addEventListener('activate', (event) => {
+  console.log('✅ Service Worker: Activated');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) {
+            console.log('🗑️ Deleting old cache:', name);
+            return caches.delete(name);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch — serve from cache first, then network
+self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
+  
+  // Skip Supabase API calls (always go to network)
+  if (event.request.url.includes('supabase.co')) return;
+  
+  // Skip Cloudinary uploads
+  if (event.request.url.includes('cloudinary.com')) return;
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      // If found in cache, return it (stale-while-revalidate)
+      if (cachedResponse) {
+        // Fetch fresh copy in background
+        fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200 && networkResponse.type !== 'opaque') {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, networkResponse.clone());
+            });
+          }
+        }).catch(() => {});
+        
+        return cachedResponse;
+      }
+      
+      // Not in cache — fetch from network
+      return fetch(event.request).then((networkResponse) => {
+        // Don't cache non-successful or opaque responses
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === 'opaque') {
+          return networkResponse;
+        }
+        
+        // Cache successful responses
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        
+        return networkResponse;
+      }).catch(() => {
+        // Network failed and not in cache
+        if (event.request.mode === 'navigate') {
+          return caches.match('./offline.html') || caches.match('./index.html');
+        }
+        return new Response('Offline – Please check your internet connection', {
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
       });
+    })
+  );
+});
 
-      const container = document.getElementById('karigarsList');
-      if (karigars.length === 0) { container.innerHTML = '<div class="empty-state"><p>No karigars yet</p></div>'; return; }
-      
-      container.innerHTML = karigars.map(k => {
-        const kServices = services.filter(s => s.karigar_name === k.name);
-        const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
-        
-        let totalCharges = kServices.reduce((sum, s) => sum + (Number(s.charges)||0), 0);
-        let totalPaid = kPays.reduce((sum, p) => sum + (Number(p.amount)||0), 0);
-        let balance = totalCharges - totalPaid;
-        
-        let balHtml = '';
-        if (balance > 0) balHtml = `<span style="color:#FCA5A5;">Payable: ${formatPKR(balance)}</span>`;
-        else if (balance < 0) balHtml = `<span style="color:#86EFAC;">Adv: ${formatPKR(Math.abs(balance))}</span>`;
-        else balHtml = `<span style="color:#B8B8B8;">Clear</span>`;
-
-        return `
-        <div class="data-item" style="cursor:pointer;" onclick="openLedger('karigar','${k.name}')">
-          <div>
-            <div class="data-item-title">${k.name}</div>
-            <div class="data-item-sub">📞 ${k.phone} ${k.cnic ? '• CNIC: ' + k.cnic : ''}</div>
-          </div>
-          <div style="text-align:right;">
-            <div class="data-item-value" style="font-size:0.95rem;">${balHtml}</div>
-            <div class="data-item-sub" style="font-size:0.7rem;">Click for Khata</div>
-          </div>
-        </div>
-        `;
-      }).join('');
-    }
-
-    function autoCalcJob() {
-      const charges = parseFloat(document.getElementById('jCharges').value) || 0;
-      const paid = parseFloat(document.getElementById('jPaid').value) || 0;
-      document.getElementById('jBalance').value = Math.max(0, charges - paid);
-    }
-    ['jCharges','jPaid'].forEach(id => document.getElementById(id)?.addEventListener('input', autoCalcJob));
-
-    async function saveJob() {
-      const karigarVal = document.getElementById('jKarigar').value;
-      const item = document.getElementById('jItem').value.trim();
-      const charges = parseFloat(document.getElementById('jCharges').value) || 0;
-      
-      if (!karigarVal || !item || charges <= 0) { alert('❌ Fill all required fields'); return; }
-      const [karigarName, karigarPhone] = karigarVal.split('|');
-
-      const btn = event.target;
-      btn.textContent = 'Saving...'; btn.disabled = true;
-
-      try {
-        await addRecord('services', {
-          karigar_name: karigarName,
-          karigar_phone: karigarPhone,
-          item: item,
-          type: document.getElementById('jType').value,
-          gold_given: parseFloat(document.getElementById('jGoldGiven').value) || 0,
-          gold_returned: parseFloat(document.getElementById('jGoldReturned').value) || 0,
-          charges: charges,
-          paid: parseFloat(document.getElementById('jPaid').value) || 0,
-          balance: parseFloat(document.getElementById('jBalance').value) || 0,
-          status: document.getElementById('jStatus').value,
-          service_date: document.getElementById('jDate').value || new Date().toISOString().slice(0,10)
-        });
-        alert('✅ Job saved!');
-        ['jItem','jGoldGiven','jGoldReturned','jCharges','jPaid','jBalance'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('jKarigar').value = '';
-        loadKarigars();
-      } catch (e) { alert('❌ ' + e.message); }
-      finally { btn.textContent = 'Save Job'; btn.disabled = false; }
-    }
-
-    function openLedger(type, name) {
-      window.location.href = `ledger.html?type=${type}&name=${encodeURIComponent(name)}`;
-    }
-  </script>
-</body>
-</html>
+// Background sync
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-data') {
+    console.log('🔄 Background sync triggered');
+  }
+});

@@ -122,5 +122,12 @@
 
     document.addEventListener('DOMContentLoaded', async () => { await initDB(); loadStore(); });
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
+    });
+  }
+</script>
 </body>
 </html>
