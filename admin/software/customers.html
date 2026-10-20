@@ -19,7 +19,7 @@
 
   <div class="sw-content">
     <h1 class="page-title">Customer Management</h1>
-    <p class="page-subtitle">Complete customer records with CNIC photos (Pakistani law compliant)</p>
+    <p class="page-subtitle">Complete customer records</p>
 
     <div class="form-card">
       <h3 class="form-card-title">➕ Add New Customer</h3>
@@ -37,7 +37,7 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">CNIC Number</label>
+          <label class="form-label">CNIC</label>
           <input type="text" id="cCNIC" class="form-input" placeholder="XXXXX-XXXXXXX-X">
         </div>
         <div class="form-group">
@@ -53,40 +53,12 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Cash Balance (Rs) <span class="tooltip-icon" data-tooltip="Agar pehle se udhaar hai (lena hai) to positive, advance hai to negative">?</span></label>
+          <label class="form-label">Opening Cash Balance (Rs)</label>
           <input type="number" id="cOpeningCash" class="form-input number-input" placeholder="0">
         </div>
         <div class="form-group">
-          <label class="form-label">Opening Gold Weight (gram) <span class="tooltip-icon" data-tooltip="Agar pehle se sona lena/dеna hai">?</span></label>
+          <label class="form-label">Opening Gold Weight (gram)</label>
           <input type="number" id="cOpeningGold" class="form-input number-input" placeholder="0.000" step="0.001">
-        </div>
-      </div>
-
-      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">📸 Photos (Optional — Pakistani Law)</h4>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">CNIC Front Photo</label>
-          <input type="file" id="cCNICFront" class="form-input" accept="image/*" capture="environment" style="padding:10px;">
-          <div id="cCNICFrontPreview" style="margin-top:10px;"></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">CNIC Back Photo</label>
-          <input type="file" id="cCNICBack" class="form-input" accept="image/*" capture="environment" style="padding:10px;">
-          <div id="cCNICBackPreview" style="margin-top:10px;"></div>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Customer Photo</label>
-          <input type="file" id="cPhoto" class="form-input" accept="image/*" capture="user" style="padding:10px;">
-          <div id="cPhotoPreview" style="margin-top:10px;"></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Product Photo (jo bech raha hai)</label>
-          <input type="file" id="cProductPhoto" class="form-input" accept="image/*" capture="environment" style="padding:10px;">
-          <div id="cProductPhotoPreview" style="margin-top:10px;"></div>
         </div>
       </div>
 
@@ -95,7 +67,7 @@
       </button>
     </div>
 
-    <h2 class="section-title">📋 All Customers (Click name for Ledger)</h2>
+    <h2 class="section-title">📋 All Customers</h2>
     <div class="data-list" id="customersList">
       <div class="empty-state"><p>Loading...</p></div>
     </div>
@@ -104,32 +76,9 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    let uploadedPhotos = { front: '', back: '', customer: '', product: '' };
-
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales'])) return;
       loadCustomers();
-    });
-
-    // Photo preview + upload
-    ['cCNICFront', 'cCNICBack', 'cPhoto', 'cProductPhoto'].forEach(id => {
-      document.getElementById(id)?.addEventListener('change', async (e) => {
-        if (e.target.files[0]) {
-          const file = e.target.files[0];
-          const previewId = id + 'Preview';
-          document.getElementById(previewId).innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:100px; border-radius:8px; border:2px solid var(--gold-primary);">`;
-          
-          try {
-            const url = await uploadImage(file);
-            if (id === 'cCNICFront') uploadedPhotos.front = url;
-            if (id === 'cCNICBack') uploadedPhotos.back = url;
-            if (id === 'cPhoto') uploadedPhotos.customer = url;
-            if (id === 'cProductPhoto') uploadedPhotos.product = url;
-          } catch (err) {
-            alert('Photo upload failed: ' + err.message);
-          }
-        }
-      });
     });
 
     async function saveCustomer() {
@@ -139,8 +88,7 @@
       if (!name || !phone) { alert('❌ Name and phone required'); return; }
 
       const btn = document.getElementById('saveCustomerBtn');
-      btn.textContent = '⏳ Saving...'; 
-      btn.disabled = true;
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         await addRecord('customers', {
@@ -150,31 +98,21 @@
           city: document.getElementById('cCity').value.trim(),
           address: document.getElementById('cAddress').value.trim(),
           opening_balance: parseFloat(document.getElementById('cOpeningCash').value) || 0,
-          opening_gold_weight: parseFloat(document.getElementById('cOpeningGold').value) || 0,
-          cnic_front_photo: uploadedPhotos.front,
-          cnic_back_photo: uploadedPhotos.back,
-          customer_photo: uploadedPhotos.customer,
-          product_photo: uploadedPhotos.product
+          opening_gold_weight: parseFloat(document.getElementById('cOpeningGold').value) || 0
         });
         
-        alert('✅ Customer saved successfully!');
+        alert('✅ Customer saved!');
         clearForm();
         loadCustomers();
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = '💾 Save Customer';
-        btn.disabled = false;
+        btn.textContent = '💾 Save Customer'; btn.disabled = false;
       }
     }
 
     function clearForm() {
       ['cName','cPhone','cCNIC','cCity','cAddress','cOpeningCash','cOpeningGold'].forEach(id => document.getElementById(id).value = '');
-      ['cCNICFront','cCNICBack','cPhoto','cProductPhoto'].forEach(id => {
-        document.getElementById(id).value = '';
-        document.getElementById(id + 'Preview').innerHTML = '';
-      });
-      uploadedPhotos = { front: '', back: '', customer: '', product: '' };
     }
 
     async function loadCustomers() {
@@ -184,53 +122,49 @@
       const container = document.getElementById('customersList');
       
       if (!customers || customers.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No customers yet. Add your first customer above.</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><p>No customers yet</p></div>'; 
         return; 
       }
       
       container.innerHTML = customers.map(c => {
         const cSales = sales.filter(s => s.customer_name === c.name);
         const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
-        
         let totalBill = Number(c.opening_balance) || 0;
         let totalPaid = 0;
-        
-        cSales.forEach(s => { totalBill += Number(s.total) || 0; });
-        cPays.forEach(p => { totalPaid += Number(p.amount) || 0; });
-        
+        cSales.forEach(s => totalBill += Number(s.total) || 0);
+        cPays.forEach(p => totalPaid += Number(p.amount) || 0);
         const balance = totalBill - totalPaid;
         
         return `
-          <div class="data-item" style="cursor:pointer;" onclick="openCustomerLedger('${c.name}')">
-            <div style="display:flex; gap:15px; align-items:center;">
-              ${c.customer_photo ? `<img src="${c.customer_photo}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--gold-primary); object-fit:cover;">` : '<div style="width:50px; height:50px; border-radius:50%; background:var(--charcoal); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">👤</div>'}
-              <div>
-                <div class="data-item-title">${c.name}</div>
-                <div class="data-item-sub">📞 ${c.phone} ${c.cnic ? '• CNIC: ' + c.cnic : ''}</div>
-                <div class="data-item-sub">📦 ${cSales.length} sales • ${cPays.length} payments</div>
-              </div>
+          <div class="data-item">
+            <div style="cursor:pointer; flex:1;" onclick="window.location.href='customer-ledger.html?name=${encodeURIComponent(c.name)}'">
+              <div class="data-item-title">${c.name}</div>
+              <div class="data-item-sub">📞 ${c.phone} ${c.cnic ? '• CNIC: ' + c.cnic : ''}</div>
+              <div class="data-item-sub">📦 ${cSales.length} sales • ${cPays.length} payments</div>
             </div>
-            <div style="text-align:right;">
-              <div style="color: ${balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:1rem;">
-                ${formatPKR(Math.abs(balance))} ${balance > 0 ? 'Due' : 'Advance'}
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="text-align:right;">
+                <div style="color:${balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:1rem;">
+                  ${formatPKR(Math.abs(balance))} ${balance > 0 ? 'Due' : 'Advance'}
+                </div>
               </div>
-              <div class="data-item-sub" style="font-size:0.7rem;">Click for Ledger →</div>
+              ${deleteButtonHTML('deleteCustomer', c.id)}
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function openCustomerLedger(name) {
-      window.location.href = `customer-ledger.html?name=${encodeURIComponent(name)}`;
+    async function deleteCustomer(id) {
+      if (!confirmDelete('this customer')) return;
+      try {
+        await deleteRecord('customers', id);
+        alert('✅ Customer deleted');
+        loadCustomers();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>

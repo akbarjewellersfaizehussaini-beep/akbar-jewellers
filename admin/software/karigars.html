@@ -48,19 +48,13 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Gold Balance (gram) <span class="tooltip-icon" data-tooltip="Agar pehle se karigar ke paas sona hai">?</span></label>
+          <label class="form-label">Opening Gold Balance (gram)</label>
           <input type="number" id="kOpeningGold" class="form-input number-input" placeholder="0.000" step="0.001">
         </div>
         <div class="form-group">
-          <label class="form-label">Opening Cash Balance (Rs) <span class="tooltip-icon" data-tooltip="Agar pehle se paisa dena/lena hai">?</span></label>
+          <label class="form-label">Opening Cash Balance (Rs)</label>
           <input type="number" id="kOpeningCash" class="form-input number-input" placeholder="0">
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Karigar Photo</label>
-        <input type="file" id="kPhoto" class="form-input" accept="image/*" style="padding:10px;">
-        <div id="kPhotoPreview" style="margin-top:10px;"></div>
       </div>
 
       <button class="btn-primary" onclick="saveKarigar()" id="saveKarigarBtn" style="width:100%;">
@@ -68,7 +62,7 @@
       </button>
     </div>
 
-    <h2 class="section-title">📋 All Karigars (Click name for Ledger)</h2>
+    <h2 class="section-title">📋 All Karigars</h2>
     <div class="data-list" id="karigarsList">
       <div class="empty-state"><p>Loading...</p></div>
     </div>
@@ -77,23 +71,9 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    let uploadedPhotoUrl = '';
-
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'purchase'])) return;
       loadKarigars();
-    });
-
-    document.getElementById('kPhoto')?.addEventListener('change', async (e) => {
-      if (e.target.files[0]) {
-        const file = e.target.files[0];
-        document.getElementById('kPhotoPreview').innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:100px; border-radius:8px; border:2px solid var(--gold-primary);">`;
-        try {
-          uploadedPhotoUrl = await uploadImage(file);
-        } catch (err) {
-          alert('Photo upload failed: ' + err.message);
-        }
-      }
     });
 
     async function saveKarigar() {
@@ -103,8 +83,7 @@
       if (!name || !phone) { alert('❌ Name and phone required'); return; }
 
       const btn = document.getElementById('saveKarigarBtn');
-      btn.textContent = '⏳ Saving...'; 
-      btn.disabled = true;
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         await addRecord('karigars', {
@@ -112,46 +91,42 @@
           phone,
           cnic: document.getElementById('kCNIC').value.trim(),
           address: document.getElementById('kAddress').value.trim(),
-          photo: uploadedPhotoUrl,
           opening_gold: parseFloat(document.getElementById('kOpeningGold').value) || 0,
           opening_cash: parseFloat(document.getElementById('kOpeningCash').value) || 0
         });
         
-        alert('✅ Karigar saved successfully!');
+        alert('✅ Karigar saved!');
         clearForm();
         loadKarigars();
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = '💾 Save Karigar';
-        btn.disabled = false;
+        btn.textContent = '💾 Save Karigar'; btn.disabled = false;
       }
     }
 
     function clearForm() {
       ['kName','kPhone','kCNIC','kAddress','kOpeningGold','kOpeningCash'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('kPhoto').value = '';
-      document.getElementById('kPhotoPreview').innerHTML = '';
-      uploadedPhotoUrl = '';
     }
 
     async function loadKarigars() {
       const karigars = await getRecordsFast('karigars');
       const services = await getRecordsFast('services');
+      const payments = await getRecordsFast('payments');
       const container = document.getElementById('karigarsList');
       
       if (!karigars || karigars.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>No karigars yet. Add your first karigar above.</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><div class="icon">👷</div><p>No karigars yet</p></div>'; 
         return; 
       }
       
       container.innerHTML = karigars.map(k => {
         const kServices = services.filter(s => s.karigar_name === k.name);
+        const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
         
-        // Gold calculations
         let totalGoldGiven = Number(k.opening_gold) || 0;
         let totalGoldReturned = 0;
-        let totalCharges = 0;
+        let totalCharges = Number(k.opening_cash) || 0;
         let totalPaid = 0;
         
         kServices.forEach(s => {
@@ -160,44 +135,44 @@
           totalCharges += Number(s.charges) || 0;
           totalPaid += Number(s.paid) || 0;
         });
+        kPays.forEach(p => totalPaid += Number(p.amount) || 0);
         
         const goldBalance = totalGoldGiven - totalGoldReturned;
-        const cashBalance = totalCharges - totalPaid + (Number(k.opening_cash) || 0);
+        const cashBalance = totalCharges - totalPaid;
         
         return `
-          <div class="data-item" style="cursor:pointer;" onclick="openKarigarLedger('${k.name}')">
-            <div style="display:flex; gap:15px; align-items:center;">
-              ${k.photo ? `<img src="${k.photo}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--gold-primary); object-fit:cover;">` : '<div style="width:50px; height:50px; border-radius:50%; background:var(--charcoal); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">👤</div>'}
-              <div>
-                <div class="data-item-title">${k.name}</div>
-                <div class="data-item-sub">📞 ${k.phone} ${k.cnic ? '• CNIC: ' + k.cnic : ''}</div>
-                <div class="data-item-sub">📦 ${kServices.length} transactions</div>
-              </div>
+          <div class="data-item">
+            <div style="cursor:pointer; flex:1;" onclick="window.location.href='karigar-ledger.html?name=${encodeURIComponent(k.name)}'">
+              <div class="data-item-title">${k.name}</div>
+              <div class="data-item-sub">📞 ${k.phone} ${k.cnic ? '• CNIC: ' + k.cnic : ''}</div>
+              <div class="data-item-sub">📦 ${kServices.length} jobs</div>
             </div>
-            <div style="text-align:right;">
-              <div style="color: ${goldBalance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:0.95rem;">
-                🪙 ${formatWeight(goldBalance)} gold
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="text-align:right;">
+                <div style="color:${goldBalance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:0.9rem;">
+                  🪙 ${formatWeight(goldBalance)} gold
+                </div>
+                <div style="color:${cashBalance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:0.8rem;">
+                  💰 ${formatPKR(Math.abs(cashBalance))}
+                </div>
               </div>
-              <div style="color: ${cashBalance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:0.85rem; margin-top:3px;">
-                💰 ${formatPKR(Math.abs(cashBalance))} ${cashBalance > 0 ? 'due' : 'advance'}
-              </div>
-              <div class="data-item-sub" style="font-size:0.7rem;">Click for Ledger →</div>
+              ${deleteButtonHTML('deleteKarigar', k.id)}
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function openKarigarLedger(name) {
-      window.location.href = `karigar-ledger.html?name=${encodeURIComponent(name)}`;
+    async function deleteKarigar(id) {
+      if (!confirmDelete('this karigar')) return;
+      try {
+        await deleteRecord('karigars', id);
+        alert('✅ Karigar deleted');
+        loadKarigars();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gold Suppliers – Akbar Jewellers Software</title>
+  <title>Suppliers – Akbar Jewellers Software</title>
   <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
 </head>
@@ -19,7 +19,7 @@
 
   <div class="sw-content">
     <h1 class="page-title">Gold Supplier Management</h1>
-    <p class="page-subtitle">Sona kharida, paisa diya, baqi – complete ledger</p>
+    <p class="page-subtitle">Sona kharida, paisa diya, baqi</p>
 
     <div class="form-card">
       <h3 class="form-card-title">➕ Add New Gold Supplier</h3>
@@ -48,19 +48,13 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Gold Balance (gram) <span class="tooltip-icon" data-tooltip="Agar pehle se supplier ko sona dena hai">?</span></label>
-          <input type="number" id="sOpeningGold" class="form-input number-input" placeholder="0.000" step="0.001">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Opening Cash Balance (Rs) <span class="tooltip-icon" data-tooltip="Agar pehle se paisa dena/lena hai">?</span></label>
+          <label class="form-label">Opening Cash (Rs)</label>
           <input type="number" id="sOpeningCash" class="form-input number-input" placeholder="0">
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Supplier Photo</label>
-        <input type="file" id="sPhoto" class="form-input" accept="image/*" style="padding:10px;">
-        <div id="sPhotoPreview" style="margin-top:10px;"></div>
+        <div class="form-group">
+          <label class="form-label">Opening Gold (gram)</label>
+          <input type="number" id="sOpeningGold" class="form-input number-input" placeholder="0.000" step="0.001">
+        </div>
       </div>
 
       <button class="btn-primary" onclick="saveSupplier()" id="saveSupplierBtn" style="width:100%;">
@@ -68,7 +62,7 @@
       </button>
     </div>
 
-    <h2 class="section-title">📋 All Suppliers (Click name for Ledger)</h2>
+    <h2 class="section-title">📋 All Suppliers</h2>
     <div class="data-list" id="suppliersList">
       <div class="empty-state"><p>Loading...</p></div>
     </div>
@@ -77,23 +71,9 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    let uploadedPhotoUrl = '';
-
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'purchase'])) return;
       loadSuppliers();
-    });
-
-    document.getElementById('sPhoto')?.addEventListener('change', async (e) => {
-      if (e.target.files[0]) {
-        const file = e.target.files[0];
-        document.getElementById('sPhotoPreview').innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:100px; border-radius:8px; border:2px solid var(--gold-primary);">`;
-        try {
-          uploadedPhotoUrl = await uploadImage(file);
-        } catch (err) {
-          alert('Photo upload failed: ' + err.message);
-        }
-      }
     });
 
     async function saveSupplier() {
@@ -103,8 +83,7 @@
       if (!name || !phone) { alert('❌ Name and phone required'); return; }
 
       const btn = document.getElementById('saveSupplierBtn');
-      btn.textContent = '⏳ Saving...'; 
-      btn.disabled = true;
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         await addRecord('suppliers', {
@@ -112,90 +91,74 @@
           phone,
           cnic: document.getElementById('sCNIC').value.trim(),
           address: document.getElementById('sAddress').value.trim(),
-          photo: uploadedPhotoUrl,
-          opening_gold: parseFloat(document.getElementById('sOpeningGold').value) || 0,
-          opening_cash: parseFloat(document.getElementById('sOpeningCash').value) || 0
+          opening_cash: parseFloat(document.getElementById('sOpeningCash').value) || 0,
+          opening_gold: parseFloat(document.getElementById('sOpeningGold').value) || 0
         });
         
-        alert('✅ Supplier saved successfully!');
+        alert('✅ Supplier saved!');
         clearForm();
         loadSuppliers();
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = '💾 Save Supplier';
-        btn.disabled = false;
+        btn.textContent = '💾 Save Supplier'; btn.disabled = false;
       }
     }
 
     function clearForm() {
-      ['sName','sPhone','sCNIC','sAddress','sOpeningGold','sOpeningCash'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('sPhoto').value = '';
-      document.getElementById('sPhotoPreview').innerHTML = '';
-      uploadedPhotoUrl = '';
+      ['sName','sPhone','sCNIC','sAddress','sOpeningCash','sOpeningGold'].forEach(id => document.getElementById(id).value = '');
     }
 
     async function loadSuppliers() {
       const suppliers = await getRecordsFast('suppliers');
       const purchases = await getRecordsFast('purchases');
+      const payments = await getRecordsFast('payments');
       const container = document.getElementById('suppliersList');
       
       if (!suppliers || suppliers.length === 0) { 
-        container.innerHTML = '<div class="empty-state"><div class="icon">🏭</div><p>No suppliers yet. Add your first gold supplier above.</p></div>'; 
+        container.innerHTML = '<div class="empty-state"><div class="icon">🏭</div><p>No suppliers yet</p></div>'; 
         return; 
       }
       
       container.innerHTML = suppliers.map(s => {
-        const sPurchases = purchases.filter(p => p.supplier_name === s.name);
-        
-        let totalGoldPurchased = Number(s.opening_gold) || 0;
-        let totalGoldPaid = 0;
-        let totalCashBill = Number(s.opening_cash) || 0;
-        let totalCashPaid = 0;
-        
-        sPurchases.forEach(p => {
-          totalGoldPurchased += Number(p.gold_weight) || Number(p.weight) || 0;
-          totalCashBill += Number(p.total) || 0;
-          totalCashPaid += Number(p.paid) || 0;
-        });
-        
-        const goldBalance = totalGoldPurchased - totalGoldPaid;
-        const cashBalance = totalCashBill - totalCashPaid;
+        const sPurch = purchases.filter(p => p.supplier_name === s.name);
+        const sPays = payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+        let totalBill = Number(s.opening_cash) || 0;
+        let totalPaid = 0;
+        sPurch.forEach(p => totalBill += Number(p.total) || 0);
+        sPays.forEach(p => totalPaid += Number(p.amount) || 0);
+        const balance = totalBill - totalPaid;
         
         return `
-          <div class="data-item" style="cursor:pointer;" onclick="openSupplierLedger('${s.name}')">
-            <div style="display:flex; gap:15px; align-items:center;">
-              ${s.photo ? `<img src="${s.photo}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--gold-primary); object-fit:cover;">` : '<div style="width:50px; height:50px; border-radius:50%; background:var(--charcoal); display:flex; align-items:center; justify-content:center; font-size:1.5rem;">🏭</div>'}
-              <div>
-                <div class="data-item-title">${s.name}</div>
-                <div class="data-item-sub">📞 ${s.phone} ${s.cnic ? '• CNIC: ' + s.cnic : ''}</div>
-                <div class="data-item-sub">📦 ${sPurchases.length} purchases</div>
-              </div>
+          <div class="data-item">
+            <div style="cursor:pointer; flex:1;" onclick="window.location.href='supplier-ledger.html?name=${encodeURIComponent(s.name)}'">
+              <div class="data-item-title">${s.name}</div>
+              <div class="data-item-sub">📞 ${s.phone} ${s.cnic ? '• CNIC: ' + s.cnic : ''}</div>
+              <div class="data-item-sub">📦 ${sPurch.length} purchases • ${sPays.length} payments</div>
             </div>
-            <div style="text-align:right;">
-              <div style="color: ${cashBalance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:0.95rem;">
-                💰 ${formatPKR(Math.abs(cashBalance))} ${cashBalance > 0 ? 'payable' : 'advance'}
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="text-align:right;">
+                <div style="color:${balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700; font-size:1rem;">
+                  ${formatPKR(Math.abs(balance))} ${balance > 0 ? 'Payable' : 'Advance'}
+                </div>
               </div>
-              <div style="color: var(--text-muted); font-weight:600; font-size:0.85rem; margin-top:3px;">
-                🪙 ${formatWeight(goldBalance)} gold
-              </div>
-              <div class="data-item-sub" style="font-size:0.7rem;">Click for Ledger →</div>
+              ${deleteButtonHTML('deleteSupplier', s.id)}
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function openSupplierLedger(name) {
-      window.location.href = `supplier-ledger.html?name=${encodeURIComponent(name)}`;
+    async function deleteSupplier(id) {
+      if (!confirmDelete('this supplier')) return;
+      try {
+        await deleteRecord('suppliers', id);
+        alert('✅ Supplier deleted');
+        loadSuppliers();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
