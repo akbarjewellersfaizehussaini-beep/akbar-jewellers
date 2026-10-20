@@ -12,13 +12,14 @@
     .balance-advance { background: rgba(37,211,102,0.2); color: #86EFAC; }
     .balance-clear { background: rgba(184,184,184,0.2); color: #B8B8B8; }
     .person-card { background: var(--black-royal); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
-    .person-card:hover { border-color: var(--gold-primary); background: rgba(255,215,0,0.05); }
-    .person-card.selected { border-color: var(--gold-primary); background: rgba(255,215,0,0.1); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+    .person-card:hover { border-color: var(--gold-primary); background: rgba(255,215,0,0.05); transform: translateX(5px); }
+    .person-card.selected { border-color: var(--gold-primary); background: rgba(255,215,0,0.1); box-shadow: 0 0 20px rgba(255,215,0,0.2); transform: translateX(5px); }
     .add-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px; }
     .add-new-btn { background: linear-gradient(135deg, var(--charcoal), var(--black-soft)); border: 2px dashed rgba(255,215,0,0.4); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s; font-family: var(--font-body); }
     .add-new-btn:hover { border-color: var(--gold-primary); border-style: solid; background: rgba(255,215,0,0.05); transform: translateY(-2px); }
     .add-new-btn .icon { font-size: 1.5rem; margin-bottom: 5px; }
     .add-new-btn .label { color: var(--gold-primary); font-weight: 600; font-size: 0.85rem; }
+    .selected-info-box { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.03)); border: 2px solid var(--gold-primary); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -74,23 +75,30 @@
       </div>
     </div>
 
+    <!-- PAYMENT FORM (AUTO SHOW AFTER SELECT) -->
     <div id="paymentFormContainer" style="display: none;">
       <div class="form-card">
-        <h3 class="form-card-title">💰 Payment Entry – <span id="selectedPersonName" style="color: var(--gold-primary);"></span></h3>
+        <h3 class="form-card-title">💰 Payment Entry</h3>
         
-        <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; text-align: center;">
+        <!-- SELECTED PERSON INFO -->
+        <div class="selected-info-box">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; text-align: center;">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Selected Person</div>
+              <div style="color: var(--gold-primary); font-weight: 700; font-size: 1.1rem;" id="infoPersonName">—</div>
+              <div style="color: var(--text-muted); font-size: 0.75rem;" id="infoPersonPhone">—</div>
+            </div>
             <div>
               <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total Bill</div>
-              <div style="color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoTotalBill">Rs 0</div>
+              <div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoTotalBill">Rs 0</div>
             </div>
             <div>
               <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total Paid</div>
               <div style="color: #86EFAC; font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoTotalPaid">Rs 0</div>
             </div>
             <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Balance</div>
-              <div style="color: #FCA5A5; font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoBalance">Rs 0</div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Balance (Lena/Dena)</div>
+              <div style="color: #FCA5A5; font-weight: 700; font-family: var(--font-mono); font-size: 1.2rem;" id="infoBalance">Rs 0</div>
             </div>
           </div>
         </div>
@@ -121,7 +129,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Payment Date</label>
+            <label class="form-label">Payment Date <span class="required">*</span></label>
             <input type="date" id="pDate" class="form-input">
           </div>
         </div>
@@ -242,22 +250,9 @@
       };
       document.getElementById('addPersonTitle').textContent = titleMap[type] || 'Add New';
       
-      // Reset form
       ['newPersonName','newPersonPhone','newPersonCNIC','newPersonCity','newPersonAddress','newPersonOpeningCash','newPersonOpeningGold','newPersonPhoto'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('newPersonPhotoPreview').innerHTML = '';
       uploadedPersonPhoto = '';
-      
-      // Hide/show fields based on type
-      if (type === 'customer') {
-        document.getElementById('openingBalanceRow').style.display = 'grid';
-        document.getElementById('photoUploadGroup').style.display = 'block';
-      } else if (type === 'supplier') {
-        document.getElementById('openingBalanceRow').style.display = 'grid';
-        document.getElementById('photoUploadGroup').style.display = 'block';
-      } else if (type === 'karigar') {
-        document.getElementById('openingBalanceRow').style.display = 'grid';
-        document.getElementById('photoUploadGroup').style.display = 'block';
-      }
       
       document.getElementById('addPersonModal').classList.add('active');
     }
@@ -266,7 +261,6 @@
       document.getElementById('addPersonModal').classList.remove('active');
     }
 
-    // Photo preview
     document.getElementById('newPersonPhoto')?.addEventListener('change', async (e) => {
       if (e.target.files[0]) {
         const file = e.target.files[0];
@@ -317,11 +311,10 @@
         alert(`✅ ${type.charAt(0).toUpperCase() + type.slice(1)} saved successfully!`);
         closeAddPersonModal();
         
-        // Switch to that type and reload
         document.getElementById('pType').value = type;
+        currentType = type;
         await loadPersonsWithBalance();
         
-        // Auto-select the newly added person
         const idx = allPersons.findIndex(p => p.name === name);
         if (idx >= 0) {
           selectPerson(idx);
@@ -487,24 +480,30 @@
     function selectPerson(idx) {
       selectedPerson = allPersons[idx];
       
+      // Highlight selected card
       document.querySelectorAll('.person-card').forEach((c, i) => {
         c.classList.toggle('selected', i === idx);
       });
       
+      // Show payment form
       document.getElementById('paymentFormContainer').style.display = 'block';
-      document.getElementById('selectedPersonName').textContent = selectedPerson.name;
       
+      // AUTO-FILL person info
+      document.getElementById('infoPersonName').textContent = selectedPerson.name;
+      document.getElementById('infoPersonPhone').textContent = selectedPerson.phone || '—';
       document.getElementById('infoTotalBill').textContent = formatPKR(selectedPerson.totalBill);
       document.getElementById('infoTotalPaid').textContent = formatPKR(selectedPerson.totalPaid);
       document.getElementById('infoBalance').textContent = formatPKR(Math.abs(selectedPerson.balance));
       
+      // AUTO-FILL amount with balance
       const balanceInput = document.getElementById('pAmount');
       if (selectedPerson.balance > 0) {
         balanceInput.value = Math.round(selectedPerson.balance);
       } else {
-        balanceInput.value = '';
+        balanceInput.value = Math.abs(Math.round(selectedPerson.balance));
       }
       
+      // AUTO-SELECT payment type
       const payTypeSelect = document.getElementById('pPayType');
       if (selectedPerson.balance > 0) {
         payTypeSelect.value = 'due';
@@ -512,6 +511,7 @@
         payTypeSelect.value = 'advance';
       }
       
+      // Scroll to form
       document.getElementById('paymentFormContainer').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -519,8 +519,10 @@
       if (!selectedPerson) { alert('❌ Please select a person first'); return; }
       
       const amount = parseFloat(document.getElementById('pAmount').value) || 0;
+      const payDate = document.getElementById('pDate').value;
       
       if (amount <= 0) { alert('❌ Enter valid amount'); return; }
+      if (!payDate) { alert('❌ Please select payment date'); return; }
 
       const btn = document.getElementById('savePayBtn');
       btn.textContent = '⏳ Saving...'; btn.disabled = true;
@@ -535,7 +537,7 @@
           payment_type: document.getElementById('pPayType').value,
           payment_mode: document.getElementById('pMode').value,
           notes: document.getElementById('pNotes').value.trim(),
-          payment_date: document.getElementById('pDate').value
+          payment_date: payDate
         };
 
         const saved = await addRecord('payments', payment);
@@ -549,6 +551,7 @@
         
         showReceipt(saved);
         
+        // Reset form
         document.getElementById('pAmount').value = '';
         document.getElementById('pNotes').value = '';
         document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
