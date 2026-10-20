@@ -1,113 +1,412 @@
-// ===== AKBAR JEWELLERS – APP LOGIC =====
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products – Akbar Jewellers Software</title>
+  <link rel="icon" type="image/png" href="../../images/logo.png">
+  <link rel="stylesheet" href="style-software.css">
+  <style>
+    .product-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
+    .product-image-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid var(--gold-primary); }
+    .product-image-item img { width: 100%; height: 80px; object-fit: cover; }
+    .product-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+    .product-card-item { background: var(--black-soft); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; overflow: hidden; transition: all 0.3s; }
+    .product-card-item:hover { border-color: var(--gold-primary); box-shadow: 0 10px 30px rgba(255,215,0,0.2); transform: translateY(-4px); }
+    .product-card-img { width: 100%; height: 180px; object-fit: cover; background: var(--charcoal); }
+    .product-card-body { padding: 15px; }
+    .product-card-title { font-family: var(--font-heading); color: var(--gold-primary); font-size: 1.05rem; margin-bottom: 5px; }
+    .product-card-code { color: #93C5FD; font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 8px; }
+    .product-card-price { color: var(--gold-primary); font-weight: 700; font-size: 1.1rem; font-family: var(--font-mono); }
+    .product-card-cost { color: var(--text-muted); font-size: 0.75rem; }
+    .profit-tag { display: inline-block; background: rgba(37,211,102,0.2); color: #86EFAC; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 5px; }
+    .stock-tag { display: inline-block; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 5px; }
+    .stock-in { background: rgba(37,211,102,0.2); color: #86EFAC; }
+    .stock-out { background: rgba(220,38,38,0.2); color: #FCA5A5; }
+    .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
 
-function formatPKR(amount) { 
-  return 'Rs ' + Math.round(amount || 0).toLocaleString('en-PK'); 
-}
+  <div class="sw-header">
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Product & Inventory
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
 
-function formatDate(dateStr) { 
-  if (!dateStr) return '—'; 
-  return new Date(dateStr).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }); 
-}
+  <div class="sw-content">
+    <h1 class="page-title">Product Management</h1>
+    <p class="page-subtitle">Inventory with unique IDs, opening stock, and auto profit</p>
 
-function navigate(page) { window.location.href = page; }
+    <div class="form-card">
+      <h3 class="form-card-title" id="formTitle">➕ Add New Product</h3>
+      <input type="hidden" id="editProductId">
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Product Name <span class="required">*</span></label>
+          <input type="text" id="prName" class="form-input" placeholder="e.g., Gold Necklace Set">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category <span class="required">*</span></label>
+          <select id="prCategory" class="form-select" onchange="generateProductCode()">
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="diamond">Diamond</option>
+            <option value="artificial">Artificial</option>
+          </select>
+        </div>
+      </div>
 
-// ---------- AUTHENTICATION ----------
-function checkAuth(allowedRoles = []) {
-  const session = localStorage.getItem('akbar_user_session');
-  if (!session) { window.location.href = 'login.html'; return null; }
-  
-  const user = JSON.parse(session);
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    alert('❌ Access Denied! You do not have permission.');
-    window.location.href = 'index.html';
-    return null;
-  }
-  return user;
-}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Product ID (Auto)</label>
+          <input type="text" id="prCode" class="form-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700; font-family:var(--font-mono);">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subcategory</label>
+          <input type="text" id="prSubcategory" class="form-input" placeholder="e.g., Rings, Necklace">
+        </div>
+      </div>
 
-function logout() {
-  localStorage.removeItem('akbar_user_session');
-  window.location.href = 'login.html';
-}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Karat</label>
+          <select id="prKarat" class="form-select">
+            <option value="">N/A</option>
+            <option value="24K">24K</option>
+            <option value="22K">22K</option>
+            <option value="21K">21K</option>
+            <option value="18K">18K</option>
+            <option value="16K">16K</option>
+            <option value="14K">14K</option>
+            <option value="12K">12K</option>
+            <option value="10K">10K</option>
+            <option value="8K">8K</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weight (grams) <span class="required">*</span></label>
+          <input type="number" id="prWeight" class="form-input number-input" step="0.001" placeholder="0.000">
+        </div>
+      </div>
 
-function getCurrentUser() {
-  const s = localStorage.getItem('akbar_user_session');
-  return s ? JSON.parse(s) : null;
-}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Size</label>
+          <input type="text" id="prSize" class="form-input" placeholder="e.g., 16">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date</label>
+          <input type="date" id="prPurchaseDate" class="form-input">
+        </div>
+      </div>
 
-// ---------- CALCULATIONS ----------
-function calculateInvoice(weight, rate, making, polish, gstPct, discount) {
-  const metal = weight * rate;
-  const makingTotal = making + polish;
-  const subtotal = metal + makingTotal;
-  const gst = subtotal * (gstPct / 100);
-  const total = subtotal + gst - discount;
-  return { metal, makingTotal, subtotal, gst, total };
-}
+      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">💰 Pricing</h4>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Cost Price (Rs) <span class="required">*</span></label>
+          <input type="number" id="prCost" class="form-input number-input" placeholder="0" oninput="calcProfit()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sale Price (Rs) <span class="required">*</span></label>
+          <input type="number" id="prSale" class="form-input number-input" placeholder="0" oninput="calcProfit()">
+        </div>
+      </div>
 
-// ---------- WHATSAPP ----------
-function openWhatsApp(phone, message) {
-  if (!phone) { alert('Phone number missing'); return; }
-  let num = phone.toString().replace(/[^0-9]/g, '');
-  if (num.startsWith('0')) num = '92' + num.slice(1);
-  if (!num.startsWith('92') && num.length === 10) num = '92' + num;
-  window.open(`https://wa.me/${num}?text=${encodeURIComponent(message)}`, '_blank');
-}
+      <div class="form-group">
+        <label class="form-label">Profit (Auto)</label>
+        <input type="text" id="prProfit" class="form-input" readonly style="background:var(--charcoal); color:#86EFAC; font-weight:700; font-family:var(--font-mono);">
+      </div>
 
-// ---------- DATE FILTERS ----------
-function filterByDate(data, range) {
-  if (range === 'all') return data;
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
-  
-  const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
-  const weekStr = startOfWeek.toISOString().slice(0, 10);
-  
-  const thisMonth = new Date().toISOString().slice(0, 7);
-  const thisYear = new Date().getFullYear().toString();
+      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">📦 Inventory</h4>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Opening Stock <span class="tooltip-icon" data-tooltip="Agar pehle se stock hai to yahan daalein">?</span></label>
+          <input type="number" id="prOpeningStock" class="form-input number-input" value="0" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Stock (Auto)</label>
+          <input type="number" id="prCurrentStock" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary);" value="0">
+        </div>
+      </div>
 
-  return data.filter(item => {
-    const d = item.date || item.created_at;
-    if (!d) return false;
-    const ds = d.slice(0, 10);
-    
-    if (range === 'today') return ds === today;
-    if (range === 'week') return ds >= weekStr;
-    if (range === 'month') return d.startsWith(thisMonth);
-    if (range === 'year') return d.startsWith(thisYear);
-    return true;
-  });
-}
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Featured (Homepage)</label>
+          <select id="prFeatured" class="form-select">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+          </select>
+        </div>
+      </div>
 
-// ---------- PRINT INVOICE ----------
-function printElement(elementId) {
-  const content = document.getElementById(elementId).innerHTML;
-  const originalContent = document.body.innerHTML;
-  
-  document.body.innerHTML = `
-    <html>
-      <head>
-        <title>Print Invoice</title>
-        <style>
-          body { font-family: 'Poppins', sans-serif; padding: 20px; color: #000; background: #fff; }
-          .invoice-container { max-width: 800px; margin: 0 auto; border: 1px solid #ddd; padding: 30px; border-radius: 10px; }
-          .invoice-header { text-align: center; border-bottom: 2px solid #D4AF37; padding-bottom: 15px; margin-bottom: 20px; }
-          .invoice-header h1 { font-family: 'Playfair Display', serif; color: #D4AF37; margin: 0; font-size: 28px; }
-          .invoice-details { display: flex; justify-content: space-between; margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-          th { background: #FAF7F0; color: #D4AF37; }
-          .total-box { text-align: right; font-size: 20px; font-weight: bold; color: #D4AF37; margin-top: 20px; }
-          .footer { text-align: center; margin-top: 40px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
-        </style>
-      </head>
-      <body>
-        ${content}
-      </body>
-    </html>
-  `;
-  
-  window.print();
-  document.body.innerHTML = originalContent;
-  window.location.reload();
-}
+      <div class="form-group">
+        <label class="form-label">Product Images (Max 5) <span class="required">*</span></label>
+        <input type="file" id="prImages" class="form-input" accept="image/*" multiple style="padding:10px;" onchange="previewImages(this)">
+        <div id="prImagesPreview" class="product-image-grid"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="prDescription" class="form-input" rows="3" placeholder="Product description..."></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="saveProduct()" id="saveBtn" style="flex:1;">💾 Save Product</button>
+        <button class="btn-secondary" onclick="cancelEdit()" id="cancelBtn" style="flex:1; display:none;">❌ Cancel</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search..." style="flex:1; min-width:200px;" oninput="filterProducts()">
+      <select id="filterCategory" class="form-select" style="width:auto;" onchange="filterProducts()">
+        <option value="">All Categories</option>
+        <option value="gold">Gold</option>
+        <option value="silver">Silver</option>
+        <option value="diamond">Diamond</option>
+        <option value="artificial">Artificial</option>
+      </select>
+    </div>
+
+    <h2 class="section-title">📋 All Products (<span id="productCount">0</span>)</h2>
+    <div id="productsGrid" class="product-card-grid">
+      <div class="empty-state"><p>Loading...</p></div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let uploadedImages = [];
+    let allProducts = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      document.getElementById('prPurchaseDate').value = new Date().toISOString().slice(0, 10);
+      await generateProductCode();
+      loadProducts();
+    });
+
+    async function generateProductCode() {
+      const cat = document.getElementById('prCategory').value;
+      const catPrefix = cat.toUpperCase().slice(0, 3);
+      
+      try {
+        const products = await getRecordsFast('products', true);
+        const catCount = products.filter(p => p.category === cat).length;
+        const num = String(catCount + 1).padStart(3, '0');
+        document.getElementById('prCode').value = `AKBAR-${catPrefix}-${num}`;
+      } catch (e) {
+        document.getElementById('prCode').value = `AKBAR-${catPrefix}-001`;
+      }
+    }
+
+    function calcProfit() {
+      const cost = parseFloat(document.getElementById('prCost').value) || 0;
+      const sale = parseFloat(document.getElementById('prSale').value) || 0;
+      const profit = sale - cost;
+      const profitEl = document.getElementById('prProfit');
+      if (profit > 0) {
+        profitEl.value = '+ ' + formatPKR(profit) + ' (' + ((profit / cost) * 100).toFixed(1) + '%)';
+        profitEl.style.color = '#86EFAC';
+      } else if (profit < 0) {
+        profitEl.value = '- ' + formatPKR(Math.abs(profit));
+        profitEl.style.color = '#FCA5A5';
+      } else {
+        profitEl.value = 'Rs 0';
+        profitEl.style.color = 'var(--text-muted)';
+      }
+    }
+
+    function previewImages(input) {
+      const preview = document.getElementById('prImagesPreview');
+      preview.innerHTML = '';
+      Array.from(input.files).slice(0, 5).forEach(file => {
+        const url = URL.createObjectURL(file);
+        preview.innerHTML += `<div class="product-image-item"><img src="${url}"></div>`;
+      });
+    }
+
+    async function saveProduct() {
+      const name = document.getElementById('prName').value.trim();
+      const weight = parseFloat(document.getElementById('prWeight').value) || 0;
+      const cost = parseFloat(document.getElementById('prCost').value) || 0;
+      const sale = parseFloat(document.getElementById('prSale').value) || 0;
+      const openingStock = parseInt(document.getElementById('prOpeningStock').value) || 0;
+      const code = document.getElementById('prCode').value;
+      const images = document.getElementById('prImages').files;
+      const editId = document.getElementById('editProductId').value;
+      const isEdit = !!editId;
+      
+      if (!name) { alert('❌ Product name required'); return; }
+      if (weight <= 0) { alert('❌ Weight required'); return; }
+      if (cost <= 0) { alert('❌ Cost price required'); return; }
+      if (sale <= 0) { alert('❌ Sale price required'); return; }
+      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Upload at least 1 image'); return; }
+
+      const btn = document.getElementById('saveBtn');
+      btn.textContent = '⏳ Uploading...'; btn.disabled = true;
+
+      try {
+        const imageUrls = [...uploadedImages];
+        if (images.length > 0) {
+          for (const file of Array.from(images).slice(0, 5)) {
+            const url = await uploadImage(file);
+            imageUrls.push(url);
+          }
+        }
+
+        const productData = {
+          product_code: code,
+          name: name,
+          category: document.getElementById('prCategory').value,
+          subcategory: document.getElementById('prSubcategory').value.trim(),
+          karat: document.getElementById('prKarat').value,
+          weight: weight,
+          size: document.getElementById('prSize').value.trim(),
+          cost_price: cost,
+          sale_price: sale,
+          opening_stock: openingStock,
+          current_stock: openingStock,
+          featured: document.getElementById('prFeatured').value === 'true',
+          images: imageUrls.slice(0, 5),
+          description: document.getElementById('prDescription').value.trim(),
+          purchase_date: document.getElementById('prPurchaseDate').value,
+          is_active: true
+        };
+
+        if (isEdit) {
+          await updateRecord('products', editId, productData);
+          alert('✅ Product updated!');
+        } else {
+          await addRecord('products', productData);
+          alert('✅ Product saved!\n\nID: ' + code);
+        }
+
+        clearForm();
+        await generateProductCode();
+        loadProducts();
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
+      } finally {
+        btn.textContent = '💾 Save Product'; btn.disabled = false;
+      }
+    }
+
+    function clearForm() {
+      ['prName','prWeight','prCost','prSale','prSubcategory','prDescription','prSize','prProfit','editProductId'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('prImages').value = '';
+      document.getElementById('prImagesPreview').innerHTML = '';
+      document.getElementById('prOpeningStock').value = '0';
+      document.getElementById('prFeatured').value = 'false';
+      document.getElementById('prPurchaseDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('formTitle').textContent = '➕ Add New Product';
+      document.getElementById('cancelBtn').style.display = 'none';
+      uploadedImages = [];
+      generateProductCode();
+    }
+
+    function cancelEdit() { clearForm(); }
+
+    async function loadProducts() {
+      try {
+        allProducts = await getRecordsFast('products', true);
+        renderProducts(allProducts);
+      } catch (e) {
+        document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
+      }
+    }
+
+    function renderProducts(products) {
+      const container = document.getElementById('productsGrid');
+      document.getElementById('productCount').textContent = products.length;
+
+      if (!products || products.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products yet</p></div>';
+        return;
+      }
+
+      container.innerHTML = products.map(p => {
+        const img = p.images && p.images[0] ? p.images[0] : '../../images/placeholder.svg';
+        const profit = (p.sale_price || 0) - (p.cost_price || 0);
+        const stock = p.current_stock || 0;
+        
+        return `
+          <div class="product-card-item">
+            <img src="${img}" class="product-card-img" onerror="this.src='../../images/placeholder.svg'">
+            <div class="product-card-body">
+              <div class="product-card-title">${p.name}</div>
+              <div class="product-card-code">${p.product_code || 'N/A'}</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${p.weight || 0}g</div>
+              <div class="product-card-price">${formatPKR(p.sale_price)}</div>
+              <div class="product-card-cost">Cost: ${formatPKR(p.cost_price)}</div>
+              ${profit > 0 ? `<span class="profit-tag">📈 Profit: ${formatPKR(profit)}</span>` : profit < 0 ? `<span class="profit-tag" style="background:rgba(220,38,38,0.2); color:#FCA5A5;">📉 Loss: ${formatPKR(Math.abs(profit))}</span>` : ''}
+              <div><span class="stock-tag ${stock > 0 ? 'stock-in' : 'stock-out'}">${stock > 0 ? '✅ Stock: ' + stock : '❌ Out of Stock'}</span></div>
+              <div class="product-actions">
+                <button class="btn-secondary" style="flex:1; padding:8px; font-size:0.8rem;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Edit</button>
+                ${deleteButtonHTML('deleteProduct', p.id)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function editProduct(p) {
+      document.getElementById('formTitle').textContent = '✏️ Edit Product';
+      document.getElementById('editProductId').value = p.id;
+      document.getElementById('prName').value = p.name || '';
+      document.getElementById('prCategory').value = p.category || 'gold';
+      document.getElementById('prCode').value = p.product_code || '';
+      document.getElementById('prSubcategory').value = p.subcategory || '';
+      document.getElementById('prKarat').value = p.karat || '';
+      document.getElementById('prWeight').value = p.weight || '';
+      document.getElementById('prSize').value = p.size || '';
+      document.getElementById('prCost').value = p.cost_price || '';
+      document.getElementById('prSale').value = p.sale_price || '';
+      document.getElementById('prOpeningStock').value = p.opening_stock || 0;
+      document.getElementById('prCurrentStock').value = p.current_stock || 0;
+      document.getElementById('prFeatured').value = p.featured ? 'true' : 'false';
+      document.getElementById('prDescription').value = p.description || '';
+      document.getElementById('prPurchaseDate').value = p.purchase_date || new Date().toISOString().slice(0, 10);
+      uploadedImages = p.images || [];
+      document.getElementById('cancelBtn').style.display = 'block';
+      calcProfit();
+      document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function deleteProduct(id) {
+      if (!confirmDelete('this product')) return;
+      try {
+        await deleteRecord('products', id);
+        alert('✅ Product deleted');
+        loadProducts();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
+    }
+
+    function filterProducts() {
+      const search = document.getElementById('searchProducts').value.toLowerCase();
+      const category = document.getElementById('filterCategory').value;
+      
+      let filtered = allProducts;
+      if (search) {
+        filtered = filtered.filter(p => 
+          (p.name || '').toLowerCase().includes(search) || 
+          (p.product_code || '').toLowerCase().includes(search) ||
+          (p.category || '').toLowerCase().includes(search)
+        );
+      }
+      if (category) filtered = filtered.filter(p => p.category === category);
+      
+      renderProducts(filtered);
+    }
+  </script>
+</body>
+</html>

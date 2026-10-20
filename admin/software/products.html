@@ -23,7 +23,7 @@
     .stock-tag { display: inline-block; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 5px; }
     .stock-in { background: rgba(37,211,102,0.2); color: #86EFAC; }
     .stock-out { background: rgba(220,38,38,0.2); color: #FCA5A5; }
-    .product-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -126,7 +126,7 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Stock (Purana Stock) <span class="tooltip-icon" data-tooltip="Agar pehle se stock hai to yahan daalein">?</span></label>
+          <label class="form-label">Opening Stock <span class="tooltip-icon" data-tooltip="Agar pehle se stock hai to yahan daalein">?</span></label>
           <input type="number" id="prOpeningStock" class="form-input number-input" value="0" placeholder="0">
         </div>
         <div class="form-group">
@@ -157,17 +157,13 @@
       </div>
 
       <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="saveProduct()" id="saveBtn" style="flex:1;">
-          💾 Save Product
-        </button>
-        <button class="btn-secondary" onclick="cancelEdit()" id="cancelBtn" style="flex:1; display:none;">
-          ❌ Cancel
-        </button>
+        <button class="btn-primary" onclick="saveProduct()" id="saveBtn" style="flex:1;">💾 Save Product</button>
+        <button class="btn-secondary" onclick="cancelEdit()" id="cancelBtn" style="flex:1; display:none;">❌ Cancel</button>
       </div>
     </div>
 
     <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search by name, code, category..." style="flex:1; min-width:200px;" oninput="filterProducts()">
+      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search..." style="flex:1; min-width:200px;" oninput="filterProducts()">
       <select id="filterCategory" class="form-select" style="width:auto;" onchange="filterProducts()">
         <option value="">All Categories</option>
         <option value="gold">Gold</option>
@@ -251,16 +247,12 @@
       if (weight <= 0) { alert('❌ Weight required'); return; }
       if (cost <= 0) { alert('❌ Cost price required'); return; }
       if (sale <= 0) { alert('❌ Sale price required'); return; }
-      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { 
-        alert('❌ Please upload at least 1 image'); return; 
-      }
+      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Upload at least 1 image'); return; }
 
       const btn = document.getElementById('saveBtn');
-      btn.textContent = '⏳ Uploading...'; 
-      btn.disabled = true;
+      btn.textContent = '⏳ Uploading...'; btn.disabled = true;
 
       try {
-        // Upload new images if any
         const imageUrls = [...uploadedImages];
         if (images.length > 0) {
           for (const file of Array.from(images).slice(0, 5)) {
@@ -302,8 +294,7 @@
       } catch (error) {
         alert('❌ Error: ' + error.message);
       } finally {
-        btn.textContent = '💾 Save Product'; 
-        btn.disabled = false;
+        btn.textContent = '💾 Save Product'; btn.disabled = false;
       }
     }
 
@@ -320,17 +311,14 @@
       generateProductCode();
     }
 
-    function cancelEdit() {
-      clearForm();
-    }
+    function cancelEdit() { clearForm(); }
 
     async function loadProducts() {
-      const container = document.getElementById('productsGrid');
       try {
         allProducts = await getRecordsFast('products', true);
         renderProducts(allProducts);
       } catch (e) {
-        container.innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
+        document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
       }
     }
 
@@ -354,16 +342,14 @@
             <div class="product-card-body">
               <div class="product-card-title">${p.name}</div>
               <div class="product-card-code">${p.product_code || 'N/A'}</div>
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="color:var(--text-muted); font-size:0.75rem;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${p.weight || 0}g</span>
-              </div>
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${p.weight || 0}g</div>
               <div class="product-card-price">${formatPKR(p.sale_price)}</div>
               <div class="product-card-cost">Cost: ${formatPKR(p.cost_price)}</div>
               ${profit > 0 ? `<span class="profit-tag">📈 Profit: ${formatPKR(profit)}</span>` : profit < 0 ? `<span class="profit-tag" style="background:rgba(220,38,38,0.2); color:#FCA5A5;">📉 Loss: ${formatPKR(Math.abs(profit))}</span>` : ''}
               <div><span class="stock-tag ${stock > 0 ? 'stock-in' : 'stock-out'}">${stock > 0 ? '✅ Stock: ' + stock : '❌ Out of Stock'}</span></div>
               <div class="product-actions">
                 <button class="btn-secondary" style="flex:1; padding:8px; font-size:0.8rem;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Edit</button>
-                <button class="btn-danger" style="flex:1; padding:8px; font-size:0.8rem;" onclick="deleteProduct('${p.id}')">🗑️ Delete</button>
+                ${deleteButtonHTML('deleteProduct', p.id)}
               </div>
             </div>
           </div>
@@ -395,10 +381,10 @@
     }
 
     async function deleteProduct(id) {
-      if (!confirm('Delete this product?')) return;
+      if (!confirmDelete('this product')) return;
       try {
         await deleteRecord('products', id);
-        alert('✅ Deleted');
+        alert('✅ Product deleted');
         loadProducts();
       } catch (e) {
         alert('❌ ' + e.message);
@@ -410,7 +396,6 @@
       const category = document.getElementById('filterCategory').value;
       
       let filtered = allProducts;
-      
       if (search) {
         filtered = filtered.filter(p => 
           (p.name || '').toLowerCase().includes(search) || 
@@ -418,20 +403,10 @@
           (p.category || '').toLowerCase().includes(search)
         );
       }
-      
-      if (category) {
-        filtered = filtered.filter(p => p.category === category);
-      }
+      if (category) filtered = filtered.filter(p => p.category === category);
       
       renderProducts(filtered);
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
