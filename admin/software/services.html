@@ -1,146 +1,233 @@
-// ===== AKBAR JEWELLERS – SERVICE WORKER =====
-// Offline-first caching for PWA
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Karigar Services – Akbar Jewellers Software</title>
+  <link rel="icon" type="image/png" href="../../images/logo.png">
+  <link rel="stylesheet" href="style-software.css">
+</head>
+<body>
 
-const CACHE_NAME = 'akbar-software-v2';
-const CACHE_VERSION = '2.0.0';
+  <div class="sw-header">
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Karigar Services
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
 
-// Local files (same origin) — inhein cache karna zaroori hai
-const LOCAL_FILES = [
-  './',
-  './index.html',
-  './login.html',
-  './sales.html',
-  './purchase.html',
-  './payments.html',
-  './expenses.html',
-  './customers.html',
-  './customer-ledger.html',
-  './karigars.html',
-  './karigar-ledger.html',
-  './suppliers.html',
-  './supplier-ledger.html',
-  './products.html',
-  './bank-accounts.html',
-  './ledger.html',
-  './reports.html',
-  './settings.html',
-  './offline.html',
-  './db.js',
-  './app.js',
-  './style-software.css',
-  './manifest.json'
-];
+  <div class="sw-content">
+    <h1 class="page-title">New Job Entry</h1>
+    <p class="page-subtitle">Karigar ko sona diya, wapas aaya, charges</p>
 
-// External resources — inhein alag se handle karenge
-const EXTERNAL_FILES = [
-  'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&family=JetBrains+Mono:wght@400;600;700&display=swap',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'
-];
-
-// Install — cache all files
-self.addEventListener('install', (event) => {
-  console.log('📦 Service Worker: Installing...');
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      console.log('✅ Caching local files');
+    <div class="form-card">
+      <h3 class="form-card-title">➕ New Job Entry</h3>
       
-      // Cache local files (normal mode — cacheable)
-      try {
-        await cache.addAll(LOCAL_FILES);
-        console.log('✅ Local files cached');
-      } catch (err) {
-        console.log('⚠️ Some local files failed:', err);
-      }
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Select Karigar <span class="required">*</span></label>
+          <select id="jKarigar" class="form-select">
+            <option value="">-- Select --</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Job Date</label><input type="date" id="jDate" class="form-input"></div>
+      </div>
       
-      // Cache external files (may fail if offline — that's OK)
-      for (const url of EXTERNAL_FILES) {
-        try {
-          await cache.add(new Request(url, { mode: 'cors' }));
-        } catch (err) {
-          console.log('⚠️ External file failed (will retry on fetch):', url);
-        }
-      }
-    })
-  );
-  self.skipWaiting();
-});
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Job Description <span class="required">*</span></label><input type="text" id="jItem" class="form-input" placeholder="e.g., Ring Polish"></div>
+        <div class="form-group">
+          <label class="form-label">Job Type</label>
+          <select id="jType" class="form-select">
+            <option value="making">Jewelry Making</option>
+            <option value="repair">Repair</option>
+            <option value="polish">Polish</option>
+            <option value="setting">Stone Setting</option>
+          </select>
+        </div>
+      </div>
 
-// Activate — clean old caches
-self.addEventListener('activate', (event) => {
-  console.log('✅ Service Worker: Activated');
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            console.log('🗑️ Deleting old cache:', name);
-            return caches.delete(name);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
-});
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Gold Given (weight)</label>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+            <input type="number" id="jGoldGiven" class="form-input number-input" step="0.001" placeholder="0.000">
+            <select id="jGoldGivenUnit" class="form-select">
+              <option value="gram">Gram</option>
+              <option value="tola">Tola</option>
+              <option value="masha">Masha</option>
+              <option value="ratti">Ratti</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gold Given Karat</label>
+          <select id="jGoldGivenKarat" class="form-select">
+            <option value="24K">24K</option>
+            <option value="22K">22K</option>
+            <option value="21K">21K</option>
+            <option value="18K">18K</option>
+          </select>
+        </div>
+      </div>
 
-// Fetch — serve from cache first, then network
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
-  
-  // Skip Supabase API calls (always go to network)
-  if (event.request.url.includes('supabase.co')) return;
-  
-  // Skip Cloudinary uploads
-  if (event.request.url.includes('cloudinary.com')) return;
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Gold Returned (weight)</label>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+            <input type="number" id="jGoldReturned" class="form-input number-input" step="0.001" placeholder="0.000">
+            <select id="jGoldReturnedUnit" class="form-select">
+              <option value="gram">Gram</option>
+              <option value="tola">Tola</option>
+              <option value="masha">Masha</option>
+              <option value="ratti">Ratti</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gold Returned Karat</label>
+          <select id="jGoldReturnedKarat" class="form-select">
+            <option value="24K">24K</option>
+            <option value="22K">22K</option>
+            <option value="21K">21K</option>
+            <option value="18K">18K</option>
+          </select>
+        </div>
+      </div>
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      // If found in cache, return it (stale-while-revalidate)
-      if (cachedResponse) {
-        // Fetch fresh copy in background
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200 && networkResponse.type !== 'opaque') {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse.clone());
-            });
-          }
-        }).catch(() => {});
-        
-        return cachedResponse;
-      }
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Charges (Rs) <span class="required">*</span></label><input type="number" id="jCharges" class="form-input number-input" placeholder="0" oninput="autoCalcJob()"></div>
+        <div class="form-group"><label class="form-label">Paid (Rs)</label><input type="number" id="jPaid" class="form-input number-input" placeholder="0" oninput="autoCalcJob()"></div>
+      </div>
       
-      // Not in cache — fetch from network
-      return fetch(event.request).then((networkResponse) => {
-        // Don't cache non-successful or opaque responses
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === 'opaque') {
-          return networkResponse;
-        }
-        
-        // Cache successful responses
-        const responseClone = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        });
-        
-        return networkResponse;
-      }).catch(() => {
-        // Network failed and not in cache
-        if (event.request.mode === 'navigate') {
-          return caches.match('./offline.html') || caches.match('./index.html');
-        }
-        return new Response('Offline – Please check your internet connection', {
-          status: 503,
-          statusText: 'Service Unavailable'
-        });
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Balance (Rs)</label><input type="number" id="jBalance" class="form-input number-input" readonly style="background:var(--charcoal); color:#FCD34D; font-weight:700;"></div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="jStatus" class="form-select">
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="delivered">Delivered</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="saveJob()" id="saveJobBtn" style="width:100%;">💾 Save Job</button>
+    </div>
+
+    <h2 class="section-title">📋 Recent Jobs</h2>
+    <div class="data-list" id="jobsList"></div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'purchase'])) return;
+      document.getElementById('jDate').value = new Date().toISOString().slice(0,10);
+      await loadKarigarsDropdown();
+      loadJobs();
+    });
+
+    async function loadKarigarsDropdown() {
+      const karigars = await getRecordsFast('karigars');
+      const select = document.getElementById('jKarigar');
+      select.innerHTML = '<option value="">-- Select --</option>';
+      karigars.forEach(k => {
+        select.innerHTML += `<option value="${k.name}|${k.phone || ''}">${k.name}</option>`;
       });
-    })
-  );
-});
+    }
 
-// Background sync
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-data') {
-    console.log('🔄 Background sync triggered');
-  }
-});
+    function autoCalcJob() {
+      const charges = parseFloat(document.getElementById('jCharges').value) || 0;
+      const paid = parseFloat(document.getElementById('jPaid').value) || 0;
+      document.getElementById('jBalance').value = Math.max(0, charges - paid);
+    }
+
+    async function saveJob() {
+      const karigarVal = document.getElementById('jKarigar').value;
+      const item = document.getElementById('jItem').value.trim();
+      const charges = parseFloat(document.getElementById('jCharges').value) || 0;
+      
+      if (!karigarVal || !item || charges <= 0) { alert('❌ Fill all required fields'); return; }
+      const [karigarName, karigarPhone] = karigarVal.split('|');
+
+      const btn = document.getElementById('saveJobBtn');
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
+
+      try {
+        const givenVal = parseFloat(document.getElementById('jGoldGiven').value) || 0;
+        const givenUnit = document.getElementById('jGoldGivenUnit').value;
+        const returnedVal = parseFloat(document.getElementById('jGoldReturned').value) || 0;
+        const returnedUnit = document.getElementById('jGoldReturnedUnit').value;
+        
+        const givenGrams = givenUnit === 'tola' ? givenVal * 11.664 : givenUnit === 'masha' ? givenVal * 0.972 : givenUnit === 'ratti' ? givenVal * 0.1215 : givenVal;
+        const returnedGrams = returnedUnit === 'tola' ? returnedVal * 11.664 : returnedUnit === 'masha' ? returnedVal * 0.972 : returnedUnit === 'ratti' ? returnedVal * 0.1215 : returnedVal;
+
+        await addRecord('services', {
+          karigar_name: karigarName,
+          karigar_phone: karigarPhone,
+          item: item,
+          type: document.getElementById('jType').value,
+          gold_given_weight: givenGrams,
+          gold_given_karat: document.getElementById('jGoldGivenKarat').value,
+          gold_returned_weight: returnedGrams,
+          gold_returned_karat: document.getElementById('jGoldReturnedKarat').value,
+          charges: charges,
+          paid: parseFloat(document.getElementById('jPaid').value) || 0,
+          balance: parseFloat(document.getElementById('jBalance').value) || 0,
+          status: document.getElementById('jStatus').value,
+          service_date: document.getElementById('jDate').value || new Date().toISOString().slice(0,10)
+        });
+        
+        alert('✅ Job saved!');
+        clearForm(); loadJobs();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      } finally {
+        btn.textContent = '💾 Save Job'; btn.disabled = false;
+      }
+    }
+
+    function clearForm() {
+      ['jItem','jGoldGiven','jGoldReturned','jCharges','jPaid','jBalance'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('jKarigar').value = '';
+    }
+
+    async function loadJobs() {
+      const services = await getRecordsFast('services');
+      const container = document.getElementById('jobsList');
+      if (services.length === 0) { container.innerHTML = '<div class="empty-state"><p>No jobs yet</p></div>'; return; }
+      
+      container.innerHTML = services.slice(0, 20).map(s => `
+        <div class="data-item">
+          <div style="flex:1;">
+            <div class="data-item-title">${s.item} <span style="font-size:0.7rem; color:#888;">(${s.type})</span></div>
+            <div class="data-item-sub">${s.karigar_name} • ${formatDate(s.service_date || s.created_at)}</div>
+            ${s.gold_given_weight > 0 ? `<div class="data-item-sub" style="color:#FCD34D;">🪙 Given: ${formatWeight(s.gold_given_weight)} ${s.gold_given_karat || ''}</div>` : ''}
+            ${s.gold_returned_weight > 0 ? `<div class="data-item-sub" style="color:#86EFAC;">🪙 Returned: ${formatWeight(s.gold_returned_weight)} ${s.gold_returned_karat || ''}</div>` : ''}
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="text-align:right;">
+              <div class="data-item-value">${formatPKR(s.charges)}</div>
+              ${s.balance > 0 ? `<div class="data-item-sub" style="color:#FCD34D;">Bal: ${formatPKR(s.balance)}</div>` : '<div class="data-item-sub" style="color:#86EFAC;">Paid</div>'}
+            </div>
+            ${deleteButtonHTML('deleteJob', s.id)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function deleteJob(id) {
+      if (!confirmDelete('this job entry')) return;
+      try {
+        await deleteRecord('services', id);
+        alert('✅ Job deleted');
+        loadJobs();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
+    }
+  </script>
+</body>
+</html>

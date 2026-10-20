@@ -4,31 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Khata / Ledger – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
   <style>
-    .ledger-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .ledger-card { background: var(--black-soft); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
     .ledger-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .ledger-box { background: #0A0A0A; border-radius: 10px; padding: 15px; text-align: center; border: 1px solid rgba(255,215,0,0.1); }
-    .ledger-box .label { color: #B8B8B8; font-size: 0.75rem; text-transform: uppercase; }
-    .ledger-box .value { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-top: 5px; }
+    .ledger-box { background: var(--black-royal); border-radius: 10px; padding: 15px; text-align: center; border: 1px solid rgba(255,215,0,0.1); }
+    .ledger-box .label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; }
+    .ledger-box .value { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; margin-top: 5px; }
     .txn-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     .txn-table th, .txn-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,215,0,0.1); font-size: 0.9rem; }
-    .txn-table th { color: #FFD700; font-size: 0.8rem; text-transform: uppercase; }
+    .txn-table th { color: var(--gold-primary); font-size: 0.8rem; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Khata / Ledger</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Khata / Ledger
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Khata / Ledger</h1>
-    <p class="page-subtitle">View complete account statement of any person.</p>
+    <p class="page-subtitle">View complete account statement</p>
 
     <div class="ledger-card">
       <div class="form-row">
@@ -48,8 +49,9 @@
         </div>
       </div>
       <div style="display: flex; gap: 10px; margin-top: 10px;">
-        <button class="btn-primary" onclick="printElement('printableLedger')" style="flex: 1;">Print Ledger</button>
-        <button class="btn-secondary" onclick="sendLedgerWhatsApp()" style="flex: 1; background: #25D366; color: white; border: none;">WhatsApp</button>
+        <button class="btn-primary" onclick="printElement('printableLedger')" style="flex: 1;">🖨 Print</button>
+        <button class="btn-success" onclick="sendLedgerWhatsApp()" style="flex: 1;">📱 WhatsApp</button>
+        <button class="btn-secondary" onclick="sendLedgerEmail()" style="flex: 1; background:#3B82F6; color:white; border:none;">📧 Email</button>
       </div>
     </div>
 
@@ -101,7 +103,7 @@
       const name = document.getElementById('lPerson').value;
       if (!name) { document.getElementById('ledgerDisplay').innerHTML = ''; return; }
 
-      document.getElementById('ledgerDisplay').innerHTML = '<p style="text-align:center; padding:30px; color:#FFD700;">Loading...</p>';
+      document.getElementById('ledgerDisplay').innerHTML = '<p style="text-align:center; padding:30px; color:var(--gold-primary);">Loading...</p>';
 
       const shop = await getShopSettings();
       let transactions = [];
@@ -161,12 +163,12 @@
 
       document.getElementById('ledgerDisplay').innerHTML = `
         <div class="ledger-card" id="printableLedger">
-          <div style="text-align:center; border-bottom:2px solid #FFD700; padding-bottom:15px; margin-bottom:20px;">
-            <h1 style="font-family:'Playfair Display',serif; color:#FFD700; margin:0; font-size:1.5rem;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:1rem; color:#FFD700; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
-            <p style="margin:5px 0; font-size:0.8rem; color:#B8B8B8;">${shop.address}</p>
-            <h2 style="margin:15px 0 5px; color:#FFD700; font-family:'Playfair Display',serif;">${name} - ${type.toUpperCase()} LEDGER</h2>
-            <p style="margin:0; font-size:0.75rem; color:#B8B8B8;">Generated: ${formatDate(new Date())}</p>
+          <div style="text-align:center; border-bottom:2px solid var(--gold-primary); padding-bottom:15px; margin-bottom:20px;">
+            <h1 style="font-family:var(--font-heading); color:var(--gold-primary); margin:0; font-size:1.5rem;">${shop.name}</h1>
+            <p style="margin:5px 0; font-size:1rem; color:var(--gold-primary); font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+            <p style="margin:5px 0; font-size:0.8rem; color:var(--text-muted);">${shop.address}</p>
+            <h2 style="margin:15px 0 5px; color:var(--gold-primary); font-family:var(--font-heading);">${name} - ${type.toUpperCase()} LEDGER</h2>
+            <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">Generated: ${formatDate(new Date())}</p>
           </div>
 
           <div class="ledger-summary">
@@ -179,7 +181,7 @@
             <table class="txn-table">
               <thead><tr><th>Date</th><th>Description</th><th>Bill (Dr)</th><th>Paid (Cr)</th><th>Balance</th></tr></thead>
               <tbody>
-                ${transactions.length === 0 ? '<tr><td colspan="5" style="text-align:center; color:#B8B8B8; padding:20px;">No transactions found</td></tr>' : 
+                ${transactions.length === 0 ? '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">No transactions found</td></tr>' : 
                   transactions.map(t => `
                     <tr>
                       <td>${formatDate(t.date)}</td>
@@ -193,8 +195,8 @@
             </table>
           </div>
 
-          <div style="text-align:right; margin-top:20px; padding-top:15px; border-top:2px solid #FFD700;">
-            <p style="font-size:1.2rem; color:#FFD700; font-family:'Playfair Display',serif; font-weight:bold;">
+          <div style="text-align:right; margin-top:20px; padding-top:15px; border-top:2px solid var(--gold-primary);">
+            <p style="font-size:1.2rem; color:var(--gold-primary); font-family:var(--font-heading); font-weight:bold;">
               Final Balance: ${formatPKR(Math.abs(balance))} ${balance > 0 ? (type === 'customer' ? '(Due from Customer)' : '(Payable by Shop)') : (balance < 0 ? '(Advance)' : '(Clear)')}
             </p>
           </div>
@@ -222,13 +224,20 @@
       const phone = prompt('Enter WhatsApp number to send ledger:', '');
       if (phone) openWhatsApp(phone, msg);
     }
+
+    function sendLedgerEmail() {
+      if (!ledgerData) { alert('Please select a person first'); return; }
+      
+      const email = prompt('Enter email address:', '');
+      if (!email) return;
+      
+      let body = `${ledgerData.name} - ${ledgerData.type.toUpperCase()} LEDGER\n\n`;
+      body += `Total Bill: ${formatPKR(ledgerData.totalBill)}\n`;
+      body += `Total Paid: ${formatPKR(ledgerData.totalPaid)}\n`;
+      body += `Final Balance: ${formatPKR(Math.abs(ledgerData.balance))}\n`;
+      
+      sendEmail(email, `${ledgerData.name} - Ledger`, body);
+    }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>

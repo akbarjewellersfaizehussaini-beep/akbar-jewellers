@@ -4,31 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Expenses – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
 </head>
 <body>
+
   <div class="sw-header">
-    <div class="sw-logo">Expenses</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Expenses
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Expense Management</h1>
     
     <div class="stats-grid">
-      <div class="stat-card gold"><div class="stat-label">Total Expenses</div><div class="stat-value" id="totalExpenses" style="font-family:'Playfair Display',serif;">Rs 0</div></div>
-      <div class="stat-card silver"><div class="stat-label">This Month</div><div class="stat-value" id="monthExpenses" style="font-family:'Playfair Display',serif;">Rs 0</div></div>
-      <div class="stat-card diamond"><div class="stat-label">Total Entries</div><div class="stat-value" id="totalCount" style="font-family:'Playfair Display',serif;">0</div></div>
+      <div class="stat-card gold"><div class="stat-label">Total Expenses</div><div class="stat-value" id="totalExpenses">Rs 0</div></div>
+      <div class="stat-card silver"><div class="stat-label">This Month</div><div class="stat-value" id="monthExpenses">Rs 0</div></div>
+      <div class="stat-card diamond"><div class="stat-label">Total Entries</div><div class="stat-value" id="totalCount">0</div></div>
     </div>
 
     <div class="form-card">
-      <h3 class="form-card-title">Add Expense</h3>
+      <h3 class="form-card-title">➕ Add Expense</h3>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Category *</label>
+          <label class="form-label">Category <span class="required">*</span></label>
           <select id="eCategory" class="form-select">
             <option value="rent">Shop Rent</option>
             <option value="electricity">Electricity Bill</option>
@@ -42,7 +44,7 @@
             <option value="other">Other</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Amount (Rs) *</label><input type="number" id="eAmount" class="form-input" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Amount (Rs) <span class="required">*</span></label><input type="number" id="eAmount" class="form-input number-input" placeholder="0"></div>
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Paid To</label><input type="text" id="ePaidTo" class="form-input" placeholder="Person / Business name"></div>
@@ -59,10 +61,10 @@
         <div class="form-group"><label class="form-label">Expense Date</label><input type="date" id="eDate" class="form-input"></div>
         <div class="form-group"><label class="form-label">Notes</label><input type="text" id="eNotes" class="form-input" placeholder="Optional"></div>
       </div>
-      <button class="btn-primary" onclick="saveExpense()" style="width:100%;">Save Expense</button>
+      <button class="btn-primary" onclick="saveExpense()" id="saveExpBtn" style="width:100%;">💾 Save Expense</button>
     </div>
 
-    <h2 class="section-title">Recent Expenses</h2>
+    <h2 class="section-title">📋 Recent Expenses</h2>
     <div class="data-list" id="expensesList"></div>
   </div>
 
@@ -79,8 +81,8 @@
       const amount = parseFloat(document.getElementById('eAmount').value) || 0;
       if (amount <= 0) { alert('❌ Enter valid amount'); return; }
 
-      const btn = event.target;
-      btn.textContent = 'Saving...'; btn.disabled = true;
+      const btn = document.getElementById('saveExpBtn');
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         await addRecord('expenses', {
@@ -97,7 +99,7 @@
       } catch (e) {
         alert('❌ ' + e.message);
       } finally {
-        btn.textContent = 'Save Expense'; btn.disabled = false;
+        btn.textContent = '💾 Save Expense'; btn.disabled = false;
       }
     }
 
@@ -122,21 +124,28 @@
       
       container.innerHTML = expenses.slice(0, 30).map(e => `
         <div class="data-item">
-          <div>
+          <div style="flex:1;">
             <div class="data-item-title">${(e.category||'').toUpperCase()}</div>
             <div class="data-item-sub">${e.paid_to ? '👤 ' + e.paid_to + ' • ' : ''}${e.payment_mode} • ${formatDate(e.expense_date || e.created_at)}</div>
           </div>
-          <div class="data-item-value" style="color:#FCA5A5;">- ${formatPKR(e.amount)}</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="data-item-value" style="color:#FCA5A5;">- ${formatPKR(e.amount)}</div>
+            ${deleteButtonHTML('deleteExpense', e.id)}
+          </div>
         </div>
       `).join('');
     }
+
+    async function deleteExpense(id) {
+      if (!confirmDelete('this expense')) return;
+      try {
+        await deleteRecord('expenses', id);
+        alert('✅ Expense deleted');
+        loadExpenses();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
+    }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>

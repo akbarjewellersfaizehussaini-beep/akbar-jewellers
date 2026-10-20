@@ -13,13 +13,7 @@
     .account-card.bank::before { background: linear-gradient(90deg, #3B82F6, #1E3A8A); }
     .account-card.easypaisa::before { background: linear-gradient(90deg, #25D366, #128C7E); }
     .account-card.jazzcash::before { background: linear-gradient(90deg, #DC2626, #991B1B); }
-    .account-type-badge { display: inline-block; padding: 4px 12px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-    .account-type-badge.bank { background: rgba(59,130,246,0.2); color: #93C5FD; }
-    .account-type-badge.easypaisa { background: rgba(37,211,102,0.2); color: #86EFAC; }
-    .account-type-badge.jazzcash { background: rgba(220,38,38,0.2); color: #FCA5A5; }
     .account-balance { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: var(--gold-primary); }
-    .account-actions { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-    .account-actions .btn-small { padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; border: 1px solid; font-family: var(--font-body); }
     .total-balance-card { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); border: 2px solid var(--gold-primary); border-radius: 20px; padding: 30px; text-align: center; margin-bottom: 30px; }
     .total-balance-value { font-family: var(--font-heading); font-size: 3rem; color: var(--gold-primary); font-weight: 700; text-shadow: 0 0 30px rgba(255,215,0,0.3); }
   </style>
@@ -59,7 +53,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Account Name <span class="required">*</span></label>
-          <input type="text" id="accName" class="form-input" placeholder="e.g., Meezan Bank / My Easypaisa">
+          <input type="text" id="accName" class="form-input" placeholder="e.g., Meezan Bank">
         </div>
       </div>
 
@@ -97,7 +91,6 @@
     </div>
   </div>
 
-  <!-- Transaction Modal -->
   <div id="txnModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
       <h2 class="modal-title" id="txnModalTitle">💰 Add Transaction</h2>
@@ -118,7 +111,7 @@
       
       <div class="form-group">
         <label class="form-label">Description</label>
-        <input type="text" id="txnDesc" class="form-input" placeholder="e.g., Customer payment / Shop expense">
+        <input type="text" id="txnDesc" class="form-input" placeholder="e.g., Customer payment">
       </div>
       
       <div class="form-group">
@@ -133,7 +126,6 @@
     </div>
   </div>
 
-  <!-- History Modal -->
   <div id="historyModal" class="modal">
     <div class="modal-content" style="max-width: 700px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
@@ -196,8 +188,7 @@
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = '💾 Save Account';
-        btn.disabled = false;
+        btn.textContent = '💾 Save Account'; btn.disabled = false;
       }
     }
 
@@ -207,9 +198,7 @@
       document.getElementById('cancelBtn').style.display = 'none';
     }
 
-    function cancelEdit() {
-      clearForm();
-    }
+    function cancelEdit() { clearForm(); }
 
     async function loadAccounts() {
       const accounts = await getRecordsFast('bank_accounts', true);
@@ -225,17 +214,14 @@
         return;
       }
 
-      // Calculate balances with transactions
       let totalBalance = 0;
       const accountsWithBalance = accounts.map(acc => {
         let balance = Number(acc.opening_balance) || 0;
         const accTxns = allTransactions.filter(t => t.account_id === acc.id);
-        
         accTxns.forEach(t => {
           if (t.transaction_type === 'deposit') balance += Number(t.amount) || 0;
           else if (t.transaction_type === 'withdraw') balance -= Number(t.amount) || 0;
         });
-        
         totalBalance += balance;
         return { ...acc, calculated_balance: balance, txn_count: accTxns.length };
       });
@@ -249,7 +235,7 @@
           <div class="account-card ${acc.account_type}">
             <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
               <div style="flex: 1; min-width: 200px;">
-                <span class="account-type-badge ${acc.account_type}">${typeLabel}</span>
+                <span style="display:inline-block; padding:4px 12px; border-radius:50px; font-size:0.7rem; font-weight:700; text-transform:uppercase; background:rgba(255,215,0,0.2); color:var(--gold-primary);">${typeLabel}</span>
                 <h3 style="font-family: var(--font-heading); color: var(--gold-primary); font-size: 1.2rem; margin: 10px 0 5px;">${acc.account_name}</h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 3px;">👤 ${acc.account_title}</p>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 3px; font-family: var(--font-mono);">💳 ${acc.account_number}</p>
@@ -261,11 +247,11 @@
                 <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 5px;">${acc.txn_count} transactions</div>
               </div>
             </div>
-            <div class="account-actions">
-              <button class="btn-small" style="background: rgba(37,211,102,0.2); color: #86EFAC; border-color: var(--success);" onclick="openTxnModal('${acc.id}', '${acc.account_name}')">💰 Add Transaction</button>
-              <button class="btn-small" style="background: rgba(59,130,246,0.2); color: #93C5FD; border-color: var(--info);" onclick="viewHistory('${acc.id}', '${acc.account_name}')">📒 History</button>
-              <button class="btn-small" style="background: rgba(255,215,0,0.2); color: var(--gold-primary); border-color: var(--gold-primary);" onclick='editAccount(${JSON.stringify(acc).replace(/'/g, "&#39;")})'>✏️ Edit</button>
-              <button class="btn-small" style="background: rgba(220,38,38,0.2); color: #FCA5A5; border-color: var(--danger);" onclick="deleteAccount('${acc.id}')">🗑️ Delete</button>
+            <div style="display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap;">
+              <button style="background:rgba(37,211,102,0.2); color:#86EFAC; border:1px solid var(--success); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer;" onclick="openTxnModal('${acc.id}', '${acc.account_name}')">💰 Add Transaction</button>
+              <button style="background:rgba(59,130,246,0.2); color:#93C5FD; border:1px solid var(--info); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer;" onclick="viewHistory('${acc.id}', '${acc.account_name}')">📒 History</button>
+              <button style="background:rgba(255,215,0,0.2); color:var(--gold-primary); border:1px solid var(--gold-primary); padding:6px 12px; border-radius:6px; font-size:0.75rem; cursor:pointer;" onclick='editAccount(${JSON.stringify(acc).replace(/'/g, "&#39;")})'>✏️ Edit</button>
+              ${deleteButtonHTML('deleteAccount', acc.id)}
             </div>
           </div>
         `;
@@ -286,10 +272,10 @@
     }
 
     async function deleteAccount(id) {
-      if (!confirm('Delete this account? All transactions will also be deleted.')) return;
+      if (!confirmDelete('this account (all transactions will also be deleted)')) return;
       try {
         await deleteRecord('bank_accounts', id);
-        alert('✅ Deleted');
+        alert('✅ Account deleted');
         loadAccounts();
       } catch (e) {
         alert('❌ ' + e.message);
@@ -344,7 +330,7 @@
                   <th>Type</th>
                   <th>Description</th>
                   <th style="text-align: right;">Amount</th>
-                  <th></th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -354,7 +340,7 @@
                     <td><span style="color: ${t.transaction_type === 'deposit' ? 'var(--success)' : 'var(--danger)'}; font-weight: 700;">${t.transaction_type === 'deposit' ? '➕ Deposit' : '➖ Withdraw'}</span></td>
                     <td>${t.description || '—'}</td>
                     <td class="number" style="color: ${t.transaction_type === 'deposit' ? 'var(--success)' : 'var(--danger)'};">${t.transaction_type === 'deposit' ? '+' : '-'} ${formatPKR(t.amount)}</td>
-                    <td><button class="btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="deleteTxn('${t.id}')">🗑️</button></td>
+                    <td>${deleteButtonHTML('deleteTxn', t.id, '🗑️')}</td>
                   </tr>
                 `).join('')}
               </tbody>
@@ -366,10 +352,10 @@
     }
 
     async function deleteTxn(id) {
-      if (!confirm('Delete this transaction?')) return;
+      if (!confirmDelete('this transaction')) return;
       try {
         await deleteRecord('bank_transactions', id);
-        alert('✅ Deleted');
+        alert('✅ Transaction deleted');
         document.getElementById('historyModal').classList.remove('active');
         loadAccounts();
       } catch (e) {
@@ -377,12 +363,5 @@
       }
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
