@@ -4,77 +4,161 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Purchase – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Purchase</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      New Purchase
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">New Purchase</h1>
+    <p class="page-subtitle">Gold purchase with tola/masha/ratti + advance payment</p>
 
     <div class="form-card">
-      <h3 class="form-card-title">Supplier Info</h3>
+      <h3 class="form-card-title">🏭 Supplier Info</h3>
+      
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Supplier Name *</label><input type="text" id="pSupplier" class="form-input" placeholder="Name"></div>
-        <div class="form-group"><label class="form-label">Phone *</label><input type="tel" id="pPhone" class="form-input" placeholder="03XXXXXXXXX"></div>
+        <div class="form-group">
+          <label class="form-label">Select Existing Supplier</label>
+          <select id="selectSupplier" class="form-select" onchange="fillSupplier()">
+            <option value="">-- New Supplier --</option>
+          </select>
+        </div>
       </div>
+      
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Address</label><input type="text" id="pAddress" class="form-input" placeholder="Address"></div>
-        <div class="form-group"><label class="form-label">Purchase Date</label><input type="date" id="pDate" class="form-input"></div>
+        <div class="form-group">
+          <label class="form-label">Supplier Name <span class="required">*</span></label>
+          <input type="text" id="pSupplier" class="form-input" placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone <span class="required">*</span></label>
+          <input type="tel" id="pPhone" class="form-input" placeholder="03XXXXXXXXX">
+        </div>
       </div>
+      
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Supplier Photo</label><input type="file" id="pSupplierPhoto" class="form-input" accept="image/*" capture="user" style="padding:10px;"><div id="pPhotoPreview" style="margin-top:5px;"></div></div>
-        <div class="form-group"><label class="form-label">Bill Image</label><input type="file" id="pBillImage" class="form-input" accept="image/*" capture="environment" style="padding:10px;"><div id="pBillPreview" style="margin-top:5px;"></div></div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <input type="text" id="pAddress" class="form-input" placeholder="Address">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date</label>
+          <input type="date" id="pDate" class="form-input">
+        </div>
       </div>
     </div>
 
     <div class="form-card">
-      <h3 class="form-card-title">Item Details</h3>
+      <h3 class="form-card-title">🪙 Item Details</h3>
+      
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Product ID (Optional)</label>
-          <select id="pProductId" class="form-select" onchange="autoFillProduct()">
-            <option value="">-- Select Product --</option>
+          <label class="form-label">Item Description <span class="required">*</span></label>
+          <input type="text" id="pItem" class="form-input" placeholder="e.g., Gold Biscuit / Gold Bar">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity <span class="required">*</span></label>
+          <input type="number" id="pQty" class="form-input number-input" value="1" min="1" oninput="autoCalc()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Weight (per piece) <span class="required">*</span></label>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+            <input type="number" id="pWeight" class="form-input number-input" step="0.001" placeholder="0.000" oninput="autoCalc()">
+            <select id="pWeightUnit" class="form-select" onchange="autoCalc()">
+              <option value="gram">Gram</option>
+              <option value="tola">Tola</option>
+              <option value="masha">Masha</option>
+              <option value="ratti">Ratti</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Karat</label>
+          <select id="pKarat" class="form-select">
+            <option value="24K">24K</option>
+            <option value="22K">22K</option>
+            <option value="21K">21K</option>
+            <option value="18K">18K</option>
+            <option value="16K">16K</option>
+            <option value="14K">14K</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Item Description *</label><input type="text" id="pItem" class="form-input" placeholder="e.g., Gold Necklace"></div>
       </div>
+
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Quantity *</label><input type="number" id="pQty" class="form-input" value="1" min="1" placeholder="1"></div>
-        <div class="form-group"><label class="form-label">Weight/gram (per piece) *</label><input type="number" id="pWeight" class="form-input" step="0.001" placeholder="0.000"></div>
+        <div class="form-group">
+          <label class="form-label">Rate/gram (Rs) <span class="required">*</span></label>
+          <input type="number" id="pRate" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Cost (Rs) — Auto</label>
+          <input type="number" id="pTotal" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700;">
+        </div>
       </div>
+
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Rate/gram (Rs) *</label><input type="number" id="pRate" class="form-input" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Total Cost (Rs) *</label><input type="number" id="pTotal" class="form-input" readonly style="background:#2A2A2A; color:#FFF8DC;"></div>
+        <div class="form-group">
+          <label class="form-label">Discount (Rs) — Manual</label>
+          <input type="number" id="pDiscount" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
       </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Paid Amount (Rs)</label><input type="number" id="pPaid" class="form-input" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Balance (Rs)</label><input type="number" id="pBalance" class="form-input" readonly style="background:#2A2A2A; color:#FCD34D; font-weight:700;"></div>
+    </div>
+
+    <div class="form-card" style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,215,0,0.02)); border-color:var(--gold-primary);">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="color:var(--gold-primary); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">Total Purchase Amount</div>
+          <div style="color:var(--text-muted); font-size:0.75rem;" id="totalWeightDisplay">0g</div>
+        </div>
+        <div style="color:var(--gold-primary); font-family:var(--font-heading); font-size:2rem; font-weight:700;" id="grandTotal">Rs 0</div>
       </div>
+    </div>
+
+    <div class="form-card">
+      <h3 class="form-card-title">💳 Payment</h3>
+      
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Payment Mode</label>
-          <select id="pPayment" class="form-select">
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select id="pPaymentMode" class="form-select">
             <option value="cash">Cash</option>
             <option value="bank">Bank Transfer</option>
+            <option value="easypaisa">Easypaisa</option>
+            <option value="jazzcash">JazzCash</option>
             <option value="credit">Credit (Udhaar)</option>
           </select>
         </div>
       </div>
 
-      <div style="display: flex; gap: 12px; margin-top: 15px; flex-wrap: wrap;">
-        <button class="btn-primary" onclick="savePurchase(false)" style="flex: 1;">Save & View Invoice</button>
-        <button class="btn-secondary" onclick="savePurchase(true)" style="flex: 1; background: #25D366; color: white; border: none;">Save & WhatsApp Invoice</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Paid Amount (Rs)</label>
+          <input type="number" id="pPaid" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Balance (Rs)</label>
+          <input type="number" id="pBalance" class="form-input number-input" readonly style="background:var(--charcoal); color:#FCD34D; font-weight:700;">
+        </div>
       </div>
     </div>
 
-    <h2 class="section-title">Recent Purchases (Click to view Invoice)</h2>
+    <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+      <button class="btn-primary" onclick="savePurchase(false)" id="savePurchaseBtn" style="flex: 1;">💾 Save & View Invoice</button>
+      <button class="btn-success" onclick="savePurchase(true)" style="flex: 1;">📱 Save & WhatsApp</button>
+    </div>
+
+    <h2 class="section-title">📋 Recent Purchases (Click to view Invoice)</h2>
     <div class="data-list" id="purchasesList"></div>
   </div>
 
@@ -82,8 +166,9 @@
     <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableInvoice"></div>
       <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">Print Invoice</button>
-        <button class="btn-secondary" onclick="sendInvoiceWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">🖨 Print</button>
+        <button class="btn-success" onclick="sendInvoiceWhatsApp()" style="flex:1;">📱 WhatsApp</button>
+        <button class="btn-secondary" onclick="sendInvoiceEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
         <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
       </div>
     </div>
@@ -92,47 +177,54 @@
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    let allProducts = [];
     let currentInvoice = null;
+    let suppliers = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'purchase'])) return;
       
       document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
       
-      allProducts = await getRecordsFast('products');
-      const prodSelect = document.getElementById('pProductId');
-      allProducts.forEach(p => {
-        prodSelect.innerHTML += `<option value="${p.product_code || p.id}">${p.product_code || ''} - ${p.name}</option>`;
+      suppliers = await getRecordsFast('suppliers');
+      const supSelect = document.getElementById('selectSupplier');
+      suppliers.forEach(s => {
+        supSelect.innerHTML += `<option value="${s.name}">${s.name} - ${s.phone}</option>`;
       });
       
       loadPurchases();
       autoCalc();
     });
 
-    function autoFillProduct() {
-      const code = document.getElementById('pProductId').value;
-      if (!code) return;
-      const prod = allProducts.find(p => (p.product_code || p.id) === code);
-      if (prod) {
-        document.getElementById('pItem').value = prod.name;
-        document.getElementById('pWeight').value = prod.weight;
-        document.getElementById('pRate').value = prod.cost_price || 0;
-        autoCalc();
+    function fillSupplier() {
+      const name = document.getElementById('selectSupplier').value;
+      if (!name) return;
+      const s = suppliers.find(x => x.name === name);
+      if (s) {
+        document.getElementById('pSupplier').value = s.name || '';
+        document.getElementById('pPhone').value = s.phone || '';
+        document.getElementById('pAddress').value = s.address || '';
       }
     }
 
     function autoCalc() {
       const qty = parseFloat(document.getElementById('pQty').value) || 1;
       const weight = parseFloat(document.getElementById('pWeight').value) || 0;
+      const unit = document.getElementById('pWeightUnit').value;
       const rate = parseFloat(document.getElementById('pRate').value) || 0;
+      const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
       
-      const total = Math.round(qty * weight * rate);
-      document.getElementById('pTotal').value = total;
+      const weightInGrams = toGrams(weight, unit);
+      const totalWeight = qty * weightInGrams;
+      const metal = totalWeight * rate;
+      const total = metal - discount;
+      
+      document.getElementById('pTotal').value = Math.round(total);
+      document.getElementById('grandTotal').textContent = formatPKR(total);
+      document.getElementById('totalWeightDisplay').textContent = formatWeight(totalWeight);
+      
       const paid = parseFloat(document.getElementById('pPaid').value) || 0;
-      document.getElementById('pBalance').value = Math.max(0, total - paid);
+      document.getElementById('pBalance').value = Math.max(0, Math.round(total - paid));
     }
-    ['pQty', 'pWeight', 'pRate', 'pPaid'].forEach(id => document.getElementById(id)?.addEventListener('input', autoCalc));
 
     async function savePurchase(sendWA) {
       const supplier = document.getElementById('pSupplier').value.trim();
@@ -140,109 +232,111 @@
       const item = document.getElementById('pItem').value.trim();
       const total = parseFloat(document.getElementById('pTotal').value) || 0;
       
-      if (!supplier || !phone || !item || total <= 0) { alert('❌ Fill supplier name, phone, item, and amounts'); return; }
+      if (!supplier || !phone || !item || total <= 0) { alert('❌ Fill all required fields'); return; }
 
-      const btn = event.target;
-      btn.textContent = 'Saving...'; btn.disabled = true;
+      const btn = document.getElementById('savePurchaseBtn');
+      btn.textContent = '⏳ Saving...'; 
+      btn.disabled = true;
 
       try {
-        let supplierPhotoUrl = null, billImageUrl = null;
-        if (document.getElementById('pSupplierPhoto').files[0]) supplierPhotoUrl = await uploadImage(document.getElementById('pSupplierPhoto').files[0]);
-        if (document.getElementById('pBillImage').files[0]) billImageUrl = await uploadImage(document.getElementById('pBillImage').files[0]);
-
         const qty = parseFloat(document.getElementById('pQty').value) || 1;
         const weight = parseFloat(document.getElementById('pWeight').value) || 0;
+        const unit = document.getElementById('pWeightUnit').value;
+        const weightInGrams = toGrams(weight, unit);
 
         const purchase = {
           invoice_no: 'PUR-' + Date.now(),
-          product_id: document.getElementById('pProductId').value || null,
           supplier_name: supplier,
           supplier_phone: phone,
           supplier_address: document.getElementById('pAddress').value.trim(),
-          supplier_photo: supplierPhotoUrl,
-          bill_image: billImageUrl,
           item: item,
           qty: qty,
-          weight: weight,
-          total_weight: qty * weight,
+          weight: weightInGrams,
+          total_weight: qty * weightInGrams,
+          gold_weight: qty * weightInGrams,
+          gold_karat: document.getElementById('pKarat').value,
+          gold_rate: parseFloat(document.getElementById('pRate').value) || 0,
           rate: parseFloat(document.getElementById('pRate').value) || 0,
+          discount: parseFloat(document.getElementById('pDiscount').value) || 0,
           total: total,
           paid: parseFloat(document.getElementById('pPaid').value) || 0,
           balance: parseFloat(document.getElementById('pBalance').value) || 0,
-          payment_mode: document.getElementById('pPayment').value,
-          purchase_date: document.getElementById('pDate').value || new Date().toISOString().slice(0,10)
+          payment_mode: document.getElementById('pPaymentMode').value,
+          purchase_date: document.getElementById('pDate').value
         };
 
         const saved = await addRecord('purchases', purchase);
         
         if (sendWA) {
           const shop = await getShopSettings();
-          const msg = `*PURCHASE BILL: ${purchase.invoice_no}*\nSupplier: ${supplier}\nItem: ${item} (Qty: ${qty})\nWeight: ${qty * weight}g\nRate: ${formatPKR(purchase.rate)}/g\nTotal: ${formatPKR(total)}\nPaid: ${formatPKR(purchase.paid)}\nBalance: ${formatPKR(purchase.balance)}\n\n${shop.name}`;
+          const msg = `*PURCHASE BILL: ${purchase.invoice_no}*\nSupplier: ${supplier}\nItem: ${item}\nWeight: ${formatWeight(qty * weightInGrams)}\nRate: ${formatPKR(purchase.rate)}/g\nTotal: ${formatPKR(total)}\nPaid: ${formatPKR(purchase.paid)}\nBalance: ${formatPKR(purchase.balance)}\n\n${shop.name}`;
           openWhatsApp(phone, msg);
         }
         
         currentInvoice = saved;
         showInvoice(saved);
-        clearForm(); loadPurchases();
+        clearForm(); 
+        loadPurchases();
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = sendWA ? 'Save & WhatsApp Invoice' : 'Save & View Invoice';
+        btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Invoice';
         btn.disabled = false;
       }
     }
 
-    async function showInvoice(p) {
+    async function showInvoice(purchase) {
       const shop = await getShopSettings();
+      const qty = purchase.qty || 1;
+      const weight = purchase.weight || 0;
+      const totalWeight = qty * weight;
+      
       document.getElementById('printableInvoice').innerHTML = `
-        <div class="invoice-container">
-          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
-            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
+        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+          <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+        </div>
+        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PURCHASE BILL</h2>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+          <div>
+            <p style="margin:0; font-size:14px;"><strong>Purchase #:</strong> ${purchase.invoice_no}</p>
+            <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(purchase.purchase_date || purchase.created_at)}</p>
           </div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <div>
-              <p style="margin:0; font-size:14px;"><strong>Purchase #:</strong> ${p.invoice_no}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(p.purchase_date || p.created_at)}</p>
-            </div>
-            <div style="text-align:right;">
-              <p style="margin:0; font-size:14px;"><strong>Supplier:</strong> ${p.supplier_name}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${p.supplier_phone || '—'}</p>
-            </div>
+          <div style="text-align:right;">
+            <p style="margin:0; font-size:14px;"><strong>Supplier:</strong> ${purchase.supplier_name}</p>
+            <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${purchase.supplier_phone || '—'}</p>
           </div>
-          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-            <thead>
-              <tr style="background:#FAF7F0;">
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight (Total)</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${p.item}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${p.qty || 1}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${((p.qty || 1) * (p.weight || 0)).toFixed(3)}g</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(p.rate)}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(p.total)}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
-            <p style="margin:5px 0;">Paid: <strong>${formatPKR(p.paid)}</strong></p>
-            <p style="margin:5px 0;">Balance: <strong style="color:${p.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(p.balance)}</strong></p>
-          </div>
-          <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
-            TOTAL: ${formatPKR(p.total)}
-          </div>
-          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
-            ${shop.name} - Purchase Bill
-            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
-          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+          <thead>
+            <tr style="background:#FAF7F0;">
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Karat</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.item}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.gold_karat || '—'}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.rate)}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.total)}</td>
+            </tr>
+          </tbody>
+        </table>
+        ${purchase.discount > 0 ? `<p style="text-align:right; font-size:14px;">Discount: <strong style="color:#25D366;">- ${formatPKR(purchase.discount)}</strong></p>` : ''}
+        <div style="text-align:right; font-size:14px; margin-bottom:10px;">
+          <p style="margin:5px 0;">Paid: <strong>${formatPKR(purchase.paid)}</strong></p>
+          <p style="margin:5px 0;">Balance: <strong style="color:${purchase.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(purchase.balance)}</strong></p>
+        </div>
+        <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">
+          TOTAL: ${formatPKR(purchase.total)}
         </div>
       `;
       document.getElementById('invoiceModal').classList.add('active');
@@ -250,19 +344,23 @@
 
     function sendInvoiceWhatsApp() {
       if (!currentInvoice) return;
-      const msg = `*PURCHASE BILL: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item} (Qty: ${currentInvoice.qty||1})\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+      const msg = `*PURCHASE: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
       openWhatsApp(currentInvoice.supplier_phone, msg);
     }
 
+    function sendInvoiceEmail() {
+      if (!currentInvoice) return;
+      const email = prompt('Enter supplier email:', '');
+      if (!email) return;
+      const body = `Purchase: ${currentInvoice.invoice_no}\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+      sendEmail(email, `Purchase ${currentInvoice.invoice_no}`, body);
+    }
+
     function clearForm() {
-      ['pSupplier','pPhone','pAddress','pItem','pWeight','pRate','pTotal','pPaid','pBalance'].forEach(id => document.getElementById(id).value = '');
+      ['pSupplier','pPhone','pAddress','pItem','pWeight','pRate','pTotal','pPaid','pBalance','pDiscount'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('pQty').value = '1';
-      document.getElementById('pProductId').value = '';
+      document.getElementById('selectSupplier').value = '';
       document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
-      document.getElementById('pSupplierPhoto').value = '';
-      document.getElementById('pBillImage').value = '';
-      document.getElementById('pPhotoPreview').innerHTML = '';
-      document.getElementById('pBillPreview').innerHTML = '';
       autoCalc();
     }
 
@@ -274,7 +372,7 @@
       container.innerHTML = purchases.slice(0, 20).map(p => `
         <div class="data-item" style="cursor:pointer;" onclick='showInvoice(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
           <div>
-            <div class="data-item-title">${p.item} <span style="color:#FFD700; font-size:0.8rem;">(Qty: ${p.qty || 1})</span></div>
+            <div class="data-item-title">${p.item} <span style="color:var(--gold-primary); font-size:0.8rem;">(Qty: ${p.qty || 1})</span></div>
             <div class="data-item-sub">${p.supplier_name} • ${formatDate(p.purchase_date || p.created_at)}</div>
           </div>
           <div style="text-align:right;">

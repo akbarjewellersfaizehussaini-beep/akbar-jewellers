@@ -4,79 +4,192 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="../../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Sales</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      New Sale
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">New Sale</h1>
+    <p class="page-subtitle">Complete sale entry with tola/masha/ratti + advance payment</p>
 
     <div class="form-card">
-      <h3 class="form-card-title">Customer Info</h3>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Customer Name *</label><input type="text" id="cName" class="form-input" placeholder="Name"></div>
-        <div class="form-group"><label class="form-label">Phone</label><input type="tel" id="cPhone" class="form-input" placeholder="03XXXXXXXXX"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Address</label><input type="text" id="cAddress" class="form-input" placeholder="Address"></div>
-        <div class="form-group"><label class="form-label">Sale Date</label><input type="date" id="sDate" class="form-input"></div>
-      </div>
-    </div>
-
-    <div class="form-card">
-      <h3 class="form-card-title">Item Details</h3>
+      <h3 class="form-card-title">👤 Customer Info</h3>
+      
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Product ID (Optional)</label>
-          <select id="sProductId" class="form-select" onchange="autoFillProduct()">
-            <option value="">-- Select Product --</option>
+          <label class="form-label">Select Existing Customer</label>
+          <select id="selectCustomer" class="form-select" onchange="fillCustomer()">
+            <option value="">-- New Customer --</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Item Description *</label><input type="text" id="sItem" class="form-input" placeholder="e.g., Gold Ring"></div>
       </div>
+      
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Quantity *</label><input type="number" id="sQty" class="form-input" value="1" min="1" placeholder="1"></div>
-        <div class="form-group"><label class="form-label">Weight/gram (per piece) *</label><input type="number" id="sWeight" class="form-input" step="0.001" placeholder="0.000"></div>
+        <div class="form-group">
+          <label class="form-label">Customer Name <span class="required">*</span></label>
+          <input type="text" id="cName" class="form-input" placeholder="Name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" id="cPhone" class="form-input" placeholder="03XXXXXXXXX">
+        </div>
       </div>
+      
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Rate/gram (Rs) *</label><input type="number" id="sRate" class="form-input" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Making Charges (Rs) — Manual</label><input type="number" id="sMaking" class="form-input" placeholder="0"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Polish Charges (Rs) — Manual</label><input type="number" id="sPolish" class="form-input" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Discount (Rs) — Manual</label><input type="number" id="sDiscount" class="form-input" placeholder="0"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Tax/GST % (Auto)</label><input type="number" id="sGST" class="form-input" readonly style="background:#2A2A2A; color:#FFD700;"></div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <input type="text" id="cAddress" class="form-input" placeholder="Address">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sale Date</label>
+          <input type="date" id="sDate" class="form-input">
+        </div>
       </div>
     </div>
 
-    <div class="form-card" style="background: linear-gradient(135deg, #1C1C1C, #2A2A2A); border-color: #FFD700;">
-      <div style="display: flex; justify-content: space-between; padding: 15px 0; font-size: 1.3rem;">
-        <span style="color: #FFD700; font-weight: 700;">TOTAL:</span>
-        <strong id="calTotal" style="color: #FFD700; font-family:'Playfair Display',serif;">Rs 0</strong>
+    <div class="form-card">
+      <h3 class="form-card-title">📿 Item Details</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Product (Optional)</label>
+          <select id="sProductId" class="form-select" onchange="autoFillProduct()">
+            <option value="">-- Manual Entry --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Item Description <span class="required">*</span></label>
+          <input type="text" id="sItem" class="form-input" placeholder="e.g., Gold Ring">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Quantity <span class="required">*</span></label>
+          <input type="number" id="sQty" class="form-input number-input" value="1" min="1" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weight (per piece) <span class="required">*</span></label>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+            <input type="number" id="sWeight" class="form-input number-input" step="0.001" placeholder="0.000" oninput="autoCalc()">
+            <select id="sWeightUnit" class="form-select" onchange="autoCalc()">
+              <option value="gram">Gram</option>
+              <option value="tola">Tola</option>
+              <option value="masha">Masha</option>
+              <option value="ratti">Ratti</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Rate/gram (Rs) <span class="required">*</span></label>
+          <input type="number" id="sRate" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Making Charges (Rs) — Manual</label>
+          <input type="number" id="sMaking" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Polish Charges (Rs) — Manual</label>
+          <input type="number" id="sPolish" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount (Rs) — Manual</label>
+          <input type="number" id="sDiscount" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">GST % (Auto from Settings)</label>
+          <input type="number" id="sGST" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary);">
+        </div>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Received Amount (Rs)</label><input type="number" id="sPaid" class="form-input" placeholder="0"></div>
-      <div class="form-group"><label class="form-label">Balance / Udhaar (Rs)</label><input type="number" id="sRemaining" class="form-input" readonly style="background:#2A2A2A; color:#FCD34D;"></div>
+    <div class="form-card" style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,215,0,0.02)); border-color:var(--gold-primary);">
+      <h3 class="form-card-title">💰 Price Breakdown</h3>
+      
+      <div style="display:grid; grid-template-columns:1fr auto; gap:10px; font-size:0.95rem;">
+        <span style="color:var(--text-muted);">Metal Value</span>
+        <strong id="bdMetal" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
+        
+        <span style="color:var(--text-muted);">Making Charges</span>
+        <strong id="bdMaking" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
+        
+        <span style="color:var(--text-muted);">Polish Charges</span>
+        <strong id="bdPolish" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
+        
+        <span style="color:var(--gold-primary); font-weight:700; border-top:1px solid var(--gold-primary); padding-top:8px;">Subtotal</span>
+        <strong id="bdSubtotal" style="color:var(--gold-primary); text-align:right; font-family:var(--font-mono); border-top:1px solid var(--gold-primary); padding-top:8px;">Rs 0</strong>
+        
+        <span style="color:var(--text-muted);">GST</span>
+        <strong id="bdGST" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
+        
+        <span style="color:var(--success);">Discount</span>
+        <strong id="bdDiscount" style="color:var(--success); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
+        
+        <span style="color:var(--gold-primary); font-weight:700; font-size:1.3rem; border-top:2px solid var(--gold-primary); padding-top:10px;">TOTAL</span>
+        <strong id="bdTotal" style="color:var(--gold-primary); text-align:right; font-size:1.5rem; font-family:var(--font-heading); border-top:2px solid var(--gold-primary); padding-top:10px;">Rs 0</strong>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3 class="form-card-title">💳 Payment</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Payment Type</label>
+          <select id="sPaymentType" class="form-select" onchange="autoCalc()">
+            <option value="full">100% Full Payment</option>
+            <option value="advance">Advance Payment</option>
+            <option value="credit">Credit (Udhaar)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Mode</label>
+          <select id="sPaymentMode" class="form-select">
+            <option value="cash">Cash</option>
+            <option value="bank">Bank Transfer</option>
+            <option value="easypaisa">Easypaisa</option>
+            <option value="jazzcash">JazzCash</option>
+            <option value="credit">Credit</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Received Amount (Rs)</label>
+          <input type="number" id="sPaid" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Balance / Udhaar (Rs)</label>
+          <input type="number" id="sRemaining" class="form-input number-input" readonly style="background:var(--charcoal); color:#FCD34D; font-weight:700;">
+        </div>
+      </div>
     </div>
 
     <div style="display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
-      <button class="btn-primary" onclick="saveSale(false)" style="flex: 1;">Save & View Invoice</button>
-      <button class="btn-secondary" onclick="saveSale(true)" style="flex: 1; background: #25D366; color: white; border: none;">Save & WhatsApp Invoice</button>
+      <button class="btn-primary" onclick="saveSale(false)" id="saveSaleBtn" style="flex: 1;">💾 Save & View Invoice</button>
+      <button class="btn-success" onclick="saveSale(true)" style="flex: 1;">📱 Save & WhatsApp</button>
     </div>
 
-    <h2 class="section-title">Recent Sales (Click to view Invoice)</h2>
+    <h2 class="section-title">📋 Recent Sales (Click to view Invoice)</h2>
     <div class="data-list" id="salesList"></div>
   </div>
 
@@ -84,20 +197,21 @@
     <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableInvoice"></div>
       <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">Print Invoice</button>
-        <button class="btn-secondary" onclick="sendInvoiceWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">🖨 Print</button>
+        <button class="btn-success" onclick="sendInvoiceWhatsApp()" style="flex:1;">📱 WhatsApp</button>
+        <button class="btn-secondary" onclick="sendInvoiceEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
         <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
       </div>
     </div>
   </div>
 
-  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
     let shopRules = { gst_pct: 3 };
     let allProducts = [];
     let currentInvoice = null;
+    let customers = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales'])) return;
@@ -107,14 +221,34 @@
       document.getElementById('sGST').value = shopRules.gst_pct || 3;
       
       allProducts = await getRecordsFast('products');
+      customers = await getRecordsFast('customers');
+      
+      // Populate products
       const prodSelect = document.getElementById('sProductId');
       allProducts.forEach(p => {
         prodSelect.innerHTML += `<option value="${p.product_code || p.id}">${p.product_code || ''} - ${p.name}</option>`;
       });
       
+      // Populate customers
+      const custSelect = document.getElementById('selectCustomer');
+      customers.forEach(c => {
+        custSelect.innerHTML += `<option value="${c.name}">${c.name} - ${c.phone}</option>`;
+      });
+      
       loadSales();
       autoCalc();
     });
+
+    function fillCustomer() {
+      const name = document.getElementById('selectCustomer').value;
+      if (!name) return;
+      const c = customers.find(x => x.name === name);
+      if (c) {
+        document.getElementById('cName').value = c.name || '';
+        document.getElementById('cPhone').value = c.phone || '';
+        document.getElementById('cAddress').value = c.address || '';
+      }
+    }
 
     function autoFillProduct() {
       const code = document.getElementById('sProductId').value;
@@ -123,6 +257,7 @@
       if (prod) {
         document.getElementById('sItem').value = prod.name;
         document.getElementById('sWeight').value = prod.weight;
+        document.getElementById('sWeightUnit').value = 'gram';
         autoCalc();
       }
     }
@@ -130,12 +265,14 @@
     function autoCalc() {
       const qty = parseFloat(document.getElementById('sQty').value) || 1;
       const weight = parseFloat(document.getElementById('sWeight').value) || 0;
+      const unit = document.getElementById('sWeightUnit').value;
       const rate = parseFloat(document.getElementById('sRate').value) || 0;
       const making = parseFloat(document.getElementById('sMaking').value) || 0;
       const polish = parseFloat(document.getElementById('sPolish').value) || 0;
       const discount = parseFloat(document.getElementById('sDiscount').value) || 0;
       
-      const totalWeight = qty * weight;
+      const weightInGrams = toGrams(weight, unit);
+      const totalWeight = qty * weightInGrams;
       const metal = totalWeight * rate;
       const makingTotal = making * qty;
       const polishTotal = polish * qty;
@@ -143,29 +280,34 @@
       const gst = subtotal * ((shopRules.gst_pct || 3) / 100);
       const total = subtotal + gst - discount;
       
-      document.getElementById('calTotal').textContent = formatPKR(total);
+      document.getElementById('bdMetal').textContent = formatPKR(metal);
+      document.getElementById('bdMaking').textContent = formatPKR(makingTotal);
+      document.getElementById('bdPolish').textContent = formatPKR(polishTotal);
+      document.getElementById('bdSubtotal').textContent = formatPKR(subtotal);
+      document.getElementById('bdGST').textContent = formatPKR(gst);
+      document.getElementById('bdDiscount').textContent = '- ' + formatPKR(discount);
+      document.getElementById('bdTotal').textContent = formatPKR(total);
+      
       const paid = parseFloat(document.getElementById('sPaid').value) || 0;
       document.getElementById('sRemaining').value = Math.max(0, Math.round(total - paid));
     }
-    ['sQty', 'sWeight', 'sRate', 'sMaking', 'sPolish', 'sDiscount', 'sPaid'].forEach(id => document.getElementById(id)?.addEventListener('input', autoCalc));
 
     async function saveSale(sendWA) {
       const customer = document.getElementById('cName').value.trim();
       const item = document.getElementById('sItem').value.trim();
-      const total = parseFloat(document.getElementById('calTotal').textContent.replace(/[^0-9]/g, '')) || 0;
+      const total = parseFloat(document.getElementById('bdTotal').textContent.replace(/[^0-9]/g, '')) || 0;
       
       if (!customer || !item || total <= 0) { alert('❌ Fill customer name, item, and amounts'); return; }
 
-      const btn = event.target;
-      btn.textContent = 'Saving...'; btn.disabled = true;
+      const btn = document.getElementById('saveSaleBtn');
+      btn.textContent = '⏳ Saving...'; 
+      btn.disabled = true;
 
       try {
         const qty = parseFloat(document.getElementById('sQty').value) || 1;
         const weight = parseFloat(document.getElementById('sWeight').value) || 0;
-        const rate = parseFloat(document.getElementById('sRate').value) || 0;
-        const making = parseFloat(document.getElementById('sMaking').value) || 0;
-        const polish = parseFloat(document.getElementById('sPolish').value) || 0;
-        const discount = parseFloat(document.getElementById('sDiscount').value) || 0;
+        const unit = document.getElementById('sWeightUnit').value;
+        const weightInGrams = toGrams(weight, unit);
         
         const sale = {
           invoice_number: 'AKBAR-' + Date.now(),
@@ -175,41 +317,37 @@
           customer_address: document.getElementById('cAddress').value.trim(),
           items_summary: item,
           qty: qty,
-          weight: weight,
-          total_weight: qty * weight,
-          rate: rate,
-          making: making,
-          polish: polish,
-          discount: discount,
+          weight: weightInGrams,
+          total_weight: qty * weightInGrams,
+          rate: parseFloat(document.getElementById('sRate').value) || 0,
+          making: parseFloat(document.getElementById('sMaking').value) || 0,
+          polish: parseFloat(document.getElementById('sPolish').value) || 0,
+          discount: parseFloat(document.getElementById('sDiscount').value) || 0,
           gst_pct: shopRules.gst_pct || 3,
           total: total,
           received: parseFloat(document.getElementById('sPaid').value) || 0,
           balance: parseFloat(document.getElementById('sRemaining').value) || 0,
-          sale_date: document.getElementById('sDate').value || new Date().toISOString().slice(0,10)
+          payment_type: document.getElementById('sPaymentType').value,
+          payment_mode: document.getElementById('sPaymentMode').value,
+          sale_date: document.getElementById('sDate').value
         };
 
         const saved = await addRecord('sales', sale);
         
         if (sendWA) {
           const shop = await getShopSettings();
-          const totalWeight = qty * weight;
-          const metal = totalWeight * rate;
-          const makingTotal = making * qty;
-          const polishTotal = polish * qty;
-          const subtotal = metal + makingTotal + polishTotal;
-          const gst = Math.round(subtotal * ((shopRules.gst_pct || 3) / 100));
-          
-          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal: ${formatPKR(metal)}\nMaking: ${formatPKR(makingTotal)}\nPolish: ${formatPKR(polishTotal)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${shopRules.gst_pct}%): ${formatPKR(gst)}\n${discount > 0 ? 'Discount: -' + formatPKR(discount) + '\n' : ''}*TOTAL: ${formatPKR(total)}*\n\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
+          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item} (Qty: ${qty})\nWeight: ${formatWeight(sale.total_weight)}\nRate: ${formatPKR(sale.rate)}/g\n\n*Total: ${formatPKR(total)}*\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
           openWhatsApp(sale.customer_phone, msg);
         }
         
         currentInvoice = saved;
         showInvoice(saved);
-        clearForm(); loadSales();
+        clearForm(); 
+        loadSales();
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = sendWA ? 'Save & WhatsApp Invoice' : 'Save & View Invoice';
+        btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Invoice';
         btn.disabled = false;
       }
     }
@@ -231,95 +369,92 @@
       const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
       
       document.getElementById('printableInvoice').innerHTML = `
-        <div class="invoice-container">
-          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
-            <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-            <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
-            <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
+        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
+          <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+          <div>
+            <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
+            <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date || sale.created_at)}</p>
+          </div>
+          <div style="text-align:right;">
+            <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
+            <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
+          </div>
+        </div>
+        
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+          <thead>
+            <tr style="background:#FAF7F0;">
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
+              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td>
+              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
+          <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
+          
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+            <span style="font-size:13px; color:#666;">Metal Value (${formatWeight(totalWeight)} × ${formatPKR(rate)}/g)</span>
+            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong>
           </div>
           
-          <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <div>
-              <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date || sale.created_at)}</p>
-            </div>
-            <div style="text-align:right;">
-              <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
-            </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+            <span style="font-size:13px; color:#666;">Making Charges</span>
+            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
           </div>
           
-          <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-            <thead>
-              <tr style="background:#FAF7F0;">
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${totalWeight.toFixed(3)}g</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
-            <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Metal Value (${totalWeight.toFixed(3)}g × ${formatPKR(rate)})</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Making Charges (Rs)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Polish Charges (Rs)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
-              <span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span>
-              <strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong>
-            </div>
-            
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
-            </div>
-            
-            ${discount > 0 ? `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
-              <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
-              <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
-            </div>
-            ` : ''}
-            
-            <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
-              <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
-              <strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong>
-            </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+            <span style="font-size:13px; color:#666;">Polish Charges</span>
+            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
           </div>
           
-          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
-            <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
-            <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
+          <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
+            <span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span>
+            <strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong>
           </div>
           
-          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
-            Thank you for shopping with ${shop.name}
-            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
-            <div style="font-size:9px; color:#999; margin-top:10px;">Designed by Bilal Marghoob Creations | 0326 6501314</div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
+            <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
+            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
           </div>
+          
+          ${discount > 0 ? `
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
+            <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
+            <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
+          </div>
+          ` : ''}
+          
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
+            <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
+            <strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong>
+          </div>
+        </div>
+        
+        <div style="text-align:right; font-size:14px; margin-bottom:10px;">
+          <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
+          <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
+        </div>
+        
+        <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
+          Thank you for shopping with ${shop.name}
+          <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
         </div>
       `;
       document.getElementById('invoiceModal').classList.add('active');
@@ -327,27 +462,23 @@
 
     function sendInvoiceWhatsApp() {
       if (!currentInvoice) return;
-      const qty = currentInvoice.qty || 1;
-      const weight = currentInvoice.weight || 0;
-      const rate = currentInvoice.rate || 0;
-      const making = currentInvoice.making || 0;
-      const polish = currentInvoice.polish || 0;
-      const discount = currentInvoice.discount || 0;
-      const totalWeight = qty * weight;
-      const metal = totalWeight * rate;
-      const makingTotal = making * qty;
-      const polishTotal = polish * qty;
-      const subtotal = metal + makingTotal + polishTotal;
-      const gst = Math.round(subtotal * ((currentInvoice.gst_pct || 3) / 100));
-      
-      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\n\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary} (Qty: ${qty})\nWeight: ${totalWeight.toFixed(3)}g\nRate: ${formatPKR(rate)}/g\n\n*Breakdown:*\nMetal Value: ${formatPKR(metal)}\nMaking Charges: ${formatPKR(makingTotal)}\nPolish Charges: ${formatPKR(polishTotal)}\nSubtotal: ${formatPKR(subtotal)}\nGST (${currentInvoice.gst_pct || 3}%): ${formatPKR(gst)}\n${discount > 0 ? 'Discount: -' + formatPKR(discount) + '\n' : ''}*TOTAL: ${formatPKR(currentInvoice.total)}*\n\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
       openWhatsApp(currentInvoice.customer_phone, msg);
+    }
+
+    function sendInvoiceEmail() {
+      if (!currentInvoice) return;
+      const email = prompt('Enter customer email:', '');
+      if (!email) return;
+      const body = `Invoice: ${currentInvoice.invoice_number}\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+      sendEmail(email, `Invoice ${currentInvoice.invoice_number}`, body);
     }
 
     function clearForm() {
       ['cName','cPhone','cAddress','sItem','sWeight','sRate','sMaking','sPolish','sDiscount','sPaid','sRemaining'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('sQty').value = '1';
       document.getElementById('sProductId').value = '';
+      document.getElementById('selectCustomer').value = '';
       document.getElementById('sDate').value = new Date().toISOString().slice(0,10);
       autoCalc();
     }
@@ -360,7 +491,7 @@
       container.innerHTML = sales.slice(0, 20).map(s => `
         <div class="data-item" style="cursor:pointer;" onclick='showInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
           <div>
-            <div class="data-item-title">${s.items_summary} <span style="color:#FFD700; font-size:0.8rem;">(Qty: ${s.qty || 1})</span></div>
+            <div class="data-item-title">${s.items_summary} <span style="color:var(--gold-primary); font-size:0.8rem;">(Qty: ${s.qty || 1})</span></div>
             <div class="data-item-sub">${s.customer_name} • ${formatDate(s.sale_date || s.created_at)}</div>
           </div>
           <div style="text-align:right;">
