@@ -10,7 +10,7 @@
     .product-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
     .product-image-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid var(--gold-primary); }
     .product-image-item img { width: 100%; height: 80px; object-fit: cover; }
-    .product-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+    .product-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
     .product-card-item { background: var(--black-soft); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; overflow: hidden; transition: all 0.3s; }
     .product-card-item:hover { border-color: var(--gold-primary); box-shadow: 0 10px 30px rgba(255,215,0,0.2); transform: translateY(-4px); }
     .product-card-img { width: 100%; height: 180px; object-fit: cover; background: var(--charcoal); }
@@ -24,6 +24,10 @@
     .stock-in { background: rgba(37,211,102,0.2); color: #86EFAC; }
     .stock-out { background: rgba(220,38,38,0.2); color: #FCA5A5; }
     .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .product-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,215,0,0.15); }
+    .stat-mini { text-align: center; }
+    .stat-mini-label { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
+    .stat-mini-value { color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -38,7 +42,7 @@
 
   <div class="sw-content">
     <h1 class="page-title">Product Management</h1>
-    <p class="page-subtitle">Inventory with unique IDs, opening stock</p>
+    <p class="page-subtitle">Unique Product ID — Purchase, Sale, Return sab isi ID se linked</p>
 
     <div class="form-card">
       <h3 class="form-card-title" id="formTitle">➕ Add New Product</h3>
@@ -62,7 +66,7 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Product ID (Auto)</label>
+          <label class="form-label">Product ID (Auto — PRIMARY KEY)</label>
           <input type="text" id="prCode" class="form-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700; font-family:var(--font-mono);">
         </div>
         <div class="form-group">
@@ -88,13 +92,6 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Size</label>
-          <input type="text" id="prSize" class="form-input" placeholder="e.g., 16">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
           <label class="form-label">Weight <span class="required">*</span></label>
           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
             <input type="number" id="prWeight" class="form-input number-input" step="0.001" placeholder="0.000">
@@ -106,17 +103,24 @@
             </select>
           </div>
         </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Size</label>
+          <input type="text" id="prSize" class="form-input" placeholder="e.g., 16">
+        </div>
         <div class="form-group">
           <label class="form-label">Purchase Date</label>
           <input type="date" id="prPurchaseDate" class="form-input">
         </div>
       </div>
 
-      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">💰 Pricing</h4>
+      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">💰 Pricing (Per Unit)</h4>
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Cost Price <span class="required">*</span></label>
+          <label class="form-label">Cost Price (Per Unit) <span class="required">*</span></label>
           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
             <input type="number" id="prCost" class="form-input number-input" placeholder="0">
             <select id="prCostUnit" class="form-select">
@@ -126,7 +130,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Sale Price (Optional)</label>
+          <label class="form-label">Sale Price (Per Unit — Optional)</label>
           <input type="number" id="prSale" class="form-input number-input" placeholder="0 (optional)">
         </div>
       </div>
@@ -135,7 +139,7 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Stock</label>
+          <label class="form-label">Opening Stock (Qty)</label>
           <input type="number" id="prOpeningStock" class="form-input number-input" value="0" placeholder="0">
         </div>
         <div class="form-group">
@@ -165,7 +169,7 @@
     </div>
 
     <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search..." style="flex:1; min-width:200px;" oninput="filterProducts()">
+      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search by name, code..." style="flex:1; min-width:200px;" oninput="filterProducts()">
       <select id="filterCategory" class="form-select" style="width:auto;" onchange="filterProducts()">
         <option value="">All Categories</option>
         <option value="gold">Gold</option>
@@ -175,7 +179,7 @@
       </select>
     </div>
 
-    <h2 class="section-title">📋 All Products (<span id="productCount">0</span>)</h2>
+    <h2 class="section-title">📋 All Products (<span id="productCount">0</span>) — Product-wise Stats</h2>
     <div id="productsGrid" class="product-card-grid">
       <div class="empty-state"><p>Loading...</p></div>
     </div>
@@ -186,12 +190,13 @@
   <script>
     let uploadedImages = [];
     let allProducts = [];
+    let productStats = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
       document.getElementById('prPurchaseDate').value = new Date().toISOString().slice(0, 10);
       await generateProductCode();
-      loadProducts();
+      await loadProductsWithStats();
     });
 
     async function generateProductCode() {
@@ -274,12 +279,12 @@
           alert('✅ Product updated!');
         } else {
           await addRecord('products', productData);
-          alert('✅ Product saved!\n\nID: ' + code);
+          alert('✅ Product saved!\n\nID: ' + code + '\n\nAb is ID se purchase/sale karein.');
         }
 
         clearForm();
         await generateProductCode();
-        loadProducts();
+        await loadProductsWithStats();
       } catch (error) {
         alert('❌ Error: ' + error.message);
       } finally {
@@ -302,27 +307,35 @@
 
     function cancelEdit() { clearForm(); }
 
-    async function loadProducts() {
+    async function loadProductsWithStats() {
       try {
         allProducts = await getRecordsFast('products', true);
-        renderProducts(allProducts);
+        const purchases = await getRecordsFast('purchases', true);
+        const sales = await getRecordsFast('sales', true);
+        const payments = await getRecordsFast('payments', true);
+        const customers = await getRecordsFast('customers', true);
+
+        // Calculate product-wise stats
+        productStats = calculateAllProductsStats(allProducts, purchases, sales, payments, customers);
+        renderProducts(productStats);
       } catch (e) {
         document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
       }
     }
 
-    function renderProducts(products) {
+    function renderProducts(stats) {
       const container = document.getElementById('productsGrid');
-      document.getElementById('productCount').textContent = products.length;
+      document.getElementById('productCount').textContent = stats.length;
 
-      if (!products || products.length === 0) {
+      if (!stats || stats.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products yet</p></div>';
         return;
       }
 
-      container.innerHTML = products.map(p => {
+      container.innerHTML = stats.map(s => {
+        const p = s.product;
         const img = p.images && p.images[0] ? p.images[0] : '../../images/placeholder.svg';
-        const stock = p.current_stock || 0;
+        
         return `
           <div class="product-card-item">
             <img src="${img}" class="product-card-img" onerror="this.src='../../images/placeholder.svg'">
@@ -330,9 +343,28 @@
               <div class="product-card-title">${p.name}</div>
               <div class="product-card-code">${p.product_code || 'N/A'}</div>
               <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${p.weight || 0}g</div>
-              <div class="product-card-price">${formatPKR(p.sale_price)}</div>
-              <div class="product-card-cost">Cost: ${formatPKR(p.cost_price)}</div>
-              <div><span class="stock-tag ${stock > 0 ? 'stock-in' : 'stock-out'}">${stock > 0 ? '✅ Stock: ' + stock : '❌ Out of Stock'}</span></div>
+              
+              <div class="product-card-price">Sale: ${formatPKR(s.totalSaleAmount)}</div>
+              <div class="product-card-cost">Purchase: ${formatPKR(s.totalPurchaseAmount)}</div>
+              
+              ${s.netProfit > 0 ? `<span class="profit-tag">📈 Profit: ${formatPKR(s.netProfit)}</span>` : s.netProfit < 0 ? `<span class="profit-tag" style="background:rgba(220,38,38,0.2); color:#FCA5A5;">📉 Loss: ${formatPKR(Math.abs(s.netProfit))}</span>` : ''}
+              <div><span class="stock-tag ${s.currentStock > 0 ? 'stock-in' : 'stock-out'}">${s.currentStock > 0 ? '✅ Stock: ' + s.currentStock : '❌ Out of Stock'}</span></div>
+              
+              <div class="product-stats">
+                <div class="stat-mini">
+                  <div class="stat-mini-label">Purchased</div>
+                  <div class="stat-mini-value">${s.totalPurchasedQty}</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="stat-mini-label">Sold</div>
+                  <div class="stat-mini-value">${s.totalSoldQty}</div>
+                </div>
+                <div class="stat-mini">
+                  <div class="stat-mini-label">Stock</div>
+                  <div class="stat-mini-value">${s.currentStock}</div>
+                </div>
+              </div>
+              
               <div class="product-actions">
                 <button class="btn-secondary" style="flex:1; padding:8px; font-size:0.8rem;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Edit</button>
                 ${deleteButtonHTML('deleteProduct', p.id)}
@@ -371,7 +403,7 @@
       try {
         await deleteRecord('products', id);
         alert('✅ Product deleted');
-        loadProducts();
+        await loadProductsWithStats();
       } catch (e) {
         alert('❌ ' + e.message);
       }
@@ -380,15 +412,15 @@
     function filterProducts() {
       const search = document.getElementById('searchProducts').value.toLowerCase();
       const category = document.getElementById('filterCategory').value;
-      let filtered = allProducts;
+      let filtered = productStats;
       if (search) {
-        filtered = filtered.filter(p => 
-          (p.name || '').toLowerCase().includes(search) || 
-          (p.product_code || '').toLowerCase().includes(search) ||
-          (p.category || '').toLowerCase().includes(search)
+        filtered = filtered.filter(s => 
+          (s.productName || '').toLowerCase().includes(search) || 
+          (s.productCode || '').toLowerCase().includes(search) ||
+          (s.category || '').toLowerCase().includes(search)
         );
       }
-      if (category) filtered = filtered.filter(p => p.category === category);
+      if (category) filtered = filtered.filter(s => s.category === category);
       renderProducts(filtered);
     }
   </script>

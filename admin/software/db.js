@@ -1,5 +1,4 @@
-// ===== AKBAR JEWELLERS – SOFTWARE DATABASE (FINAL) =====
-// Direct Supabase values + Cache timeout
+// ===== AKBAR JEWELLERS – SOFTWARE DATABASE (PRIMARY KEY SYSTEM) =====
 
 const SUPABASE_URL = 'https://cvuqtmmlewaudtxzpnyg.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_of8TMEfEPDsVg21MfSSmBQ_CbwtRqRk';
@@ -7,7 +6,7 @@ const SUPABASE_KEY = 'sb_publishable_of8TMEfEPDsVg21MfSSmBQ_CbwtRqRk';
 const CLOUD_NAME = 'olpbssol';
 const CLOUDINARY_PRESET = 'akbar-jewellers';
 
-// ===== CACHE TIMEOUT (5 seconds) =====
+// ===== CACHE TIMEOUT =====
 const CACHE_TIMEOUT = 5000;
 
 // ===== WEIGHT UNITS =====
@@ -18,18 +17,9 @@ const WEIGHT_UNITS = {
   ratti: 0.1215
 };
 
-const KARAT_PURITY = {
-  '24K': 1.0, '22K': 0.9167, '21K': 0.875, '18K': 0.75,
-  '16K': 0.6667, '14K': 0.5833, '12K': 0.5, '10K': 0.4167, '8K': 0.3333
-};
-
 // ===== WEIGHT CONVERSION =====
 function toGrams(value, unit) {
   return value * (WEIGHT_UNITS[unit] || 1);
-}
-
-function fromGrams(grams, unit) {
-  return grams / (WEIGHT_UNITS[unit] || 1);
 }
 
 function formatWeight(grams) {
@@ -57,18 +47,9 @@ function formatPKR(amount) {
   return 'Rs ' + Math.round(amount || 0).toLocaleString('en-PK');
 }
 
-function formatNumber(num) {
-  return Math.round(num || 0).toLocaleString('en-PK');
-}
-
 function formatDate(dateStr) {
   if (!dateStr) return '—';
   return new Date(dateStr).toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function formatDateTime(dateStr) {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleString('en-PK', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 // ===== CACHE =====
@@ -97,7 +78,6 @@ async function sbFetch(path, options = {}) {
 async function getRecordsFast(storeName, forceRefresh = false) {
   const now = Date.now();
   
-  // Cache expire check (5 seconds)
   if (!forceRefresh && dbCache[storeName]) {
     const cacheTime = dbCache[storeName + '_time'] || 0;
     if (now - cacheTime < CACHE_TIMEOUT) {
@@ -150,7 +130,7 @@ async function deleteRecord(storeName, id) {
   clearCache(storeName);
 }
 
-// ===== SETTINGS =====
+// ===== SHOP SETTINGS =====
 async function getShopSettings() {
   const defaults = { 
     name: 'AKBAR JEWELLERS', 
@@ -176,21 +156,6 @@ async function getShopSettings() {
   }
 }
 
-async function saveSetting(key, value) {
-  const existing = await sbFetch(`settings?setting_key=eq.${encodeURIComponent(key)}&select=id`);
-  if (existing && existing.length > 0) {
-    return sbFetch(`settings?setting_key=eq.${encodeURIComponent(key)}`, { 
-      method: 'PATCH', 
-      body: JSON.stringify({ setting_value: String(value) }) 
-    });
-  } else {
-    return sbFetch(`settings`, { 
-      method: 'POST', 
-      body: JSON.stringify({ setting_key: key, setting_value: String(value) }) 
-    });
-  }
-}
-
 // ===== CLOUDINARY =====
 async function uploadToCloudinary(file, resourceType = 'image') {
   const form = new FormData();
@@ -206,45 +171,92 @@ async function uploadToCloudinary(file, resourceType = 'image') {
 }
 
 async function uploadImage(file) { return uploadToCloudinary(file, 'image'); }
-async function uploadVideo(file) { return uploadToCloudinary(file, 'video'); }
-async function uploadMultipleImages(files) {
-  const urls = [];
-  for (const file of Array.from(files)) {
-    const url = await uploadImage(file);
-    urls.push(url);
-  }
-  return urls;
+
+// ===== PRODUCT-WISE CALCULATIONS (PRIMARY KEY SYSTEM) =====
+
+// Har product ka complete hisaab
+function calculateProductStats(productCode, products, purchases, sales, payments, customers) {
+  const product = products.find(p => p.product_code === productCode);
+  if (!product) return null;
+
+  // Purchases of this product
+  const productPurchases = purchases.filter(p => p.product_id === productCode);
+  const totalPurchasedQty = productPurchases.reduce((sum, p) => sum + (Number(p.qty) || 0), 0);
+  const totalPurchasedWeight = productPurchases.reduce((sum, p) => sum + (Number(p.total_weight) || Number(p.weight) * Number(p.qty) || 0), 0);
+  const totalPurchaseAmount = productPurchases.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+  const totalPurchasePaid = productPurchases.reduce((sum, p) => sum + (Number(p.paid) || 0), 0);
+  const totalPurchaseBalance = totalPurchasedAmount - totalPurchasePaid;
+
+  // Sales of this product
+  const productSales = sales.filter(s => s.product_id === productCode);
+  const totalSoldQty = productSales.reduce((sum, s) => sum + (Number(s.qty) || 0), 0);
+  const totalSoldWeight = productSales.reduce((sum, s) => sum + (Number(s.total_weight) || Number(s.weight) * Number(s.qty) || 0), 0);
+  const totalSaleAmount = productSales.reduce((sum, s) => sum + (Number(s.total) || 0), 0);
+  const totalSaleReceived = productSales.reduce((sum, s) => sum + (Number(s.received) || 0), 0);
+  const totalSaleBalance = totalSaleAmount - totalSaleReceived;
+
+  // Inventory
+  const openingStock = Number(product.opening_stock) || 0;
+  const currentStock = openingStock + totalPurchasedQty - totalSoldQty;
+
+  // Profit (per product)
+  const avgPurchaseRate = totalPurchasedWeight > 0 ? totalPurchaseAmount / totalPurchasedWeight : (Number(product.cost_price) || 0);
+  const avgSaleRate = totalSoldWeight > 0 ? totalSaleAmount / totalSoldWeight : (Number(product.sale_price) || 0);
+
+  const costOfSold = totalSoldWeight * avgPurchaseRate;
+  const revenueFromSold = totalSaleAmount;
+  const grossProfit = revenueFromSold - costOfSold;
+
+  // GST on sales
+  let totalGST = 0;
+  productSales.forEach(s => {
+    const qty = Number(s.qty) || 1;
+    const weight = Number(s.weight) || 0;
+    const rate = Number(s.rate) || 0;
+    const making = Number(s.making) || 0;
+    const polish = Number(s.polish) || 0;
+    const gstPct = Number(s.gst_pct) || 3;
+    const totalWeight = qty * weight;
+    const subtotal = (totalWeight * rate) + (making * qty) + (polish * qty);
+    totalGST += subtotal * (gstPct / 100);
+  });
+
+  // Net profit
+  const netProfit = grossProfit - totalGST;
+
+  return {
+    product,
+    productCode,
+    productName: product.name,
+    category: product.category,
+    karat: product.karat,
+    openingStock,
+    currentStock,
+    totalPurchasedQty,
+    totalPurchasedWeight,
+    totalPurchaseAmount,
+    totalPurchasePaid,
+    totalPurchaseBalance,
+    totalSoldQty,
+    totalSoldWeight,
+    totalSaleAmount,
+    totalSaleReceived,
+    totalSaleBalance,
+    avgPurchaseRate,
+    avgSaleRate,
+    costOfSold,
+    revenueFromSold,
+    grossProfit,
+    totalGST,
+    netProfit,
+    salesCount: productSales.length,
+    purchasesCount: productPurchases.length
+  };
 }
 
-// ===== BUSINESS CALCULATIONS =====
-function calculateSaleTotal(sale) {
-  const qty = sale.qty || 1;
-  const weight = sale.weight || 0;
-  const rate = sale.rate || 0;
-  const making = sale.making || 0;
-  const polish = sale.polish || 0;
-  const discount = sale.discount || 0;
-  const gstPct = sale.gst_pct || 3;
-  
-  const totalWeight = qty * weight;
-  const metal = totalWeight * rate;
-  const makingTotal = making * qty;
-  const polishTotal = polish * qty;
-  const subtotal = metal + makingTotal + polishTotal;
-  const gst = subtotal * (gstPct / 100);
-  const total = subtotal + gst - discount;
-  
-  return { totalWeight, metal, makingTotal, polishTotal, subtotal, gst, total };
-}
-
-function calculatePurchaseTotal(purchase) {
-  const qty = purchase.qty || 1;
-  const weight = purchase.weight || 0;
-  const rate = purchase.rate || 0;
-  const totalWeight = qty * weight;
-  const total = totalWeight * rate;
-  
-  return { totalWeight, total };
+// Saare products ka stats
+function calculateAllProductsStats(products, purchases, sales, payments, customers) {
+  return products.map(p => calculateProductStats(p.product_code, products, purchases, sales, payments, customers)).filter(Boolean);
 }
 
 // ===== WHATSAPP / EMAIL =====
