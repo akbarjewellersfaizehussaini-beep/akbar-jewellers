@@ -3,161 +3,565 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payments – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
+  <title>Payments & Receipts – Akbar Jewellers Software</title>
   <link rel="icon" type="image/png" href="../../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style-software.css">
+  <style>
+    .balance-badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }
+    .balance-due { background: rgba(220,38,38,0.2); color: #FCA5A5; }
+    .balance-advance { background: rgba(37,211,102,0.2); color: #86EFAC; }
+    .balance-clear { background: rgba(184,184,184,0.2); color: #B8B8B8; }
+    .person-card { background: var(--black-royal); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
+    .person-card:hover { border-color: var(--gold-primary); background: rgba(255,215,0,0.05); }
+    .person-card.selected { border-color: var(--gold-primary); background: rgba(255,215,0,0.1); box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+    .add-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px; }
+    .add-new-btn { background: linear-gradient(135deg, var(--charcoal), var(--black-soft)); border: 2px dashed rgba(255,215,0,0.4); border-radius: 12px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.3s; font-family: var(--font-body); }
+    .add-new-btn:hover { border-color: var(--gold-primary); border-style: solid; background: rgba(255,215,0,0.05); transform: translateY(-2px); }
+    .add-new-btn .icon { font-size: 1.5rem; margin-bottom: 5px; }
+    .add-new-btn .label { color: var(--gold-primary); font-weight: 600; font-size: 0.85rem; }
+  </style>
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Payments & Receipts</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Payments & Receipts
+    </div>
+    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Payment Receipt</h1>
-    <p class="page-subtitle">Receive advance from customers or pay suppliers/karigars.</p>
+    <p class="page-subtitle">Sirf un logon ko dikhaya ja raha hai jinke paas balance hai</p>
+
+    <!-- ADD NEW BUTTONS -->
+    <div class="add-btn-grid">
+      <button class="add-new-btn" onclick="openAddPersonModal('customer')">
+        <div class="icon">👤➕</div>
+        <div class="label">Add New Customer</div>
+      </button>
+      <button class="add-new-btn" onclick="openAddPersonModal('supplier')">
+        <div class="icon">🏭➕</div>
+        <div class="label">Add New Supplier</div>
+      </button>
+      <button class="add-new-btn" onclick="openAddPersonModal('karigar')">
+        <div class="icon">👷➕</div>
+        <div class="label">Add New Karigar</div>
+      </button>
+    </div>
 
     <div class="form-card">
-      <h3 class="form-card-title">New Payment Entry</h3>
+      <h3 class="form-card-title">📋 Select Person (Balance Wale)</h3>
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Person Type *</label>
-          <select id="pType" class="form-select" onchange="loadPersons()">
-            <option value="customer">Customer (Receive Payment)</option>
-            <option value="supplier">Supplier (Give Payment)</option>
-            <option value="karigar">Karigar (Give Payment)</option>
+          <label class="form-label">Person Type</label>
+          <select id="pType" class="form-select" onchange="loadPersonsWithBalance()">
+            <option value="customer">👥 Customers (Jinke paas udhaar hai — Receive)</option>
+            <option value="supplier">🏭 Suppliers (Jinko dena hai — Pay)</option>
+            <option value="karigar">👷 Karigars (Jinko dena hai — Pay)</option>
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Select Name *</label>
-          <select id="pPerson" class="form-select">
-            <option value="">-- Select --</option>
-          </select>
+          <label class="form-label">Search</label>
+          <input type="text" id="searchPerson" class="form-input" placeholder="🔍 Name ya phone se search karein..." oninput="filterPersonCards()">
         </div>
       </div>
 
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Amount (Rs) *</label><input type="number" id="pAmount" class="form-input" placeholder="0"></div>
-        <div class="form-group">
-          <label class="form-label">Payment Type</label>
-          <select id="pPayType" class="form-select">
-            <option value="advance">Advance</option>
-            <option value="due">Against Due</option>
-            <option value="full">Full & Final</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Payment Mode</label>
-          <select id="pMode" class="form-select">
-            <option value="cash">Cash</option>
-            <option value="bank">Bank Transfer</option>
-            <option value="easypaisa">Easypaisa</option>
-            <option value="jazzcash">JazzCash</option>
-          </select>
-        </div>
-        <div class="form-group"><label class="form-label">Payment Date</label><input type="date" id="pDate" class="form-input"></div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Notes (Optional)</label>
-        <input type="text" id="pNotes" class="form-input" placeholder="Any details...">
-      </div>
-
-      <div style="display: flex; gap: 12px; margin-top: 15px;">
-        <button class="btn-primary" onclick="savePayment(false)" style="flex: 1;">Save & View Receipt</button>
-        <button class="btn-secondary" onclick="savePayment(true)" style="flex: 1; background: #25D366; color: white; border: none;">Save & WhatsApp</button>
+      <div id="personsList" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+        <div class="empty-state"><p>Loading...</p></div>
       </div>
     </div>
 
-    <h2 class="section-title">Recent Payments (Click to view Receipt)</h2>
+    <div id="paymentFormContainer" style="display: none;">
+      <div class="form-card">
+        <h3 class="form-card-title">💰 Payment Entry – <span id="selectedPersonName" style="color: var(--gold-primary);"></span></h3>
+        
+        <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; text-align: center;">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total Bill</div>
+              <div style="color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoTotalBill">Rs 0</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total Paid</div>
+              <div style="color: #86EFAC; font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoTotalPaid">Rs 0</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Balance</div>
+              <div style="color: #FCA5A5; font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoBalance">Rs 0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount (Rs) <span class="required">*</span></label>
+            <input type="number" id="pAmount" class="form-input number-input" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Type</label>
+            <select id="pPayType" class="form-select">
+              <option value="due">Against Due</option>
+              <option value="advance">Advance</option>
+              <option value="full">Full & Final</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Payment Mode</label>
+            <select id="pMode" class="form-select">
+              <option value="cash">Cash</option>
+              <option value="bank">Bank Transfer</option>
+              <option value="easypaisa">Easypaisa</option>
+              <option value="jazzcash">JazzCash</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Date</label>
+            <input type="date" id="pDate" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Notes (Optional)</label>
+          <input type="text" id="pNotes" class="form-input" placeholder="Any details...">
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 15px;">
+          <button class="btn-primary" onclick="savePayment(false)" id="savePayBtn" style="flex: 1;">💾 Save & View Receipt</button>
+          <button class="btn-success" onclick="savePayment(true)" style="flex: 1;">📱 Save & WhatsApp</button>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">📋 Recent Payments (Click to view Receipt)</h2>
     <div class="data-list" id="paymentsList"></div>
   </div>
 
+  <!-- ADD PERSON MODAL -->
+  <div id="addPersonModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="modal-title" style="margin: 0;" id="addPersonTitle">➕ Add New</h2>
+        <button onclick="closeAddPersonModal()" style="background: none; border: none; color: var(--gold-primary); font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+
+      <input type="hidden" id="addPersonType">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Name <span class="required">*</span></label>
+          <input type="text" id="newPersonName" class="form-input" placeholder="Poora naam">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone <span class="required">*</span></label>
+          <input type="tel" id="newPersonPhone" class="form-input" placeholder="03XXXXXXXXX">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">CNIC</label>
+          <input type="text" id="newPersonCNIC" class="form-input" placeholder="XXXXX-XXXXXXX-X">
+        </div>
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input type="text" id="newPersonCity" class="form-input" placeholder="Lahore">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" id="newPersonAddress" class="form-input" placeholder="Complete address">
+      </div>
+
+      <div class="form-row" id="openingBalanceRow">
+        <div class="form-group">
+          <label class="form-label">Opening Cash Balance (Rs) <span class="tooltip-icon" data-tooltip="Agar pehle se udhaar/advance hai">?</span></label>
+          <input type="number" id="newPersonOpeningCash" class="form-input number-input" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Opening Gold Weight (gram) <span class="tooltip-icon" data-tooltip="Agar pehle se sona hai">?</span></label>
+          <input type="number" id="newPersonOpeningGold" class="form-input number-input" placeholder="0.000" step="0.001">
+        </div>
+      </div>
+
+      <div class="form-group" id="photoUploadGroup">
+        <label class="form-label">Photo (Optional)</label>
+        <input type="file" id="newPersonPhoto" class="form-input" accept="image/*" style="padding:10px;">
+        <div id="newPersonPhotoPreview" style="margin-top:10px;"></div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn-secondary" onclick="closeAddPersonModal()" style="flex: 1;">Cancel</button>
+        <button class="btn-primary" onclick="saveNewPerson()" id="saveNewPersonBtn" style="flex: 1;">💾 Save & Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPT MODAL -->
   <div id="receiptModal" class="modal">
     <div class="modal-content" style="max-width: 600px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableReceipt"></div>
       <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableReceipt')" style="flex:1;">Print Receipt</button>
-        <button class="btn-secondary" onclick="sendReceiptWhatsApp()" style="flex:1; background:#25D366; color:white; border:none;">WhatsApp</button>
+        <button class="btn-primary" onclick="printElement('printableReceipt')" style="flex:1;">🖨 Print</button>
+        <button class="btn-success" onclick="sendReceiptWhatsApp()" style="flex:1;">📱 WhatsApp</button>
+        <button class="btn-secondary" onclick="sendReceiptEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
         <button class="btn-danger" onclick="document.getElementById('receiptModal').classList.remove('active')" style="flex:1;">Close</button>
       </div>
     </div>
   </div>
 
-  <script src="../../js/supabase.js"></script>
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
     let currentReceipt = null;
+    let allPersons = [];
+    let selectedPerson = null;
+    let currentType = 'customer';
+    let uploadedPersonPhoto = '';
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
       document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
-      await loadPersons();
+      await loadPersonsWithBalance();
       loadPayments();
     });
 
-    async function loadPersons() {
-      const type = document.getElementById('pType').value;
-      const select = document.getElementById('pPerson');
-      select.innerHTML = '<option value="">-- Select --</option>';
+    // ===== ADD PERSON MODAL =====
+    function openAddPersonModal(type) {
+      document.getElementById('addPersonType').value = type;
+      const titleMap = {
+        'customer': '👤 Add New Customer',
+        'supplier': '🏭 Add New Supplier',
+        'karigar': '👷 Add New Karigar'
+      };
+      document.getElementById('addPersonTitle').textContent = titleMap[type] || 'Add New';
       
-      let data = [];
-      if (type === 'customer') data = await getRecordsFast('customers');
-      else if (type === 'supplier') data = await getRecordsFast('suppliers');
-      else if (type === 'karigar') data = await getRecordsFast('karigars');
+      // Reset form
+      ['newPersonName','newPersonPhone','newPersonCNIC','newPersonCity','newPersonAddress','newPersonOpeningCash','newPersonOpeningGold','newPersonPhoto'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('newPersonPhotoPreview').innerHTML = '';
+      uploadedPersonPhoto = '';
+      
+      // Hide/show fields based on type
+      if (type === 'customer') {
+        document.getElementById('openingBalanceRow').style.display = 'grid';
+        document.getElementById('photoUploadGroup').style.display = 'block';
+      } else if (type === 'supplier') {
+        document.getElementById('openingBalanceRow').style.display = 'grid';
+        document.getElementById('photoUploadGroup').style.display = 'block';
+      } else if (type === 'karigar') {
+        document.getElementById('openingBalanceRow').style.display = 'grid';
+        document.getElementById('photoUploadGroup').style.display = 'block';
+      }
+      
+      document.getElementById('addPersonModal').classList.add('active');
+    }
 
-      data.forEach(p => {
-        select.innerHTML += `<option value="${p.name}|${p.phone || ''}">${p.name}</option>`;
+    function closeAddPersonModal() {
+      document.getElementById('addPersonModal').classList.remove('active');
+    }
+
+    // Photo preview
+    document.getElementById('newPersonPhoto')?.addEventListener('change', async (e) => {
+      if (e.target.files[0]) {
+        const file = e.target.files[0];
+        document.getElementById('newPersonPhotoPreview').innerHTML = `<img src="${URL.createObjectURL(file)}" style="max-width:100px; border-radius:8px; border:2px solid var(--gold-primary);">`;
+        try {
+          uploadedPersonPhoto = await uploadImage(file);
+        } catch (err) {
+          alert('Photo upload failed: ' + err.message);
+        }
+      }
+    });
+
+    async function saveNewPerson() {
+      const type = document.getElementById('addPersonType').value;
+      const name = document.getElementById('newPersonName').value.trim();
+      const phone = document.getElementById('newPersonPhone').value.trim();
+      
+      if (!name || !phone) { alert('❌ Name and phone required'); return; }
+
+      const btn = document.getElementById('saveNewPersonBtn');
+      btn.textContent = '⏳ Saving...'; 
+      btn.disabled = true;
+
+      try {
+        const data = {
+          name,
+          phone,
+          cnic: document.getElementById('newPersonCNIC').value.trim(),
+          address: document.getElementById('newPersonAddress').value.trim(),
+          photo: uploadedPersonPhoto
+        };
+
+        if (type === 'customer') {
+          data.city = document.getElementById('newPersonCity').value.trim();
+          data.opening_balance = parseFloat(document.getElementById('newPersonOpeningCash').value) || 0;
+          data.opening_gold_weight = parseFloat(document.getElementById('newPersonOpeningGold').value) || 0;
+          await addRecord('customers', data);
+        } else if (type === 'supplier') {
+          data.opening_cash = parseFloat(document.getElementById('newPersonOpeningCash').value) || 0;
+          data.opening_gold = parseFloat(document.getElementById('newPersonOpeningGold').value) || 0;
+          await addRecord('suppliers', data);
+        } else if (type === 'karigar') {
+          data.opening_cash = parseFloat(document.getElementById('newPersonOpeningCash').value) || 0;
+          data.opening_gold = parseFloat(document.getElementById('newPersonOpeningGold').value) || 0;
+          await addRecord('karigars', data);
+        }
+
+        alert(`✅ ${type.charAt(0).toUpperCase() + type.slice(1)} saved successfully!`);
+        closeAddPersonModal();
+        
+        // Switch to that type and reload
+        document.getElementById('pType').value = type;
+        await loadPersonsWithBalance();
+        
+        // Auto-select the newly added person
+        const idx = allPersons.findIndex(p => p.name === name);
+        if (idx >= 0) {
+          selectPerson(idx);
+        }
+        
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      } finally {
+        btn.textContent = '💾 Save & Continue';
+        btn.disabled = false;
+      }
+    }
+
+    // ===== LOAD PERSONS WITH BALANCE =====
+    async function loadPersonsWithBalance() {
+      currentType = document.getElementById('pType').value;
+      const container = document.getElementById('personsList');
+      container.innerHTML = '<div class="empty-state"><p>Loading...</p></div>';
+      
+      document.getElementById('paymentFormContainer').style.display = 'none';
+      selectedPerson = null;
+
+      try {
+        const sales = await getRecordsFast('sales');
+        const purchases = await getRecordsFast('purchases');
+        const payments = await getRecordsFast('payments');
+        const services = await getRecordsFast('services');
+        
+        allPersons = [];
+
+        if (currentType === 'customer') {
+          const customers = await getRecordsFast('customers');
+          
+          allPersons = customers.map(c => {
+            const cSales = sales.filter(s => s.customer_name === c.name);
+            const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+            
+            let totalBill = Number(c.opening_balance) || 0;
+            let totalPaid = 0;
+            
+            cSales.forEach(s => totalBill += Number(s.total) || 0);
+            cPays.forEach(p => totalPaid += Number(p.amount) || 0);
+            
+            const balance = totalBill - totalPaid;
+            
+            return {
+              name: c.name,
+              phone: c.phone,
+              type: 'customer',
+              totalBill,
+              totalPaid,
+              balance,
+              balanceType: balance > 0 ? 'due' : balance < 0 ? 'advance' : 'clear'
+            };
+          }).filter(p => p.balance !== 0);
+          
+        } else if (currentType === 'supplier') {
+          const suppliers = await getRecordsFast('suppliers');
+          
+          allPersons = suppliers.map(s => {
+            const sPurch = purchases.filter(p => p.supplier_name === s.name);
+            const sPays = payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+            
+            let totalBill = Number(s.opening_cash) || 0;
+            let totalPaid = 0;
+            
+            sPurch.forEach(p => totalBill += Number(p.total) || 0);
+            sPays.forEach(p => totalPaid += Number(p.amount) || 0);
+            
+            const balance = totalBill - totalPaid;
+            
+            return {
+              name: s.name,
+              phone: s.phone,
+              type: 'supplier',
+              totalBill,
+              totalPaid,
+              balance,
+              balanceType: balance > 0 ? 'due' : balance < 0 ? 'advance' : 'clear'
+            };
+          }).filter(p => p.balance !== 0);
+          
+        } else if (currentType === 'karigar') {
+          const karigars = await getRecordsFast('karigars');
+          
+          allPersons = karigars.map(k => {
+            const kServices = services.filter(s => s.karigar_name === k.name);
+            const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
+            
+            let totalBill = Number(k.opening_cash) || 0;
+            let totalPaid = 0;
+            
+            kServices.forEach(s => totalBill += Number(s.charges) || 0);
+            kPays.forEach(p => totalPaid += Number(p.amount) || 0);
+            
+            const balance = totalBill - totalPaid;
+            
+            return {
+              name: k.name,
+              phone: k.phone,
+              type: 'karigar',
+              totalBill,
+              totalPaid,
+              balance,
+              balanceType: balance > 0 ? 'due' : balance < 0 ? 'advance' : 'clear'
+            };
+          }).filter(p => p.balance !== 0);
+        }
+
+        renderPersonsList();
+
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div class="empty-state"><p>Error loading data: ' + e.message + '</p></div>';
+      }
+    }
+
+    function renderPersonsList() {
+      const container = document.getElementById('personsList');
+      
+      if (allPersons.length === 0) {
+        const typeLabel = currentType === 'customer' ? 'customers' : currentType === 'supplier' ? 'suppliers' : 'karigars';
+        container.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>Koi ${typeLabel} nahi hai jinke paas balance hai. Sab clear hai!</p><p style="font-size:0.8rem; margin-top:10px;">Naya ${currentType} add karne ke liye upar button click karein.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = allPersons.map((p, idx) => {
+        const badgeClass = p.balanceType === 'due' ? 'balance-due' : p.balanceType === 'advance' ? 'balance-advance' : 'balance-clear';
+        const balanceText = p.balanceType === 'due' ? `Due: ${formatPKR(p.balance)}` : p.balanceType === 'advance' ? `Advance: ${formatPKR(Math.abs(p.balance))}` : 'Clear';
+        
+        return `
+          <div class="person-card" data-name="${p.name.toLowerCase()}" data-phone="${(p.phone || '').toLowerCase()}" onclick="selectPerson(${idx})">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <div style="color: var(--gold-primary); font-weight: 700; font-size: 1rem;">${p.name}</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem;">📞 ${p.phone || '—'}</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="balance-badge ${badgeClass}">${balanceText}</span>
+                <div style="color: var(--text-muted); font-size: 0.7rem; margin-top: 3px;">Click to select</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterPersonCards() {
+      const search = document.getElementById('searchPerson').value.toLowerCase();
+      const cards = document.querySelectorAll('.person-card');
+      
+      cards.forEach(card => {
+        const name = card.getAttribute('data-name');
+        const phone = card.getAttribute('data-phone');
+        if (name.includes(search) || phone.includes(search)) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
       });
     }
 
+    function selectPerson(idx) {
+      selectedPerson = allPersons[idx];
+      
+      document.querySelectorAll('.person-card').forEach((c, i) => {
+        c.classList.toggle('selected', i === idx);
+      });
+      
+      document.getElementById('paymentFormContainer').style.display = 'block';
+      document.getElementById('selectedPersonName').textContent = selectedPerson.name;
+      
+      document.getElementById('infoTotalBill').textContent = formatPKR(selectedPerson.totalBill);
+      document.getElementById('infoTotalPaid').textContent = formatPKR(selectedPerson.totalPaid);
+      document.getElementById('infoBalance').textContent = formatPKR(Math.abs(selectedPerson.balance));
+      
+      const balanceInput = document.getElementById('pAmount');
+      if (selectedPerson.balance > 0) {
+        balanceInput.value = Math.round(selectedPerson.balance);
+      } else {
+        balanceInput.value = '';
+      }
+      
+      const payTypeSelect = document.getElementById('pPayType');
+      if (selectedPerson.balance > 0) {
+        payTypeSelect.value = 'due';
+      } else {
+        payTypeSelect.value = 'advance';
+      }
+      
+      document.getElementById('paymentFormContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+
     async function savePayment(sendWA) {
-      const personType = document.getElementById('pType').value;
-      const personVal = document.getElementById('pPerson').value;
+      if (!selectedPerson) { alert('❌ Please select a person first'); return; }
+      
       const amount = parseFloat(document.getElementById('pAmount').value) || 0;
       
-      if (!personVal || amount <= 0) { alert('❌ Select person and enter valid amount'); return; }
+      if (amount <= 0) { alert('❌ Enter valid amount'); return; }
 
-      const [personName, personPhone] = personVal.split('|');
-      const btn = event.target;
-      btn.textContent = 'Saving...'; btn.disabled = true;
+      const btn = document.getElementById('savePayBtn');
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         const payment = {
           receipt_number: 'RCV-' + Date.now(),
-          person_type: personType,
-          person_name: personName,
-          person_phone: personPhone,
+          person_type: selectedPerson.type,
+          person_name: selectedPerson.name,
+          person_phone: selectedPerson.phone,
           amount: amount,
           payment_type: document.getElementById('pPayType').value,
           payment_mode: document.getElementById('pMode').value,
           notes: document.getElementById('pNotes').value.trim(),
-          payment_date: document.getElementById('pDate').value || new Date().toISOString().slice(0,10)
+          payment_date: document.getElementById('pDate').value
         };
 
         const saved = await addRecord('payments', payment);
         currentReceipt = saved;
         
         if (sendWA) {
-          const action = personType === 'customer' ? 'Received from' : 'Paid to';
-          const msg = `*PAYMENT RECEIPT*\nReceipt #: ${payment.receipt_number}\n${action}: ${personName}\nAmount: ${formatPKR(amount)}\nDate: ${formatDate(payment.payment_date)}\nMode: ${payment.payment_mode.toUpperCase()}`;
-          openWhatsApp(personPhone, msg);
+          const action = selectedPerson.type === 'customer' ? 'Received from' : 'Paid to';
+          const msg = `*PAYMENT RECEIPT*\nReceipt #: ${payment.receipt_number}\n${action}: ${selectedPerson.name}\nAmount: ${formatPKR(amount)}\nDate: ${formatDate(payment.payment_date)}\nMode: ${payment.payment_mode.toUpperCase()}`;
+          openWhatsApp(selectedPerson.phone, msg);
         }
         
         showReceipt(saved);
-        clearForm(); loadPayments();
+        
+        document.getElementById('pAmount').value = '';
+        document.getElementById('pNotes').value = '';
+        document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('paymentFormContainer').style.display = 'none';
+        selectedPerson = null;
+        
+        await loadPersonsWithBalance();
+        loadPayments();
+        
       } catch (e) {
         alert('❌ Error: ' + e.message);
       } finally {
-        btn.textContent = sendWA ? 'Save & WhatsApp' : 'Save & View Receipt';
+        btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Receipt';
         btn.disabled = false;
       }
     }
@@ -214,10 +618,13 @@
       openWhatsApp(currentReceipt.person_phone, msg);
     }
 
-    function clearForm() {
-      ['pAmount','pNotes'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('pPerson').value = '';
-      document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
+    function sendReceiptEmail() {
+      if (!currentReceipt) return;
+      const email = prompt('Enter email address:', '');
+      if (!email) return;
+      const action = currentReceipt.person_type === 'customer' ? 'Received from' : 'Paid to';
+      const body = `Payment Receipt\n\nReceipt #: ${currentReceipt.receipt_number}\n${action}: ${currentReceipt.person_name}\nAmount: ${formatPKR(currentReceipt.amount)}\nDate: ${formatDate(currentReceipt.payment_date)}\nMode: ${currentReceipt.payment_mode.toUpperCase()}`;
+      sendEmail(email, `Payment Receipt ${currentReceipt.receipt_number}`, body);
     }
 
     async function loadPayments() {
@@ -244,12 +651,5 @@
       }).join('');
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
