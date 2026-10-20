@@ -97,25 +97,25 @@
           <input type="number" id="sRate" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
         <div class="form-group">
-          <label class="form-label">Making Charges (Rs) — Manual</label>
+          <label class="form-label">Making Charges (Rs)</label>
           <input type="number" id="sMaking" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Polish Charges (Rs) — Manual</label>
+          <label class="form-label">Polish Charges (Rs)</label>
           <input type="number" id="sPolish" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
         <div class="form-group">
-          <label class="form-label">Discount (Rs) — Manual</label>
+          <label class="form-label">Discount (Rs)</label>
           <input type="number" id="sDiscount" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">GST % (Auto from Settings)</label>
+          <label class="form-label">GST %</label>
           <input type="number" id="sGST" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary);">
         </div>
       </div>
@@ -123,26 +123,19 @@
 
     <div class="form-card" style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,215,0,0.02)); border-color:var(--gold-primary);">
       <h3 class="form-card-title">💰 Price Breakdown</h3>
-      
       <div style="display:grid; grid-template-columns:1fr auto; gap:10px; font-size:0.95rem;">
         <span style="color:var(--text-muted);">Metal Value</span>
         <strong id="bdMetal" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
-        
         <span style="color:var(--text-muted);">Making Charges</span>
         <strong id="bdMaking" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
-        
         <span style="color:var(--text-muted);">Polish Charges</span>
         <strong id="bdPolish" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
-        
         <span style="color:var(--gold-primary); font-weight:700; border-top:1px solid var(--gold-primary); padding-top:8px;">Subtotal</span>
         <strong id="bdSubtotal" style="color:var(--gold-primary); text-align:right; font-family:var(--font-mono); border-top:1px solid var(--gold-primary); padding-top:8px;">Rs 0</strong>
-        
         <span style="color:var(--text-muted);">GST</span>
         <strong id="bdGST" style="color:var(--text-light); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
-        
         <span style="color:var(--success);">Discount</span>
         <strong id="bdDiscount" style="color:var(--success); text-align:right; font-family:var(--font-mono);">Rs 0</strong>
-        
         <span style="color:var(--gold-primary); font-weight:700; font-size:1.3rem; border-top:2px solid var(--gold-primary); padding-top:10px;">TOTAL</span>
         <strong id="bdTotal" style="color:var(--gold-primary); text-align:right; font-size:1.5rem; font-family:var(--font-heading); border-top:2px solid var(--gold-primary); padding-top:10px;">Rs 0</strong>
       </div>
@@ -150,11 +143,10 @@
 
     <div class="form-card">
       <h3 class="form-card-title">💳 Payment</h3>
-      
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Payment Type</label>
-          <select id="sPaymentType" class="form-select" onchange="autoCalc()">
+          <select id="sPaymentType" class="form-select">
             <option value="full">100% Full Payment</option>
             <option value="advance">Advance Payment</option>
             <option value="credit">Credit (Udhaar)</option>
@@ -171,7 +163,6 @@
           </select>
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Received Amount (Rs)</label>
@@ -196,11 +187,23 @@
   <div id="invoiceModal" class="modal">
     <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableInvoice"></div>
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">🖨 Print</button>
-        <button class="btn-success" onclick="sendInvoiceWhatsApp()" style="flex:1;">📱 WhatsApp</button>
-        <button class="btn-secondary" onclick="sendInvoiceEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
-        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      <div class="action-buttons-grid">
+        <button class="action-btn print-btn" onclick="printElement('printableInvoice')">
+          <span class="btn-icon">🖨</span>
+          <span class="btn-text">Print</span>
+        </button>
+        <button class="action-btn whatsapp-btn" onclick="sendInvoiceWhatsApp()">
+          <span class="btn-icon">📱</span>
+          <span class="btn-text">WhatsApp</span>
+        </button>
+        <button class="action-btn email-btn" onclick="sendInvoiceEmail()">
+          <span class="btn-icon">📧</span>
+          <span class="btn-text">Email</span>
+        </button>
+        <button class="action-btn close-btn" onclick="document.getElementById('invoiceModal').classList.remove('active')">
+          <span class="btn-icon">✕</span>
+          <span class="btn-text">Close</span>
+        </button>
       </div>
     </div>
   </div>
@@ -210,8 +213,8 @@
   <script>
     let shopRules = { gst_pct: 3 };
     let allProducts = [];
-    let currentInvoice = null;
     let customers = [];
+    let currentInvoice = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales'])) return;
@@ -223,16 +226,14 @@
       allProducts = await getRecordsFast('products');
       customers = await getRecordsFast('customers');
       
-      // Populate products
       const prodSelect = document.getElementById('sProductId');
       allProducts.forEach(p => {
         prodSelect.innerHTML += `<option value="${p.product_code || p.id}">${p.product_code || ''} - ${p.name}</option>`;
       });
       
-      // Populate customers
       const custSelect = document.getElementById('selectCustomer');
       customers.forEach(c => {
-        custSelect.innerHTML += `<option value="${c.name}">${c.name} - ${c.phone}</option>`;
+        custSelect.innerHTML += `<option value="${c.name}">${c.name} - ${c.phone || ''}</option>`;
       });
       
       loadSales();
@@ -271,7 +272,7 @@
       const polish = parseFloat(document.getElementById('sPolish').value) || 0;
       const discount = parseFloat(document.getElementById('sDiscount').value) || 0;
       
-      const weightInGrams = toGrams(weight, unit);
+      const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
       const totalWeight = qty * weightInGrams;
       const metal = totalWeight * rate;
       const makingTotal = making * qty;
@@ -300,14 +301,13 @@
       if (!customer || !item || total <= 0) { alert('❌ Fill customer name, item, and amounts'); return; }
 
       const btn = document.getElementById('saveSaleBtn');
-      btn.textContent = '⏳ Saving...'; 
-      btn.disabled = true;
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         const qty = parseFloat(document.getElementById('sQty').value) || 1;
         const weight = parseFloat(document.getElementById('sWeight').value) || 0;
         const unit = document.getElementById('sWeightUnit').value;
-        const weightInGrams = toGrams(weight, unit);
+        const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
         
         const sale = {
           invoice_number: 'AKBAR-' + Date.now(),
@@ -336,7 +336,7 @@
         
         if (sendWA) {
           const shop = await getShopSettings();
-          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item} (Qty: ${qty})\nWeight: ${formatWeight(sale.total_weight)}\nRate: ${formatPKR(sale.rate)}/g\n\n*Total: ${formatPKR(total)}*\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
+          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item}\nTotal: ${formatPKR(total)}\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
           openWhatsApp(sale.customer_phone, msg);
         }
         
@@ -354,7 +354,6 @@
 
     async function showInvoice(sale) {
       const shop = await getShopSettings();
-      
       const qty = sale.qty || 1;
       const weight = sale.weight || 0;
       const rate = sale.rate || 0;
@@ -375,7 +374,6 @@
           <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
           <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
         </div>
-        
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
           <div>
             <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
@@ -386,72 +384,24 @@
             <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
           </div>
         </div>
-        
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-          <thead>
-            <tr style="background:#FAF7F0;">
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td>
-            </tr>
-          </tbody>
+          <thead><tr style="background:#FAF7F0;"><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th></tr></thead>
+          <tbody><tr><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${totalWeight.toFixed(3)}g</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td></tr></tbody>
         </table>
-        
         <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
-          <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
-          
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-            <span style="font-size:13px; color:#666;">Metal Value (${formatWeight(totalWeight)} × ${formatPKR(rate)}/g)</span>
-            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong>
-          </div>
-          
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-            <span style="font-size:13px; color:#666;">Making Charges</span>
-            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
-          </div>
-          
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-            <span style="font-size:13px; color:#666;">Polish Charges</span>
-            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
-          </div>
-          
-          <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
-            <span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span>
-            <strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong>
-          </div>
-          
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-            <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
-            <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
-          </div>
-          
-          ${discount > 0 ? `
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
-            <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
-            <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
-          </div>
-          ` : ''}
-          
-          <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
-            <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
-            <strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong>
-          </div>
+          <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase;">💰 Price Breakdown</h3>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Metal Value</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Making Charges</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Polish Charges</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;"><span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span><strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong></div>
+          ${discount > 0 ? `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);"><span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span><strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong></div>` : ''}
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;"><span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span><strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong></div>
         </div>
-        
         <div style="text-align:right; font-size:14px; margin-bottom:10px;">
           <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
           <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
         </div>
-        
         <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
           Thank you for shopping with ${shop.name}
           <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
@@ -470,7 +420,7 @@
       if (!currentInvoice) return;
       const email = prompt('Enter customer email:', '');
       if (!email) return;
-      const body = `Invoice: ${currentInvoice.invoice_number}\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+      const body = `Invoice: ${currentInvoice.invoice_number}\nCustomer: ${currentInvoice.customer_name}\nTotal: ${formatPKR(currentInvoice.total)}`;
       sendEmail(email, `Invoice ${currentInvoice.invoice_number}`, body);
     }
 
@@ -489,25 +439,29 @@
       if (sales.length === 0) { container.innerHTML = '<div class="empty-state"><p>No sales yet</p></div>'; return; }
       
       container.innerHTML = sales.slice(0, 20).map(s => `
-        <div class="data-item" style="cursor:pointer;" onclick='showInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
-          <div>
+        <div class="data-item">
+          <div style="cursor:pointer; flex:1;" onclick='showInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
             <div class="data-item-title">${s.items_summary} <span style="color:var(--gold-primary); font-size:0.8rem;">(Qty: ${s.qty || 1})</span></div>
             <div class="data-item-sub">${s.customer_name} • ${formatDate(s.sale_date || s.created_at)}</div>
           </div>
-          <div style="text-align:right;">
+          <div style="display:flex; align-items:center; gap:10px;">
             <div class="data-item-value">${formatPKR(s.total)}</div>
-            ${s.balance > 0 ? `<div class="data-item-sub" style="color:#FCD34D;">Due: ${formatPKR(s.balance)}</div>` : '<div class="data-item-sub" style="color:#86EFAC;">Paid</div>'}
+            ${deleteButtonHTML('deleteSale', s.id)}
           </div>
         </div>
       `).join('');
     }
+
+    async function deleteSale(id) {
+      if (!confirmDelete('this sale')) return;
+      try {
+        await deleteRecord('sales', id);
+        alert('✅ Sale deleted');
+        loadSales();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
+    }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>

@@ -38,7 +38,7 @@
 
   <div class="sw-content">
     <h1 class="page-title">Product Management</h1>
-    <p class="page-subtitle">Inventory with unique IDs, opening stock, and auto profit</p>
+    <p class="page-subtitle">Inventory with unique IDs, opening stock</p>
 
     <div class="form-card">
       <h3 class="form-card-title" id="formTitle">➕ Add New Product</h3>
@@ -88,15 +88,23 @@
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">Weight (grams) <span class="required">*</span></label>
-          <input type="number" id="prWeight" class="form-input number-input" step="0.001" placeholder="0.000">
+          <label class="form-label">Size</label>
+          <input type="text" id="prSize" class="form-input" placeholder="e.g., 16">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Size</label>
-          <input type="text" id="prSize" class="form-input" placeholder="e.g., 16">
+          <label class="form-label">Weight <span class="required">*</span></label>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+            <input type="number" id="prWeight" class="form-input number-input" step="0.001" placeholder="0.000">
+            <select id="prWeightUnit" class="form-select">
+              <option value="gram">Gram</option>
+              <option value="tola">Tola</option>
+              <option value="masha">Masha</option>
+              <option value="ratti">Ratti</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">Purchase Date</label>
@@ -108,34 +116,28 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Cost Price (Rs) <span class="required">*</span></label>
-          <input type="number" id="prCost" class="form-input number-input" placeholder="0" oninput="calcProfit()">
+          <label class="form-label">Cost Price <span class="required">*</span></label>
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
+            <input type="number" id="prCost" class="form-input number-input" placeholder="0">
+            <select id="prCostUnit" class="form-select">
+              <option value="tola">Per Tola</option>
+              <option value="gram">Per Gram</option>
+            </select>
+          </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Sale Price (Rs) <span class="required">*</span></label>
-          <input type="number" id="prSale" class="form-input number-input" placeholder="0" oninput="calcProfit()">
+          <label class="form-label">Sale Price (Optional)</label>
+          <input type="number" id="prSale" class="form-input number-input" placeholder="0 (optional)">
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Profit (Auto)</label>
-        <input type="text" id="prProfit" class="form-input" readonly style="background:var(--charcoal); color:#86EFAC; font-weight:700; font-family:var(--font-mono);">
       </div>
 
       <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">📦 Inventory</h4>
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Stock <span class="tooltip-icon" data-tooltip="Agar pehle se stock hai to yahan daalein">?</span></label>
+          <label class="form-label">Opening Stock</label>
           <input type="number" id="prOpeningStock" class="form-input number-input" value="0" placeholder="0">
         </div>
-        <div class="form-group">
-          <label class="form-label">Current Stock (Auto)</label>
-          <input type="number" id="prCurrentStock" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary);" value="0">
-        </div>
-      </div>
-
-      <div class="form-row">
         <div class="form-group">
           <label class="form-label">Featured (Homepage)</label>
           <select id="prFeatured" class="form-select">
@@ -195,7 +197,6 @@
     async function generateProductCode() {
       const cat = document.getElementById('prCategory').value;
       const catPrefix = cat.toUpperCase().slice(0, 3);
-      
       try {
         const products = await getRecordsFast('products', true);
         const catCount = products.filter(p => p.category === cat).length;
@@ -203,23 +204,6 @@
         document.getElementById('prCode').value = `AKBAR-${catPrefix}-${num}`;
       } catch (e) {
         document.getElementById('prCode').value = `AKBAR-${catPrefix}-001`;
-      }
-    }
-
-    function calcProfit() {
-      const cost = parseFloat(document.getElementById('prCost').value) || 0;
-      const sale = parseFloat(document.getElementById('prSale').value) || 0;
-      const profit = sale - cost;
-      const profitEl = document.getElementById('prProfit');
-      if (profit > 0) {
-        profitEl.value = '+ ' + formatPKR(profit) + ' (' + ((profit / cost) * 100).toFixed(1) + '%)';
-        profitEl.style.color = '#86EFAC';
-      } else if (profit < 0) {
-        profitEl.value = '- ' + formatPKR(Math.abs(profit));
-        profitEl.style.color = '#FCA5A5';
-      } else {
-        profitEl.value = 'Rs 0';
-        profitEl.style.color = 'var(--text-muted)';
       }
     }
 
@@ -235,7 +219,9 @@
     async function saveProduct() {
       const name = document.getElementById('prName').value.trim();
       const weight = parseFloat(document.getElementById('prWeight').value) || 0;
+      const weightUnit = document.getElementById('prWeightUnit').value;
       const cost = parseFloat(document.getElementById('prCost').value) || 0;
+      const costUnit = document.getElementById('prCostUnit').value;
       const sale = parseFloat(document.getElementById('prSale').value) || 0;
       const openingStock = parseInt(document.getElementById('prOpeningStock').value) || 0;
       const code = document.getElementById('prCode').value;
@@ -246,13 +232,16 @@
       if (!name) { alert('❌ Product name required'); return; }
       if (weight <= 0) { alert('❌ Weight required'); return; }
       if (cost <= 0) { alert('❌ Cost price required'); return; }
-      if (sale <= 0) { alert('❌ Sale price required'); return; }
       if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Upload at least 1 image'); return; }
 
       const btn = document.getElementById('saveBtn');
-      btn.textContent = '⏳ Uploading...'; btn.disabled = true;
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
+        const weightInGrams = weightUnit === 'tola' ? weight * 11.664 : weightUnit === 'masha' ? weight * 0.972 : weightUnit === 'ratti' ? weight * 0.1215 : weight;
+        const costPerGram = costUnit === 'tola' ? cost / 11.664 : cost;
+        const totalCost = costPerGram * weightInGrams;
+
         const imageUrls = [...uploadedImages];
         if (images.length > 0) {
           for (const file of Array.from(images).slice(0, 5)) {
@@ -267,9 +256,9 @@
           category: document.getElementById('prCategory').value,
           subcategory: document.getElementById('prSubcategory').value.trim(),
           karat: document.getElementById('prKarat').value,
-          weight: weight,
+          weight: weightInGrams,
           size: document.getElementById('prSize').value.trim(),
-          cost_price: cost,
+          cost_price: totalCost,
           sale_price: sale,
           opening_stock: openingStock,
           current_stock: openingStock,
@@ -299,7 +288,7 @@
     }
 
     function clearForm() {
-      ['prName','prWeight','prCost','prSale','prSubcategory','prDescription','prSize','prProfit','editProductId'].forEach(id => document.getElementById(id).value = '');
+      ['prName','prWeight','prCost','prSale','prSubcategory','prDescription','prSize','editProductId'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('prImages').value = '';
       document.getElementById('prImagesPreview').innerHTML = '';
       document.getElementById('prOpeningStock').value = '0';
@@ -333,9 +322,7 @@
 
       container.innerHTML = products.map(p => {
         const img = p.images && p.images[0] ? p.images[0] : '../../images/placeholder.svg';
-        const profit = (p.sale_price || 0) - (p.cost_price || 0);
         const stock = p.current_stock || 0;
-        
         return `
           <div class="product-card-item">
             <img src="${img}" class="product-card-img" onerror="this.src='../../images/placeholder.svg'">
@@ -345,7 +332,6 @@
               <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${p.weight || 0}g</div>
               <div class="product-card-price">${formatPKR(p.sale_price)}</div>
               <div class="product-card-cost">Cost: ${formatPKR(p.cost_price)}</div>
-              ${profit > 0 ? `<span class="profit-tag">📈 Profit: ${formatPKR(profit)}</span>` : profit < 0 ? `<span class="profit-tag" style="background:rgba(220,38,38,0.2); color:#FCA5A5;">📉 Loss: ${formatPKR(Math.abs(profit))}</span>` : ''}
               <div><span class="stock-tag ${stock > 0 ? 'stock-in' : 'stock-out'}">${stock > 0 ? '✅ Stock: ' + stock : '❌ Out of Stock'}</span></div>
               <div class="product-actions">
                 <button class="btn-secondary" style="flex:1; padding:8px; font-size:0.8rem;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Edit</button>
@@ -366,17 +352,17 @@
       document.getElementById('prSubcategory').value = p.subcategory || '';
       document.getElementById('prKarat').value = p.karat || '';
       document.getElementById('prWeight').value = p.weight || '';
+      document.getElementById('prWeightUnit').value = 'gram';
       document.getElementById('prSize').value = p.size || '';
       document.getElementById('prCost').value = p.cost_price || '';
+      document.getElementById('prCostUnit').value = 'gram';
       document.getElementById('prSale').value = p.sale_price || '';
       document.getElementById('prOpeningStock').value = p.opening_stock || 0;
-      document.getElementById('prCurrentStock').value = p.current_stock || 0;
       document.getElementById('prFeatured').value = p.featured ? 'true' : 'false';
       document.getElementById('prDescription').value = p.description || '';
       document.getElementById('prPurchaseDate').value = p.purchase_date || new Date().toISOString().slice(0, 10);
       uploadedImages = p.images || [];
       document.getElementById('cancelBtn').style.display = 'block';
-      calcProfit();
       document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -394,7 +380,6 @@
     function filterProducts() {
       const search = document.getElementById('searchProducts').value.toLowerCase();
       const category = document.getElementById('filterCategory').value;
-      
       let filtered = allProducts;
       if (search) {
         filtered = filtered.filter(p => 
@@ -404,7 +389,6 @@
         );
       }
       if (category) filtered = filtered.filter(p => p.category === category);
-      
       renderProducts(filtered);
     }
   </script>

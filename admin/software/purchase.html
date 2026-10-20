@@ -62,7 +62,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Item Description <span class="required">*</span></label>
-          <input type="text" id="pItem" class="form-input" placeholder="e.g., Gold Biscuit / Gold Bar">
+          <input type="text" id="pItem" class="form-input" placeholder="e.g., Gold Biscuit">
         </div>
         <div class="form-group">
           <label class="form-label">Quantity <span class="required">*</span></label>
@@ -109,7 +109,7 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Discount (Rs) — Manual</label>
+          <label class="form-label">Discount (Rs)</label>
           <input type="number" id="pDiscount" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
       </div>
@@ -127,7 +127,6 @@
 
     <div class="form-card">
       <h3 class="form-card-title">💳 Payment</h3>
-      
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Payment Mode</label>
@@ -140,7 +139,6 @@
           </select>
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Paid Amount (Rs)</label>
@@ -158,18 +156,30 @@
       <button class="btn-success" onclick="savePurchase(true)" style="flex: 1;">📱 Save & WhatsApp</button>
     </div>
 
-    <h2 class="section-title">📋 Recent Purchases (Click to view Invoice)</h2>
+    <h2 class="section-title">📋 Recent Purchases</h2>
     <div class="data-list" id="purchasesList"></div>
   </div>
 
   <div id="invoiceModal" class="modal">
     <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableInvoice"></div>
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">🖨 Print</button>
-        <button class="btn-success" onclick="sendInvoiceWhatsApp()" style="flex:1;">📱 WhatsApp</button>
-        <button class="btn-secondary" onclick="sendInvoiceEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
-        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      <div class="action-buttons-grid">
+        <button class="action-btn print-btn" onclick="printElement('printableInvoice')">
+          <span class="btn-icon">🖨</span>
+          <span class="btn-text">Print</span>
+        </button>
+        <button class="action-btn whatsapp-btn" onclick="sendInvoiceWhatsApp()">
+          <span class="btn-icon">📱</span>
+          <span class="btn-text">WhatsApp</span>
+        </button>
+        <button class="action-btn email-btn" onclick="sendInvoiceEmail()">
+          <span class="btn-icon">📧</span>
+          <span class="btn-text">Email</span>
+        </button>
+        <button class="action-btn close-btn" onclick="document.getElementById('invoiceModal').classList.remove('active')">
+          <span class="btn-icon">✕</span>
+          <span class="btn-text">Close</span>
+        </button>
       </div>
     </div>
   </div>
@@ -188,7 +198,7 @@
       suppliers = await getRecordsFast('suppliers');
       const supSelect = document.getElementById('selectSupplier');
       suppliers.forEach(s => {
-        supSelect.innerHTML += `<option value="${s.name}">${s.name} - ${s.phone}</option>`;
+        supSelect.innerHTML += `<option value="${s.name}">${s.name} - ${s.phone || ''}</option>`;
       });
       
       loadPurchases();
@@ -213,14 +223,14 @@
       const rate = parseFloat(document.getElementById('pRate').value) || 0;
       const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
       
-      const weightInGrams = toGrams(weight, unit);
+      const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
       const totalWeight = qty * weightInGrams;
       const metal = totalWeight * rate;
       const total = metal - discount;
       
       document.getElementById('pTotal').value = Math.round(total);
       document.getElementById('grandTotal').textContent = formatPKR(total);
-      document.getElementById('totalWeightDisplay').textContent = formatWeight(totalWeight);
+      document.getElementById('totalWeightDisplay').textContent = totalWeight.toFixed(3) + 'g';
       
       const paid = parseFloat(document.getElementById('pPaid').value) || 0;
       document.getElementById('pBalance').value = Math.max(0, Math.round(total - paid));
@@ -235,14 +245,13 @@
       if (!supplier || !phone || !item || total <= 0) { alert('❌ Fill all required fields'); return; }
 
       const btn = document.getElementById('savePurchaseBtn');
-      btn.textContent = '⏳ Saving...'; 
-      btn.disabled = true;
+      btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
         const qty = parseFloat(document.getElementById('pQty').value) || 1;
         const weight = parseFloat(document.getElementById('pWeight').value) || 0;
         const unit = document.getElementById('pWeightUnit').value;
-        const weightInGrams = toGrams(weight, unit);
+        const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
 
         const purchase = {
           invoice_no: 'PUR-' + Date.now(),
@@ -269,7 +278,7 @@
         
         if (sendWA) {
           const shop = await getShopSettings();
-          const msg = `*PURCHASE BILL: ${purchase.invoice_no}*\nSupplier: ${supplier}\nItem: ${item}\nWeight: ${formatWeight(qty * weightInGrams)}\nRate: ${formatPKR(purchase.rate)}/g\nTotal: ${formatPKR(total)}\nPaid: ${formatPKR(purchase.paid)}\nBalance: ${formatPKR(purchase.balance)}\n\n${shop.name}`;
+          const msg = `*PURCHASE BILL: ${purchase.invoice_no}*\nSupplier: ${supplier}\nItem: ${item}\nTotal: ${formatPKR(total)}\nPaid: ${formatPKR(purchase.paid)}\nBalance: ${formatPKR(purchase.balance)}\n\n${shop.name}`;
           openWhatsApp(phone, msg);
         }
         
@@ -309,28 +318,9 @@
           </div>
         </div>
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-          <thead>
-            <tr style="background:#FAF7F0;">
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Karat</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-              <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.item}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.gold_karat || '—'}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.rate)}</td>
-              <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.total)}</td>
-            </tr>
-          </tbody>
+          <thead><tr style="background:#FAF7F0;"><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th></tr></thead>
+          <tbody><tr><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.item}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${totalWeight.toFixed(3)}g</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.rate)}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.total)}</td></tr></tbody>
         </table>
-        ${purchase.discount > 0 ? `<p style="text-align:right; font-size:14px;">Discount: <strong style="color:#25D366;">- ${formatPKR(purchase.discount)}</strong></p>` : ''}
         <div style="text-align:right; font-size:14px; margin-bottom:10px;">
           <p style="margin:5px 0;">Paid: <strong>${formatPKR(purchase.paid)}</strong></p>
           <p style="margin:5px 0;">Balance: <strong style="color:${purchase.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(purchase.balance)}</strong></p>
@@ -352,7 +342,7 @@
       if (!currentInvoice) return;
       const email = prompt('Enter supplier email:', '');
       if (!email) return;
-      const body = `Purchase: ${currentInvoice.invoice_no}\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
+      const body = `Purchase: ${currentInvoice.invoice_no}\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}`;
       sendEmail(email, `Purchase ${currentInvoice.invoice_no}`, body);
     }
 
@@ -370,25 +360,29 @@
       if (purchases.length === 0) { container.innerHTML = '<div class="empty-state"><p>No purchases yet</p></div>'; return; }
       
       container.innerHTML = purchases.slice(0, 20).map(p => `
-        <div class="data-item" style="cursor:pointer;" onclick='showInvoice(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
-          <div>
+        <div class="data-item">
+          <div style="cursor:pointer; flex:1;" onclick='showInvoice(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
             <div class="data-item-title">${p.item} <span style="color:var(--gold-primary); font-size:0.8rem;">(Qty: ${p.qty || 1})</span></div>
             <div class="data-item-sub">${p.supplier_name} • ${formatDate(p.purchase_date || p.created_at)}</div>
           </div>
-          <div style="text-align:right;">
+          <div style="display:flex; align-items:center; gap:10px;">
             <div class="data-item-value">${formatPKR(p.total)}</div>
-            ${p.balance > 0 ? `<div class="data-item-sub" style="color:#FCD34D;">Bal: ${formatPKR(p.balance)}</div>` : ''}
+            ${deleteButtonHTML('deletePurchase', p.id)}
           </div>
         </div>
       `).join('');
     }
+
+    async function deletePurchase(id) {
+      if (!confirmDelete('this purchase')) return;
+      try {
+        await deleteRecord('purchases', id);
+        alert('✅ Purchase deleted');
+        loadPurchases();
+      } catch (e) {
+        alert('❌ ' + e.message);
+      }
+    }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
