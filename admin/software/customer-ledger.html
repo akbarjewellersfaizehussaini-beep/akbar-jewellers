@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Ledger – Akbar Jewellers Software</title>
+  <link rel="icon" type="image/png" href="../../images/logo.png">
+  <link rel="stylesheet" href="style-software.css">
+  <style>
+    .ledger-header { background: linear-gradient(135deg, var(--black-soft), #252525); border: 2px solid var(--gold-primary); border-radius: 16px; padding: 25px; margin-bottom: 25px; }
+    .ledger-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+    .ledger-box { background: var(--black-royal); border-radius: 12px; padding: 15px; text-align: center; border: 1px solid rgba(255,215,0,0.2); }
+    .ledger-box .label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; }
+    .ledger-box .value { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; margin-top: 5px; }
+    .txn-table { width: 100%; border-collapse: collapse; background: var(--black-soft); border-radius: 12px; overflow: hidden; }
+    .txn-table th { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); color: var(--gold-primary); padding: 12px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; }
+    .txn-table td { padding: 12px 10px; border-bottom: 1px solid rgba(255,215,0,0.08); font-size: 0.85rem; }
+    .txn-table td.number { font-family: var(--font-mono); text-align: right; }
+    .photo-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--gold-primary); cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="sw-header">
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Customer Ledger
+    </div>
+    <button onclick="navigate('customers.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div class="sw-content">
+    <div id="ledgerContent">
+      <p style="text-align:center; padding:50px; color:var(--gold-primary);">Loading...</p>
+    </div>
+  </div>
+
+  <div id="invoiceModal" class="modal">
+    <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableLedger"></div>
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn-primary" onclick="printElement('printableLedger')" style="flex:1;">🖨 Print</button>
+        <button class="btn-success" onclick="sendLedgerWhatsApp()" style="flex:1;">📱 WhatsApp</button>
+        <button class="btn-secondary" onclick="sendLedgerEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
+        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let currentCustomer = null;
+    let allTransactions = [];
+    let shopInfo = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales'])) return;
+      
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name');
+      
+      if (!name) {
+        alert('No customer selected');
+        window.location.href = 'customers.html';
+        return;
+      }
+      
+      shopInfo = await getShopSettings();
+      await loadLedger(name);
+    });
+
+    async function loadLedger(name) {
+      const customers = await getRecordsFast('customers');
+      const sales = await getRecordsFast('sales');
+      const payments = await getRecordsFast('payments');
+      
+      currentCustomer = customers.find(c => c.name === name);
+      if (!currentCustomer) {
+        document.getElementById('ledgerContent').innerHTML = '<p style="text-align:center; padding:50px; color:var(--danger);">Customer not found</p>';
+        return;
+      }
+
+      const cSales = sales.filter(s => s.customer_name === name);
+      const cPays = payments.filter(p => p.person_name === name && p.person_type === 'customer');
+      
+      // Combine transactions
+      allTransactions = [];
+      
+      cSales.forEach(s => {
+        allTransactions.push({
+          id: s.id,
+          type: 'sale',
+          date: s.sale_date || s.created_at,
+          desc: s.items_summary || 'Sale',
+          ref: s.invoice_number,
+          debit: Number(s.total) || 0,
+          credit: 0,
+          received: Number(s.received) || 0,
+          balance: Number(s.balance) || 0
+        });
+      });
+      
+      cPays.forEach(p => {
+        allTransactions.push({
+          id: p.id,
+          type: 'payment',
+          date: p.payment_date || p.created_at,
+          desc: `Payment (${p.payment_type || 'advance'})`,
+          ref: p.receipt_number,
+          debit: 0,
+          credit: Number(p.amount) || 0,
+          received: 0,
+          balance: 0
+        });
+      });
+      
+      allTransactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      // Calculate running balance
+      let openingBalance = Number(currentCustomer.opening_balance) || 0;
+      let runningBalance = openingBalance;
+      allTransactions.forEach(t => {
+        runningBalance += t.debit - t.credit;
+        t.runningBalance = runningBalance;
+      });
+
+      let totalDebit = openingBalance;
+      let totalCredit = 0;
+      allTransactions.forEach(t => {
+        totalDebit += t.debit;
+        totalCredit += t.credit;
+      });
+      const finalBalance = totalDebit - totalCredit;
+
+      document.getElementById('ledgerContent').innerHTML = `
+        <div class="ledger-header">
+          <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+            ${currentCustomer.customer_photo ? `<img src="${currentCustomer.customer_photo}" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--gold-primary); object-fit:cover;">` : '<div style="width:80px; height:80px; border-radius:50%; background:var(--charcoal); display:flex; align-items:center; justify-content:center; font-size:2rem;">👤</div>'}
+            <div>
+              <h1 style="font-family:var(--font-heading); color:var(--gold-primary); font-size:1.8rem; margin-bottom:5px;">${currentCustomer.name}</h1>
+              <p style="color:var(--text-muted);">📞 ${currentCustomer.phone} ${currentCustomer.cnic ? '• CNIC: ' + currentCustomer.cnic : ''}</p>
+              ${currentCustomer.address ? `<p style="color:var(--text-muted); font-size:0.85rem;">📍 ${currentCustomer.address}${currentCustomer.city ? ', ' + currentCustomer.city : ''}</p>` : ''}
+            </div>
+          </div>
+
+          ${(currentCustomer.cnic_front_photo || currentCustomer.cnic_back_photo || currentCustomer.product_photo) ? `
+          <div style="margin-top:20px;">
+            <h4 style="color:var(--gold-primary); margin-bottom:10px; font-family:var(--font-heading);">📸 Documents (Pakistani Law)</h4>
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+              ${currentCustomer.cnic_front_photo ? `<div><div style="color:var(--text-muted); font-size:0.7rem; margin-bottom:5px;">CNIC Front</div><img src="${currentCustomer.cnic_front_photo}" class="photo-thumb" onclick="window.open('${currentCustomer.cnic_front_photo}', '_blank')"></div>` : ''}
+              ${currentCustomer.cnic_back_photo ? `<div><div style="color:var(--text-muted); font-size:0.7rem; margin-bottom:5px;">CNIC Back</div><img src="${currentCustomer.cnic_back_photo}" class="photo-thumb" onclick="window.open('${currentCustomer.cnic_back_photo}', '_blank')"></div>` : ''}
+              ${currentCustomer.product_photo ? `<div><div style="color:var(--text-muted); font-size:0.7rem; margin-bottom:5px;">Product</div><img src="${currentCustomer.product_photo}" class="photo-thumb" onclick="window.open('${currentCustomer.product_photo}', '_blank')"></div>` : ''}
+            </div>
+          </div>
+          ` : ''}
+          
+          <div class="ledger-summary">
+            <div class="ledger-box">
+              <div class="label">Opening Balance</div>
+              <div class="value" style="color:#93C5FD;">${formatPKR(openingBalance)}</div>
+            </div>
+            <div class="ledger-box">
+              <div class="label">Total Debit (Bill)</div>
+              <div class="value" style="color:#FCD34D;">${formatPKR(totalDebit)}</div>
+            </div>
+            <div class="ledger-box">
+              <div class="label">Total Credit (Paid)</div>
+              <div class="value" style="color:#86EFAC;">${formatPKR(totalCredit)}</div>
+            </div>
+            <div class="ledger-box">
+              <div class="label">Final Balance</div>
+              <div class="value" style="color:${finalBalance > 0 ? 'var(--danger)' : 'var(--success)'};">${formatPKR(Math.abs(finalBalance))}</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+            <button class="btn-primary" onclick="showLedgerPrint()" style="flex:1;">🖨 Print Ledger</button>
+            <button class="btn-success" onclick="showLedgerPrint(); setTimeout(() => sendLedgerWhatsApp(), 500);" style="flex:1;">📱 WhatsApp</button>
+            <button class="btn-secondary" onclick="showLedgerPrint(); setTimeout(() => sendLedgerEmail(), 500);" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h3 class="form-card-title">💰 Quick Payment Entry</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Amount (Rs) <span class="required">*</span></label>
+              <input type="number" id="payAmount" class="form-input number-input" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Payment Type</label>
+              <select id="payType" class="form-select">
+                <option value="advance">Advance</option>
+                <option value="due">Against Due</option>
+                <option value="full">Full & Final</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Payment Mode</label>
+              <select id="payMode" class="form-select">
+                <option value="cash">Cash</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="easypaisa">Easypaisa</option>
+                <option value="jazzcash">JazzCash</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="payDate" class="form-input">
+            </div>
+          </div>
+
+          <button class="btn-success" onclick="savePayment()" id="savePayBtn" style="width:100%;">
+            💰 Receive Payment
+          </button>
+        </div>
+
+        <h2 class="section-title">📒 Transaction History</h2>
+        <div style="overflow-x:auto;">
+          <table class="txn-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Ref #</th>
+                <th>Bill (Dr)</th>
+                <th>Paid (Cr)</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:rgba(255,215,0,0.05);">
+                <td>—</td>
+                <td><strong style="color:var(--gold-primary);">Opening Balance</strong></td>
+                <td>—</td>
+                <td class="number">${openingBalance > 0 ? formatPKR(openingBalance) : '—'}</td>
+                <td class="number">${openingBalance < 0 ? formatPKR(Math.abs(openingBalance)) : '—'}</td>
+                <td class="number" style="color:${openingBalance > 0 ? 'var(--danger)' : 'var(--success)'};">${formatPKR(Math.abs(openingBalance))}</td>
+              </tr>
+              ${allTransactions.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:30px; color:var(--text-muted);">No transactions yet</td></tr>' :
+                allTransactions.map(t => `
+                  <tr>
+                    <td>${formatDate(t.date)}</td>
+                    <td><strong style="color:${t.type === 'sale' ? 'var(--gold-primary)' : 'var(--success)'};">${t.desc}</strong></td>
+                    <td style="font-size:0.75rem; color:var(--text-muted);">${t.ref || '—'}</td>
+                    <td class="number" style="color:#FCD34D;">${t.debit > 0 ? formatPKR(t.debit) : '—'}</td>
+                    <td class="number" style="color:#86EFAC;">${t.credit > 0 ? formatPKR(t.credit) : '—'}</td>
+                    <td class="number" style="color:${t.runningBalance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">${formatPKR(Math.abs(t.runningBalance))}</td>
+                  </tr>
+                `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      document.getElementById('payDate').value = new Date().toISOString().slice(0, 10);
+    }
+
+    async function savePayment() {
+      const amount = parseFloat(document.getElementById('payAmount').value) || 0;
+      if (amount <= 0) { alert('❌ Enter valid amount'); return; }
+
+      const btn = document.getElementById('savePayBtn');
+      btn.textContent = '⏳ Saving...'; 
+      btn.disabled = true;
+
+      try {
+        await addRecord('payments', {
+          receipt_number: 'RCV-' + Date.now(),
+          person_type: 'customer',
+          person_name: currentCustomer.name,
+          person_phone: currentCustomer.phone,
+          amount: amount,
+          payment_type: document.getElementById('payType').value,
+          payment_mode: document.getElementById('payMode').value,
+          payment_date: document.getElementById('payDate').value
+        });
+
+        alert('✅ Payment received!');
+        location.reload();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      } finally {
+        btn.textContent = '💰 Receive Payment';
+        btn.disabled = false;
+      }
+    }
+
+    function showLedgerPrint() {
+      let openingBalance = Number(currentCustomer.opening_balance) || 0;
+      let totalDebit = openingBalance;
+      let totalCredit = 0;
+      allTransactions.forEach(t => {
+        totalDebit += t.debit;
+        totalCredit += t.credit;
+      });
+      const finalBalance = totalDebit - totalCredit;
+
+      document.getElementById('printableLedger').innerHTML = `
+        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shopInfo.name}</h1>
+          <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shopInfo.name_urdu || 'فیض حسینی'}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">${shopInfo.address}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shopInfo.phone}</p>
+        </div>
+        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:10px;">CUSTOMER LEDGER</h2>
+        <p style="text-align:center; color:#666; margin-bottom:5px;"><strong>${currentCustomer.name}</strong> | ${currentCustomer.phone}</p>
+        ${currentCustomer.cnic ? `<p style="text-align:center; color:#666; margin-bottom:20px; font-size:12px;">CNIC: ${currentCustomer.cnic}</p>` : '<p style="margin-bottom:20px;"></p>'}
+        
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px;">
+          <div style="background:#FAF7F0; padding:10px; border-radius:6px; text-align:center;">
+            <div style="font-size:10px; color:#666;">Opening</div>
+            <div style="font-weight:700; color:#D4AF37;">${formatPKR(openingBalance)}</div>
+          </div>
+          <div style="background:#FAF7F0; padding:10px; border-radius:6px; text-align:center;">
+            <div style="font-size:10px; color:#666;">Total Bill</div>
+            <div style="font-weight:700; color:#D4AF37;">${formatPKR(totalDebit)}</div>
+          </div>
+          <div style="background:#FAF7F0; padding:10px; border-radius:6px; text-align:center;">
+            <div style="font-size:10px; color:#666;">Total Paid</div>
+            <div style="font-weight:700; color:#D4AF37;">${formatPKR(totalCredit)}</div>
+          </div>
+          <div style="background:#FAF7F0; padding:10px; border-radius:6px; text-align:center;">
+            <div style="font-size:10px; color:#666;">Balance</div>
+            <div style="font-weight:700; color:${finalBalance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(Math.abs(finalBalance))}</div>
+          </div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
+          <thead>
+            <tr style="background:#FAF7F0;">
+              <th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Date</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Description</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Ref</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:right; font-size:11px; color:#D4AF37;">Bill</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:right; font-size:11px; color:#D4AF37;">Paid</th>
+              <th style="border:1px solid #ddd; padding:8px; text-align:right; font-size:11px; color:#D4AF37;">Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid #ddd; padding:8px; font-size:11px;">—</td>
+              <td style="border:1px solid #ddd; padding:8px; font-size:11px;"><strong>Opening Balance</strong></td>
+              <td style="border:1px solid #ddd; padding:8px; font-size:11px;">—</td>
+              <td style="border:1px solid #ddd; padding:8px; font-size:11px; text-align:right;">${openingBalance > 0 ? formatPKR(openingBalance) : '—'}</td>
+              <td style="border:1px solid #ddd; padding:8px; font-size:11px; text-align:right;">${openingBalance < 0 ? formatPKR(Math.abs(openingBalance)) : '—'}</td>
+              <td style="border:1px solid #ddd; padding:8px; font-size:11px; text-align:right;">${formatPKR(Math.abs(openingBalance))}</td>
+            </tr>
+            ${allTransactions.map(t => `
+              <tr>
+                <td style="border:1px solid #ddd; padding:8px; font-size:11px;">${formatDate(t.date)}</td>
+                <td style="border:1px solid #ddd; padding:8px; font-size:11px;">${t.desc}</td>
+                <td style="border:1px solid #ddd; padding:8px; font-size:11px;">${t.ref || '—'}</td>
+                <td style="border:1px solid #ddd; padding:8px; font-size:11px; text-align:right;">${t.debit > 0 ? formatPKR(t.debit) : '—'}</td>
+                <td style="border:1px solid #ddd; padding:8px; font-size:11px; text-align:right;">${t.credit > 0 ? formatPKR(t.credit) : '—'}</td>
+                <td style="border:1px solid #ddd; padding:8px; font-size:11px; text-align:right;">${formatPKR(Math.abs(t.runningBalance || 0))}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div style="text-align:center; margin-top:30px; padding-top:15px; border-top:1px solid #eee; font-size:10px; color:#999;">
+          ${shopInfo.name} © ${new Date().getFullYear()} | Generated: ${formatDateTime(new Date())}
+        </div>
+      `;
+      document.getElementById('invoiceModal').classList.add('active');
+    }
+
+    function sendLedgerWhatsApp() {
+      let openingBalance = Number(currentCustomer.opening_balance) || 0;
+      let totalDebit = openingBalance;
+      let totalCredit = 0;
+      allTransactions.forEach(t => {
+        totalDebit += t.debit;
+        totalCredit += t.credit;
+      });
+      
+      let msg = `*CUSTOMER LEDGER*\n*${shopInfo.name}*\n\n👤 ${currentCustomer.name}\n📞 ${currentCustomer.phone}\n\n`;
+      msg += `💰 Opening: ${formatPKR(openingBalance)}\n`;
+      msg += `💰 Total Bill: ${formatPKR(totalDebit)}\n`;
+      msg += `💰 Total Paid: ${formatPKR(totalCredit)}\n`;
+      msg += `💰 Balance: ${formatPKR(Math.abs(totalDebit - totalCredit))}\n\n`;
+      msg += `Thank you!`;
+      
+      openWhatsApp(currentCustomer.phone, msg);
+    }
+
+    function sendLedgerEmail() {
+      const email = prompt('Enter customer email:', '');
+      if (!email) return;
+      
+      let openingBalance = Number(currentCustomer.opening_balance) || 0;
+      let totalDebit = openingBalance;
+      let totalCredit = 0;
+      allTransactions.forEach(t => {
+        totalDebit += t.debit;
+        totalCredit += t.credit;
+      });
+      
+      let body = `Customer Ledger\n\nName: ${currentCustomer.name}\nPhone: ${currentCustomer.phone}\n\n`;
+      body += `Opening: ${formatPKR(openingBalance)}\n`;
+      body += `Total Bill: ${formatPKR(totalDebit)}\n`;
+      body += `Total Paid: ${formatPKR(totalCredit)}\n`;
+      body += `Balance: ${formatPKR(Math.abs(totalDebit - totalCredit))}\n`;
+      
+      sendEmail(email, `Customer Ledger – ${currentCustomer.name}`, body);
+    }
+  </script>
+</body>
+</html>
