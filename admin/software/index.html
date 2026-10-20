@@ -23,8 +23,6 @@
     .loss-card { border-color: #DC2626; background: linear-gradient(135deg, rgba(220,38,38,0.1), #1C1C1C); }
     .loss-card::before { background: linear-gradient(90deg, #DC2626, #991B1B) !important; }
     .payment-card { border-color: #93C5FD; background: linear-gradient(135deg, rgba(59,130,246,0.1), #1C1C1C); }
-    .gold-card { border-color: #FFD700; background: linear-gradient(135deg, rgba(255,215,0,0.15), #1C1C1C); }
-    .gold-card::before { background: linear-gradient(90deg, #FFD700, #C9A227) !important; }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
     .summary-box { background: linear-gradient(135deg, var(--black-soft), #252525); border: 1px solid rgba(255,215,0,0.15); border-radius: 14px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
     .summary-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
@@ -36,6 +34,26 @@
     .summary-box.orange::before { background: linear-gradient(90deg, #F59E0B, #D97706); }
     .summary-label { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
     .summary-value { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 700; }
+    
+    /* TABS */
+    .money-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .money-tab { padding: 12px 24px; background: var(--black-royal); border: 2px solid rgba(255,215,0,0.3); color: var(--text-light); border-radius: 50px; cursor: pointer; font-size: 0.85rem; font-family: var(--font-body); font-weight: 600; transition: all 0.3s; }
+    .money-tab:hover { border-color: var(--gold-primary); }
+    .money-tab.active { background: linear-gradient(135deg, var(--gold-primary), var(--gold-deep)); color: var(--black-royal); border-color: var(--gold-primary); }
+    
+    /* TAB CONTENT */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    /* GST TABLE */
+    .gst-table { width: 100%; border-collapse: collapse; background: var(--black-soft); border-radius: 12px; overflow: hidden; }
+    .gst-table th { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); color: var(--gold-primary); padding: 12px 10px; text-align: left; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid var(--gold-primary); }
+    .gst-table td { padding: 10px 10px; border-bottom: 1px solid rgba(255,215,0,0.08); font-size: 0.85rem; }
+    .gst-table tr:hover { background: rgba(255,215,0,0.03); }
+    .gst-total-box { background: linear-gradient(135deg, rgba(37,211,102,0.15), rgba(37,211,102,0.05)); border: 2px solid #25D366; border-radius: 12px; padding: 15px 20px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .gst-total-label { color: #25D366; font-weight: 700; font-size: 1rem; }
+    .gst-total-value { color: #25D366; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; }
   </style>
 </head>
 <body>
@@ -79,7 +97,7 @@
     <div class="stats-grid">
       <div class="stat-card profit-card">
         <div class="stat-icon">💰</div>
-        <div class="stat-label">Total Sales (All Time)</div>
+        <div class="stat-label">Total Sales</div>
         <div class="stat-value" id="totalSalesAll" style="color:#25D366;">Rs 0</div>
       </div>
       <div class="stat-card expense">
@@ -92,69 +110,132 @@
         <div class="stat-label">Total Expenses</div>
         <div class="stat-value" id="totalExpensesAll" style="color:#FCA5A5;">Rs 0</div>
       </div>
+      <div class="stat-card expense">
+        <div class="stat-icon">🏛️</div>
+        <div class="stat-label">Total GST Collected</div>
+        <div class="stat-value" id="totalGSTAll" style="color:#FCA5A5;">Rs 0</div>
+      </div>
       <div class="stat-card" id="profitLossCard" style="border-color:#FFD700;">
         <div class="stat-icon" id="profitIcon">📈</div>
         <div class="stat-label" id="profitLabel">Net Profit / Loss</div>
         <div class="stat-value" id="profitLoss">Rs 0</div>
-        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="profitSubtext">After all expenses</div>
+        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="profitSubtext">Sale - Purchase - GST - Expense</div>
       </div>
     </div>
 
-    <!-- THIS MONTH SUMMARY -->
-    <h2 class="section-title" style="margin-top: 30px;">📅 This Month Summary</h2>
-    <div class="stats-grid">
-      <div class="stat-card profit-card">
-        <div class="stat-label">Month Sales</div>
-        <div class="stat-value" id="monthSales" style="color:#25D366;">Rs 0</div>
-      </div>
-      <div class="stat-card expense">
-        <div class="stat-label">Month Purchases</div>
-        <div class="stat-value" id="monthPurchases2" style="color:#FCA5A5;">Rs 0</div>
-      </div>
-      <div class="stat-card expense">
-        <div class="stat-label">Month Expenses</div>
-        <div class="stat-value" id="monthExpenses" style="color:#FCA5A5;">Rs 0</div>
-      </div>
-      <div class="stat-card" id="monthProfitCard" style="border-color:#FFD700;">
-        <div class="stat-label" id="monthProfitLabel">Month Profit / Loss</div>
-        <div class="stat-value" id="monthProfit">Rs 0</div>
+    <!-- MONEY TABS -->
+    <h2 class="section-title" style="margin-top: 30px;">💵 Money Summary</h2>
+    
+    <div class="money-tabs">
+      <button class="money-tab active" onclick="switchMoneyTab('cash', this)">💵 Cash in Hand</button>
+      <button class="money-tab" onclick="switchMoneyTab('online', this)">🏦 Online (Bank/Easypaisa/JazzCash)</button>
+      <button class="money-tab" onclick="switchMoneyTab('available', this)">💼 Available Amount</button>
+      <button class="money-tab" onclick="switchMoneyTab('gst', this)">🏛️ GST Collection</button>
+    </div>
+
+    <!-- CASH TAB -->
+    <div id="cashTab" class="tab-content active">
+      <div class="summary-grid">
+        <div class="summary-box green">
+          <div class="summary-label">💰 Cash Received (Sales)</div>
+          <div class="summary-value" id="cashSales" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box green">
+          <div class="summary-label">💰 Cash Received (Payments)</div>
+          <div class="summary-value" id="cashPayments" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box red">
+          <div class="summary-label">📤 Cash Paid (Purchases)</div>
+          <div class="summary-value" id="cashPurchases" style="color:#FCA5A5;">Rs 0</div>
+        </div>
+        <div class="summary-box red">
+          <div class="summary-label">📤 Cash Paid (Expenses)</div>
+          <div class="summary-value" id="cashExpenses" style="color:#FCA5A5;">Rs 0</div>
+        </div>
+        <div class="summary-box red">
+          <div class="summary-label">📤 Cash Paid (Suppliers/Karigars)</div>
+          <div class="summary-value" id="cashPaymentsOut" style="color:#FCA5A5;">Rs 0</div>
+        </div>
+        <div class="summary-box gold">
+          <div class="summary-label">💵 Cash in Hand (Total)</div>
+          <div class="summary-value" id="cashInHand" style="color:#FFD700;">Rs 0</div>
+        </div>
       </div>
     </div>
 
-    <!-- ASSETS & LIABILITIES -->
-    <h2 class="section-title" style="margin-top: 30px;">💎 Assets & Liabilities</h2>
-    <div class="summary-grid">
-      <div class="summary-box gold">
-        <div class="summary-label">🪙 Gold in Stock</div>
-        <div class="summary-value" id="goldInStock" style="color:#FFD700;">0g</div>
+    <!-- ONLINE TAB -->
+    <div id="onlineTab" class="tab-content">
+      <div class="summary-grid">
+        <div class="summary-box green">
+          <div class="summary-label">🏦 Total Bank Balance</div>
+          <div class="summary-value" id="bankBalance" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box green">
+          <div class="summary-label">💚 Easypaisa Total</div>
+          <div class="summary-value" id="easypaisaBalance" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box green">
+          <div class="summary-label">🔴 JazzCash Total</div>
+          <div class="summary-value" id="jazzcashBalance" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box gold">
+          <div class="summary-label">💼 Total Online Amount</div>
+          <div class="summary-value" id="onlineTotal" style="color:#FFD700;">Rs 0</div>
+        </div>
       </div>
-      <div class="summary-box gold">
-        <div class="summary-label">💰 Stock Value</div>
-        <div class="summary-value" id="stockValue" style="color:#FFD700;">Rs 0</div>
+    </div>
+
+    <!-- AVAILABLE TAB -->
+    <div id="availableTab" class="tab-content">
+      <div class="summary-grid">
+        <div class="summary-box green">
+          <div class="summary-label">💵 Cash in Hand</div>
+          <div class="summary-value" id="availCash" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box green">
+          <div class="summary-label">🏦 Online Balance</div>
+          <div class="summary-value" id="availOnline" style="color:#25D366;">Rs 0</div>
+        </div>
+        <div class="summary-box gold" style="grid-column: span 2;">
+          <div class="summary-label">💼 Total Available Amount (Cash + Online)</div>
+          <div class="summary-value" id="availTotal" style="color:#FFD700; font-size: 2rem;">Rs 0</div>
+        </div>
       </div>
-      <div class="summary-box orange">
-        <div class="summary-label">⚖️ Gold with Karigar</div>
-        <div class="summary-value" id="goldWithKarigar" style="color:#F59E0B;">0g</div>
-      </div>
-      <div class="summary-box green">
-        <div class="summary-label">🏦 Bank/Easypaisa/JazzCash</div>
-        <div class="summary-value" id="bankBalance" style="color:#25D366;">Rs 0</div>
-      </div>
-      <div class="summary-box green">
-        <div class="summary-label">💵 Cash in Hand</div>
-        <div class="summary-value" id="cashInHand" style="color:#25D366;">Rs 0</div>
-      </div>
-      <div class="summary-box red">
-        <div class="summary-label">📥 Receivables (Lena Hai)</div>
-        <div class="summary-value" id="receivables" style="color:#FCA5A5;">Rs 0</div>
-      </div>
-      <div class="summary-box red">
-        <div class="summary-label">📤 Payables (Dena Hai)</div>
-        <div class="summary-value" id="payables" style="color:#FCA5A5;">Rs 0</div>
-      </div>
-      <div class="summary-box blue">
-        <div class="summary-label">💼 Total Assets</div>
-        <div class="summary-value" id="totalAssets" style="color:#93C5FD;">Rs 0</div>
+    </div>
+
+    <!-- GST TAB -->
+    <div id="gstTab" class="tab-content">
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="color: var(--gold-primary); font-family: var(--font-heading); font-size: 1.2rem;">🏛️ GST Collection (Every Invoice)</h3>
+          <select id="gstFilter" class="form-select" style="width: auto;" onchange="loadGSTTable()">
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="gst-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Invoice #</th>
+                <th>Customer</th>
+                <th style="text-align: right;">Sale Amount</th>
+                <th style="text-align: right;">GST %</th>
+                <th style="text-align: right;">GST Amount</th>
+              </tr>
+            </thead>
+            <tbody id="gstTableBody">
+              <tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gst-total-box">
+          <span class="gst-total-label">💰 Total GST Collected</span>
+          <span class="gst-total-value" id="gstTotal">Rs 0</span>
+        </div>
       </div>
     </div>
 
@@ -179,11 +260,23 @@
   <div id="invoiceModal" class="modal">
     <div class="modal-content" style="max-width: 800px; background:#fff; color:#1A1A1A; padding: 40px;">
       <div id="printableInvoice"></div>
-      <div style="display:flex; gap:10px; margin-top:20px;">
-        <button class="btn-primary" onclick="printElement('printableInvoice')" style="flex:1;">🖨 Print</button>
-        <button class="btn-success" onclick="sendInvoiceWhatsApp()" style="flex:1;">📱 WhatsApp</button>
-        <button class="btn-secondary" onclick="sendInvoiceEmail()" style="flex:1; background:#3B82F6; color:white; border:none;">📧 Email</button>
-        <button class="btn-danger" onclick="document.getElementById('invoiceModal').classList.remove('active')" style="flex:1;">Close</button>
+      <div class="action-buttons-grid">
+        <button class="action-btn print-btn" onclick="printElement('printableInvoice')">
+          <span class="btn-icon">🖨</span>
+          <span class="btn-text">Print</span>
+        </button>
+        <button class="action-btn whatsapp-btn" onclick="sendInvoiceWhatsApp()">
+          <span class="btn-icon">📱</span>
+          <span class="btn-text">WhatsApp</span>
+        </button>
+        <button class="action-btn email-btn" onclick="sendInvoiceEmail()">
+          <span class="btn-icon">📧</span>
+          <span class="btn-text">Email</span>
+        </button>
+        <button class="action-btn close-btn" onclick="document.getElementById('invoiceModal').classList.remove('active')">
+          <span class="btn-icon">✕</span>
+          <span class="btn-text">Close</span>
+        </button>
       </div>
     </div>
   </div>
@@ -193,6 +286,7 @@
   <script>
     let currentUser = null;
     let currentInvoiceData = null;
+    let allData = { sales: [], purchases: [], expenses: [], payments: [], products: [], customers: [], karigars: [], suppliers: [], services: [], bankAccounts: [], bankTransactions: [] };
 
     async function loadDashboard() {
       currentUser = checkAuth();
@@ -217,25 +311,54 @@
       document.getElementById('navMenu').innerHTML = navHtml;
 
       // Fetch all data
-      const sales = await getRecordsFast('sales');
-      const purchases = await getRecordsFast('purchases');
-      const customers = await getRecordsFast('customers');
-      const expenses = await getRecordsFast('expenses');
-      const products = await getRecordsFast('products');
-      const payments = await getRecordsFast('payments');
-      const karigars = await getRecordsFast('karigars');
-      const suppliers = await getRecordsFast('suppliers');
-      const services = await getRecordsFast('services');
-      const bankAccounts = await getRecordsFast('bank_accounts');
-      const bankTransactions = await getRecordsFast('bank_transactions');
+      allData.sales = await getRecordsFast('sales');
+      allData.purchases = await getRecordsFast('purchases');
+      allData.customers = await getRecordsFast('customers');
+      allData.expenses = await getRecordsFast('expenses');
+      allData.products = await getRecordsFast('products');
+      allData.payments = await getRecordsFast('payments');
+      allData.karigars = await getRecordsFast('karigars');
+      allData.suppliers = await getRecordsFast('suppliers');
+      allData.services = await getRecordsFast('services');
+      allData.bankAccounts = await getRecordsFast('bank_accounts');
+      allData.bankTransactions = await getRecordsFast('bank_transactions');
       
       const today = new Date().toISOString().slice(0,10);
       const thisMonth = new Date().toISOString().slice(0,7);
       
+      const sales = allData.sales;
+      const purchases = allData.purchases;
+      const customers = allData.customers;
+      const expenses = allData.expenses;
+      const products = allData.products;
+      const payments = allData.payments;
+      const karigars = allData.karigars;
+      const suppliers = allData.suppliers;
+      const services = allData.services;
+      const bankAccounts = allData.bankAccounts;
+      const bankTransactions = allData.bankTransactions;
+
       // Today's sales
       document.getElementById('todaySales').textContent = formatPKR(sales.filter(s => s.date?.startsWith(today)).reduce((sum, s) => sum + (Number(s.total)||0), 0));
       document.getElementById('monthPurchases').textContent = formatPKR(purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0));
       document.getElementById('totalCustomers').textContent = customers.length;
+
+      // ===== CALCULATE GST =====
+      let totalGST = 0;
+      sales.forEach(s => {
+        const qty = s.qty || 1;
+        const weight = s.weight || 0;
+        const rate = s.rate || 0;
+        const making = s.making || 0;
+        const polish = s.polish || 0;
+        const totalWeight = qty * weight;
+        const metal = totalWeight * rate;
+        const makingTotal = making * qty;
+        const polishTotal = polish * qty;
+        const subtotal = metal + makingTotal + polishTotal;
+        const gst = Math.round(subtotal * ((s.gst_pct || 3) / 100));
+        totalGST += gst;
+      });
 
       // ALL TIME TOTALS
       const totalSalesAll = sales.reduce((sum, s) => sum + (Number(s.total)||0), 0);
@@ -245,10 +368,10 @@
       document.getElementById('totalSalesAll').textContent = formatPKR(totalSalesAll);
       document.getElementById('totalPurchasesAll').textContent = formatPKR(totalPurchasesAll);
       document.getElementById('totalExpensesAll').textContent = formatPKR(totalExpensesAll);
+      document.getElementById('totalGSTAll').textContent = formatPKR(totalGST);
       
-      // PROFIT/LOSS
-      const totalCost = totalPurchasesAll + totalExpensesAll;
-      const profitLoss = totalSalesAll - totalCost;
+      // PROFIT/LOSS = Sales - Purchase - GST - Expense
+      const profitLoss = totalSalesAll - totalPurchasesAll - totalGST - totalExpensesAll;
       
       const profitCard = document.getElementById('profitLossCard');
       const profitIcon = document.getElementById('profitIcon');
@@ -262,7 +385,7 @@
         profitLabel.textContent = 'Net Profit';
         profitLossEl.textContent = '+ ' + formatPKR(profitLoss);
         profitLossEl.style.color = '#25D366';
-        profitSubtext.textContent = 'Sales > Cost (Profit)';
+        profitSubtext.textContent = 'Sale - Purchase - GST - Expense';
       } else if (profitLoss < 0) {
         profitCard.style.borderColor = '#DC2626';
         profitIcon.textContent = '📉';
@@ -279,68 +402,46 @@
         profitSubtext.textContent = 'Sales = Cost';
       }
 
-      // THIS MONTH
-      const monthSales = sales.filter(s => s.date?.startsWith(thisMonth)).reduce((sum, s) => sum + (Number(s.total)||0), 0);
-      const monthPurchasesVal = purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0);
-      const monthExpensesVal = expenses.filter(e => e.date?.startsWith(thisMonth)).reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+      // ===== CASH CALCULATIONS =====
+      let cashInSales = 0, cashInPayments = 0, cashOutPurchases = 0, cashOutExpenses = 0, cashOutPayments = 0;
       
-      document.getElementById('monthSales').textContent = formatPKR(monthSales);
-      document.getElementById('monthPurchases2').textContent = formatPKR(monthPurchasesVal);
-      document.getElementById('monthExpenses').textContent = formatPKR(monthExpensesVal);
-      
-      const monthProfitLoss = monthSales - (monthPurchasesVal + monthExpensesVal);
-      const monthProfitEl = document.getElementById('monthProfit');
-      const monthProfitCard = document.getElementById('monthProfitCard');
-      const monthProfitLabel = document.getElementById('monthProfitLabel');
-      
-      if (monthProfitLoss > 0) {
-        monthProfitEl.textContent = '+ ' + formatPKR(monthProfitLoss);
-        monthProfitEl.style.color = '#25D366';
-        monthProfitCard.style.borderColor = '#25D366';
-        monthProfitLabel.textContent = 'Month Profit';
-      } else if (monthProfitLoss < 0) {
-        monthProfitEl.textContent = '- ' + formatPKR(Math.abs(monthProfitLoss));
-        monthProfitEl.style.color = '#DC2626';
-        monthProfitCard.style.borderColor = '#DC2626';
-        monthProfitLabel.textContent = 'Month Loss';
-      } else {
-        monthProfitEl.textContent = formatPKR(0);
-        monthProfitEl.style.color = '#FFD700';
-        monthProfitCard.style.borderColor = '#FFD700';
-        monthProfitLabel.textContent = 'Month Break Even';
-      }
-
-      // ===== ASSETS & LIABILITIES =====
-      
-      // Gold in stock (products with current_stock > 0)
-      let goldInStock = 0;
-      let stockValue = 0;
-      products.forEach(p => {
-        const stock = Number(p.current_stock) || 0;
-        if (stock > 0) {
-          goldInStock += stock * (Number(p.weight) || 0);
-          stockValue += stock * (Number(p.cost_price) || 0);
+      sales.forEach(s => {
+        if ((s.payment_mode === 'cash' || !s.payment_mode) && s.received) {
+          cashInSales += Number(s.received) || 0;
         }
       });
-      document.getElementById('goldInStock').textContent = formatWeight(goldInStock);
-      document.getElementById('stockValue').textContent = formatPKR(stockValue);
       
-      // Gold with karigar
-      let goldWithKarigar = 0;
-      karigars.forEach(k => {
-        let opening = Number(k.opening_gold) || 0;
-        const kServices = services.filter(s => s.karigar_name === k.name);
-        let given = 0, returned = 0;
-        kServices.forEach(s => {
-          given += Number(s.gold_given_weight) || 0;
-          returned += Number(s.gold_returned_weight) || 0;
-        });
-        goldWithKarigar += opening + given - returned;
+      payments.forEach(p => {
+        if (p.payment_mode === 'cash' || !p.payment_mode) {
+          if (p.person_type === 'customer') cashInPayments += Number(p.amount) || 0;
+          else cashOutPayments += Number(p.amount) || 0;
+        }
       });
-      document.getElementById('goldWithKarigar').textContent = formatWeight(goldWithKarigar);
       
-      // Bank balance
-      let bankBalance = 0;
+      purchases.forEach(p => {
+        if ((p.payment_mode === 'cash' || !p.payment_mode) && p.paid) {
+          cashOutPurchases += Number(p.paid) || 0;
+        }
+      });
+      
+      expenses.forEach(e => {
+        if (e.payment_mode === 'cash' || !e.payment_mode) {
+          cashOutExpenses += Number(e.amount) || 0;
+        }
+      });
+      
+      const cashInHand = cashInSales + cashInPayments - cashOutPurchases - cashOutExpenses - cashOutPayments;
+      
+      document.getElementById('cashSales').textContent = formatPKR(cashInSales);
+      document.getElementById('cashPayments').textContent = formatPKR(cashInPayments);
+      document.getElementById('cashPurchases').textContent = formatPKR(cashOutPurchases);
+      document.getElementById('cashExpenses').textContent = formatPKR(cashOutExpenses);
+      document.getElementById('cashPaymentsOut').textContent = formatPKR(cashOutPayments);
+      document.getElementById('cashInHand').textContent = formatPKR(cashInHand);
+
+      // ===== ONLINE CALCULATIONS =====
+      let bankTotal = 0, easypaisaTotal = 0, jazzcashTotal = 0;
+      
       bankAccounts.forEach(acc => {
         let balance = Number(acc.opening_balance) || 0;
         const accTxns = bankTransactions.filter(t => t.account_id === acc.id);
@@ -348,76 +449,26 @@
           if (t.transaction_type === 'deposit') balance += Number(t.amount) || 0;
           else if (t.transaction_type === 'withdraw') balance -= Number(t.amount) || 0;
         });
-        bankBalance += balance;
+        
+        if (acc.account_type === 'bank') bankTotal += balance;
+        else if (acc.account_type === 'easypaisa') easypaisaTotal += balance;
+        else if (acc.account_type === 'jazzcash') jazzcashTotal += balance;
       });
-      document.getElementById('bankBalance').textContent = formatPKR(bankBalance);
       
-      // Cash in hand = Sales received (cash) - Purchases paid (cash) - Expenses (cash)
-      let cashInHand = 0;
-      sales.forEach(s => {
-        if (s.payment_mode === 'cash' || !s.payment_mode) {
-          cashInHand += Number(s.received) || 0;
-        }
-      });
-      purchases.forEach(p => {
-        if (p.payment_mode === 'cash' || !p.payment_mode) {
-          cashInHand -= Number(p.paid) || 0;
-        }
-      });
-      expenses.forEach(e => {
-        if (e.payment_mode === 'cash' || !e.payment_mode) {
-          cashInHand -= Number(e.amount) || 0;
-        }
-      });
-      payments.forEach(p => {
-        if (p.payment_mode === 'cash' || !p.payment_mode) {
-          if (p.person_type === 'customer') cashInHand += Number(p.amount) || 0;
-          else cashInHand -= Number(p.amount) || 0;
-        }
-      });
-      document.getElementById('cashInHand').textContent = formatPKR(Math.max(0, cashInHand));
+      const onlineTotal = bankTotal + easypaisaTotal + jazzcashTotal;
       
-      // Receivables (customers se lena)
-      let receivables = 0;
-      customers.forEach(c => {
-        let opening = Number(c.opening_balance) || 0;
-        const cSales = sales.filter(s => s.customer_name === c.name);
-        const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
-        let totalBill = opening, totalPaid = 0;
-        cSales.forEach(s => totalBill += Number(s.total) || 0);
-        cPays.forEach(p => totalPaid += Number(p.amount) || 0);
-        const bal = totalBill - totalPaid;
-        if (bal > 0) receivables += bal;
-      });
-      document.getElementById('receivables').textContent = formatPKR(receivables);
-      
-      // Payables (suppliers + karigars ko dena)
-      let payables = 0;
-      suppliers.forEach(s => {
-        let opening = Number(s.opening_cash) || 0;
-        const sPurch = purchases.filter(p => p.supplier_name === s.name);
-        const sPays = payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
-        let totalBill = opening, totalPaid = 0;
-        sPurch.forEach(p => totalBill += Number(p.total) || 0);
-        sPays.forEach(p => totalPaid += Number(p.amount) || 0);
-        const bal = totalBill - totalPaid;
-        if (bal > 0) payables += bal;
-      });
-      karigars.forEach(k => {
-        let opening = Number(k.opening_cash) || 0;
-        const kServices = services.filter(s => s.karigar_name === k.name);
-        const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
-        let totalCharges = opening, totalPaid = 0;
-        kServices.forEach(s => totalCharges += Number(s.charges) || 0);
-        kPays.forEach(p => totalPaid += Number(p.amount) || 0);
-        const bal = totalCharges - totalPaid;
-        if (bal > 0) payables += bal;
-      });
-      document.getElementById('payables').textContent = formatPKR(payables);
-      
-      // Total assets = Cash + Bank + Stock Value + Receivables
-      const totalAssets = Math.max(0, cashInHand) + bankBalance + stockValue + receivables;
-      document.getElementById('totalAssets').textContent = formatPKR(totalAssets);
+      document.getElementById('bankBalance').textContent = formatPKR(bankTotal);
+      document.getElementById('easypaisaBalance').textContent = formatPKR(easypaisaTotal);
+      document.getElementById('jazzcashBalance').textContent = formatPKR(jazzcashTotal);
+      document.getElementById('onlineTotal').textContent = formatPKR(onlineTotal);
+
+      // ===== AVAILABLE =====
+      document.getElementById('availCash').textContent = formatPKR(cashInHand);
+      document.getElementById('availOnline').textContent = formatPKR(onlineTotal);
+      document.getElementById('availTotal').textContent = formatPKR(cashInHand + onlineTotal);
+
+      // ===== LOAD GST TABLE =====
+      loadGSTTable();
 
       // Recent sales
       const recent = sales.slice(0, 5);
@@ -431,6 +482,77 @@
           <div class="data-item-value">${formatPKR(s.total)}</div>
         </div>
       `).join('');
+    }
+
+    // ===== MONEY TABS SWITCH =====
+    function switchMoneyTab(tab, btn) {
+      document.querySelectorAll('.money-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      
+      if (tab === 'cash') document.getElementById('cashTab').classList.add('active');
+      else if (tab === 'online') document.getElementById('onlineTab').classList.add('active');
+      else if (tab === 'available') document.getElementById('availableTab').classList.add('active');
+      else if (tab === 'gst') {
+        document.getElementById('gstTab').classList.add('active');
+        loadGSTTable();
+      }
+    }
+
+    // ===== LOAD GST TABLE =====
+    function loadGSTTable() {
+      const filter = document.getElementById('gstFilter')?.value || 'all';
+      const sales = allData.sales;
+      
+      let filteredSales = sales;
+      if (filter === 'today') {
+        const today = new Date().toISOString().slice(0,10);
+        filteredSales = sales.filter(s => s.date?.startsWith(today));
+      } else if (filter === 'month') {
+        const thisMonth = new Date().toISOString().slice(0,7);
+        filteredSales = sales.filter(s => s.date?.startsWith(thisMonth));
+      } else if (filter === 'year') {
+        const thisYear = new Date().getFullYear().toString();
+        filteredSales = sales.filter(s => s.date?.startsWith(thisYear));
+      }
+      
+      let totalGST = 0;
+      const rows = filteredSales.map(s => {
+        const qty = s.qty || 1;
+        const weight = s.weight || 0;
+        const rate = s.rate || 0;
+        const making = s.making || 0;
+        const polish = s.polish || 0;
+        const totalWeight = qty * weight;
+        const metal = totalWeight * rate;
+        const makingTotal = making * qty;
+        const polishTotal = polish * qty;
+        const subtotal = metal + makingTotal + polishTotal;
+        const gst = Math.round(subtotal * ((s.gst_pct || 3) / 100));
+        totalGST += gst;
+        
+        return `
+          <tr>
+            <td>${formatDate(s.sale_date || s.created_at)}</td>
+            <td style="font-family: var(--font-mono); font-size: 0.8rem;">${s.invoice_number || '—'}</td>
+            <td>${s.customer_name || '—'}</td>
+            <td style="text-align: right;">${formatPKR(s.total)}</td>
+            <td style="text-align: right;">${s.gst_pct || 3}%</td>
+            <td style="text-align: right; color: #25D366; font-weight: 700;">${formatPKR(gst)}</td>
+          </tr>
+        `;
+      }).join('');
+      
+      const tbody = document.getElementById('gstTableBody');
+      if (tbody) {
+        tbody.innerHTML = filteredSales.length === 0 
+          ? '<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">No invoices found</td></tr>' 
+          : rows;
+      }
+      
+      const gstTotalEl = document.getElementById('gstTotal');
+      if (gstTotalEl) gstTotalEl.textContent = formatPKR(totalGST);
     }
 
     async function viewInvoice(sale) {
@@ -546,14 +668,14 @@
       if (!currentInvoiceData) return;
       const email = prompt('Enter customer email:', '');
       if (!email) return;
-      const body = `Invoice: ${currentInvoiceData.invoice_number}\nCustomer: ${currentInvoiceData.customer_name}\nItem: ${currentInvoiceData.items_summary}\nTotal: ${formatPKR(currentInvoiceData.total)}\nReceived: ${formatPKR(currentInvoiceData.received)}\nBalance: ${formatPKR(currentInvoiceData.balance)}`;
+      const body = `Invoice: ${currentInvoiceData.invoice_number}\nCustomer: ${currentInvoiceData.customer_name}\nItem: ${currentInvoiceData.items_summary}\nTotal: ${formatPKR(currentInvoiceData.total)}`;
       sendEmail(email, `Invoice ${currentInvoiceData.invoice_number}`, body);
     }
 
     document.addEventListener('DOMContentLoaded', loadDashboard);
   </script>
-    <script>
-    // Register Service Worker
+
+  <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./service-worker.js')
