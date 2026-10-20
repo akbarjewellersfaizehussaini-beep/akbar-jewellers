@@ -7,6 +7,100 @@
   <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
   <style>
+    /* ===== ACTION BUTTONS (Print/WhatsApp/Email/Close) ===== */
+.action-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.action-btn {
+  padding: 14px 10px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.action-btn:hover::before { left: 100%; }
+
+.action-btn:hover {
+  transform: translateY(-4px);
+}
+
+.action-btn .btn-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.action-btn .btn-text {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* PRINT BUTTON */
+.action-btn.print-btn {
+  background: linear-gradient(135deg, #FFD700, #C9A227);
+  color: #0A0A0A;
+}
+.action-btn.print-btn:hover {
+  box-shadow: 0 10px 30px rgba(255,215,0,0.5);
+}
+
+/* WHATSAPP BUTTON */
+.action-btn.whatsapp-btn {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+}
+.action-btn.whatsapp-btn:hover {
+  box-shadow: 0 10px 30px rgba(37,211,102,0.5);
+}
+
+/* EMAIL BUTTON */
+.action-btn.email-btn {
+  background: linear-gradient(135deg, #3B82F6, #1E3A8A);
+  color: white;
+}
+.action-btn.email-btn:hover {
+  box-shadow: 0 10px 30px rgba(59,130,246,0.5);
+}
+
+/* CLOSE BUTTON */
+.action-btn.close-btn {
+  background: linear-gradient(135deg, #DC2626, #991B1B);
+  color: white;
+}
+.action-btn.close-btn:hover {
+  box-shadow: 0 10px 30px rgba(220,38,38,0.5);
+}
+
+/* MOBILE RESPONSIVE */
+@media (max-width: 600px) {
+  .action-buttons-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
     .balance-badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; margin-left: 8px; }
     .balance-due { background: rgba(220,38,38,0.2); color: #FCA5A5; }
     .balance-advance { background: rgba(37,211,102,0.2); color: #86EFAC; }
