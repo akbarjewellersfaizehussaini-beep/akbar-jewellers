@@ -4,150 +4,216 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
-  <style>
-    .sw-content { max-width: 800px; margin: 0 auto; padding: 20px; }
-    .settings-card { background: #1C1C1C; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-    .settings-card h3 { color: #FFD700; margin-bottom: 15px; font-family: 'Playfair Display', serif; }
-  </style>
 </head>
 <body>
 
   <div class="sw-header">
-    <div class="sw-logo">Settings</div>
-    <button onclick="window.location.href='index.html'" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Settings
+    </div>
+    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
-    <h2 class="section-title">Software Settings (Cloud)</h2>
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Shop info, rules, aur admin-only data management</p>
 
-    <div class="settings-card">
-      <h3>🏪 Shop Information</h3>
-      <div class="form-group"><label class="form-label">Shop Name</label><input type="text" id="setShopName" class="form-input" placeholder="Loading..."></div>
-      <div class="form-group"><label class="form-label">Urdu Name</label><input type="text" id="setShopNameUrdu" class="form-input" dir="rtl" style="font-family:'Noto Nastaliq Urdu',serif;"></div>
-      <div class="form-group"><label class="form-label">Tagline</label><input type="text" id="setShopTagline" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Address</label><input type="text" id="setShopAddress" class="form-input"></div>
-      <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="text" id="setShopPhone" class="form-input"></div>
-      <div class="form-group"><label class="form-label">Email</label><input type="email" id="setShopEmail" class="form-input"></div>
-      <button class="btn-primary" onclick="saveShopInfo()" style="width:100%; margin-top:10px;">Save to Cloud</button>
-    </div>
-
-    <div class="settings-card">
-      <h3>📊 Business Rules</h3>
+    <!-- SHOP INFO -->
+    <div class="form-card">
+      <h3 class="form-card-title">🏪 Shop Information</h3>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">GST %</label><input type="number" id="setGST" class="form-input"></div>
-        <div class="form-group"><label class="form-label">Making %</label><input type="number" id="setMaking" class="form-input"></div>
+        <div class="form-group">
+          <label class="form-label">Shop Name</label>
+          <input type="text" id="shopName" class="form-input" value="AKBAR JEWELLERS">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Urdu Name</label>
+          <input type="text" id="shopNameUrdu" class="form-input" value="فیض حسینی" dir="rtl" style="font-family: 'Noto Nastaliq Urdu', serif;">
+        </div>
       </div>
-      <button class="btn-primary" onclick="saveRules()" style="width:100%; margin-top:10px;">Save Rules to Cloud</button>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tagline</label>
+          <input type="text" id="shopTagline" class="form-input" value="Diamond aur Kundan Antique Jewellery ke Expert">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="text" id="shopPhone" class="form-input" value="03234086439">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input type="text" id="shopAddress" class="form-input" value="New Canal Park, Ali Plaza Tajbagh, Lahore">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" id="shopEmail" class="form-input" value="akbarjewellersfaizehussaini@gmail.com">
+      </div>
+      <button class="btn-primary" onclick="saveShopInfo()" style="width:100%;">💾 Save Shop Info</button>
     </div>
 
-    <div class="settings-card">
-      <h3>⚠️ Danger Zone</h3>
-      <button class="btn-danger" onclick="clearAllData()" style="width:100%;">Clear All Cloud Data</button>
+    <!-- BUSINESS RULES -->
+    <div class="form-card">
+      <h3 class="form-card-title">📊 Business Rules</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">GST %</label>
+          <input type="number" id="gstPct" class="form-input number-input" value="3" step="0.1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Making Charges %</label>
+          <input type="number" id="makingPct" class="form-input number-input" value="15" step="0.1">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveRules()" style="width:100%;">💾 Save Rules</button>
     </div>
+
+    <!-- ADMIN-ONLY DANGER ZONE -->
+    <div class="form-card" id="dangerZone" style="display:none; border-color: #DC2626; background: linear-gradient(135deg, rgba(220,38,38,0.1), #1C1C1C);">
+      <h3 class="form-card-title" style="color: #FCA5A5; border-color: rgba(220,38,38,0.3);">⚠️ Danger Zone (Admin Only)</h3>
+      
+      <div style="background: rgba(220,38,38,0.1); border: 1px solid #DC2626; border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+        <h4 style="color: #FCA5A5; margin-bottom: 10px; font-size: 1rem;">🗑️ Clear All Data</h4>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
+          Yeh action <strong style="color: #FCA5A5;">poori database</strong> delete kar dega — products, sales, purchases, customers, suppliers, karigars, payments, expenses, bank accounts — sab kuch.
+          <br><br>
+          <strong style="color: #DC2626;">⚠️ This action CANNOT be undone!</strong>
+        </p>
+        <button onclick="confirmClearAllData()" class="btn-danger" style="width: 100%;">
+          🗑️ Clear All Data
+        </button>
+      </div>
+
+      <div style="background: rgba(220,38,38,0.1); border: 1px solid #DC2626; border-radius: 12px; padding: 20px;">
+        <h4 style="color: #FCA5A5; margin-bottom: 10px; font-size: 1rem;">📊 Delete Specific Data</h4>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Sirf specific table clear karein:</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+          <button onclick="clearTable('sales')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Sales</button>
+          <button onclick="clearTable('purchases')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Purchases</button>
+          <button onclick="clearTable('payments')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Payments</button>
+          <button onclick="clearTable('expenses')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Expenses</button>
+          <button onclick="clearTable('products')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Products</button>
+          <button onclick="clearTable('customers')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Customers</button>
+          <button onclick="clearTable('suppliers')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Suppliers</button>
+          <button onclick="clearTable('karigars')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Karigars</button>
+          <button onclick="clearTable('services')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Services</button>
+          <button onclick="clearTable('returns')" class="btn-danger" style="padding: 8px; font-size: 0.8rem;">Returns</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NON-ADMIN MESSAGE -->
+    <div class="form-card" id="nonAdminMessage" style="display:none; text-align: center;">
+      <p style="color: var(--text-muted);">ℹ️ Data management options sirf admin ke liye available hain.</p>
+    </div>
+
   </div>
 
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    async function getCloudSettings() {
-      const defaults = {
-        name: 'AKBAR JEWELLERS',
-        name_urdu: 'فیض حسینی',
-        tagline: 'Diamond aur Kundan Antique Jewellery ke Expert',
-        address: 'New Canal Park, Ali Plaza Tajbagh, Lahore',
-        phone: '03234086439',
-        email: 'akbarjewellersfaizehussaini@gmail.com',
-        gst_pct: 3,
-        making_pct: 15
-      };
-      
-      try {
-        const rows = await sbFetch('settings?select=*', { method: 'GET' });
-        if (!rows || rows.length === 0) return defaults;
-        
-        const settings = { ...defaults };
-        rows.forEach(r => {
-          const isNum = ['gst_pct', 'making_pct'].includes(r.setting_key);
-          settings[r.setting_key] = isNum ? parseFloat(r.setting_value) : r.setting_value;
-        });
-        return settings;
-      } catch (e) {
-        console.warn('Settings fetch error:', e);
-        return defaults;
-      }
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
-      await initDB();
-      const s = await getCloudSettings();
+      const user = checkAuth(['admin', 'sales', 'purchase']);
+      if (!user) return;
       
-      document.getElementById('setShopName').value = s.shop_name || s.name || 'AKBAR JEWELLERS';
-      document.getElementById('setShopNameUrdu').value = s.shop_name_urdu || s.name_urdu || 'فیض حسینی';
-      document.getElementById('setShopTagline').value = s.shop_tagline || s.tagline || '';
-      document.getElementById('setShopAddress').value = s.shop_address || s.address || '';
-      document.getElementById('setShopPhone').value = s.shop_phone || s.phone || '';
-      document.getElementById('setShopEmail').value = s.shop_email || s.email || '';
-      document.getElementById('setGST').value = s.gst_pct || 3;
-      document.getElementById('setMaking').value = s.making_pct || 15;
+      if (typeof clearCache === 'function') clearCache();
+      
+      // Show danger zone only for admin
+      if (user.role === 'admin') {
+        document.getElementById('dangerZone').style.display = 'block';
+      } else {
+        document.getElementById('nonAdminMessage').style.display = 'block';
+      }
+      
+      // Load shop settings
+      const shop = await getShopSettings();
+      if (shop.name) document.getElementById('shopName').value = shop.name;
+      if (shop.name_urdu) document.getElementById('shopNameUrdu').value = shop.name_urdu;
+      if (shop.tagline) document.getElementById('shopTagline').value = shop.tagline;
+      if (shop.address) document.getElementById('shopAddress').value = shop.address;
+      if (shop.phone) document.getElementById('shopPhone').value = shop.phone;
+      if (shop.email) document.getElementById('shopEmail').value = shop.email;
+      if (shop.gst_pct) document.getElementById('gstPct').value = shop.gst_pct;
+      if (shop.making_pct) document.getElementById('makingPct').value = shop.making_pct;
     });
 
     async function saveShopInfo() {
-      const btn = event.target;
-      btn.textContent = 'Saving to Cloud...'; btn.disabled = true;
-      
       try {
-        await saveSetting('shop_name', document.getElementById('setShopName').value.trim());
-        await saveSetting('shop_name_urdu', document.getElementById('setShopNameUrdu').value.trim());
-        await saveSetting('shop_tagline', document.getElementById('setShopTagline').value.trim());
-        await saveSetting('shop_address', document.getElementById('setShopAddress').value.trim());
-        await saveSetting('shop_phone', document.getElementById('setShopPhone').value.trim());
-        await saveSetting('shop_email', document.getElementById('setShopEmail').value.trim());
-        
-        alert('✅ Shop info saved to Supabase Cloud!');
+        await saveSetting('shop_name', document.getElementById('shopName').value.trim());
+        await saveSetting('shop_name_urdu', document.getElementById('shopNameUrdu').value.trim());
+        await saveSetting('shop_tagline', document.getElementById('shopTagline').value.trim());
+        await saveSetting('shop_address', document.getElementById('shopAddress').value.trim());
+        await saveSetting('shop_phone', document.getElementById('shopPhone').value.trim());
+        await saveSetting('shop_email', document.getElementById('shopEmail').value.trim());
+        alert('✅ Shop info saved!');
       } catch (e) {
         alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = 'Save to Cloud'; btn.disabled = false;
       }
     }
 
     async function saveRules() {
-      const btn = event.target;
-      btn.textContent = 'Saving to Cloud...'; btn.disabled = true;
-      
       try {
-        await saveSetting('gst_pct', document.getElementById('setGST').value);
-        await saveSetting('making_pct', document.getElementById('setMaking').value);
-        
-        alert('✅ Business rules saved to Supabase Cloud!');
+        await saveSetting('gst_pct', document.getElementById('gstPct').value);
+        await saveSetting('making_pct', document.getElementById('makingPct').value);
+        alert('✅ Rules saved!');
       } catch (e) {
         alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = 'Save Rules to Cloud'; btn.disabled = false;
       }
     }
 
-    async function clearAllData() {
-      if (!confirm('⚠️ Delete ALL data from cloud?')) return;
-      if (!confirm('⚠️ Are you absolutely sure?')) return;
-      
-      const tables = ['sales','stock','customers','expenses','purchases','services','suppliers'];
-      for (const t of tables) {
-        try { clearCache(t); } catch (e) { console.warn(t, e.message); }
+    async function confirmClearAllData() {
+      const user = getCurrentUser();
+      if (!user || user.role !== 'admin') {
+        alert('❌ Sirf admin data delete kar sakta hai');
+        return;
       }
-      alert('✅ Cache cleared. Cloud data safe.');
+      
+      if (!confirm('⚠️ WARNING: Clear ALL data?\n\nThis will delete:\n- Products\n- Sales\n- Purchases\n- Customers\n- Suppliers\n- Karigars\n- Payments\n- Expenses\n- Bank Accounts\n- Returns\n\nThis CANNOT be undone!')) return;
+      
+      if (!confirm('🔴 FINAL WARNING\n\nAre you ABSOLUTELY sure?\n\nType "YES" mentally and click OK to proceed.')) return;
+      
+      const typeConfirm = prompt('Type "DELETE" (all capitals) to confirm:');
+      if (typeConfirm !== 'DELETE') {
+        alert('❌ Cancelled. Data not deleted.');
+        return;
+      }
+      
+      try {
+        await deleteAllData();
+        alert('✅ All data cleared successfully!');
+        location.reload();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
+    }
+
+    async function clearTable(table) {
+      const user = getCurrentUser();
+      if (!user || user.role !== 'admin') {
+        alert('❌ Sirf admin data delete kar sakta hai');
+        return;
+      }
+      
+      if (!confirm(`⚠️ Delete all data from "${table}" table?\n\nThis cannot be undone!`)) return;
+      
+      const typeConfirm = prompt(`Type "${table}" to confirm:`);
+      if (typeConfirm !== table) {
+        alert('❌ Cancelled.');
+        return;
+      }
+      
+      try {
+        await sbFetch(`${table}?id=not.is.null`, { method: 'DELETE' });
+        clearCache(table);
+        alert(`✅ All ${table} deleted!`);
+        location.reload();
+      } catch (e) {
+        alert('❌ Error: ' + e.message);
+      }
     }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>

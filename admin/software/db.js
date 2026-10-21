@@ -188,4 +188,39 @@ function sendEmail(to, subject, body) {
   window.open(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
 }
 
+// ===== DELETE ALL DATA (Only Admin) =====
+async function deleteAllData() {
+  const user = getCurrentUser();
+  if (!user || user.role !== 'admin') {
+    alert('❌ Sirf admin data delete kar sakta hai');
+    return false;
+  }
+  
+  const tables = ['sales', 'purchases', 'payments', 'expenses', 'services', 'bank_transactions', 'products', 'customers', 'suppliers', 'karigars', 'bank_accounts'];
+  
+  try {
+    for (const table of tables) {
+      await sbFetch(`${table}?id=not.is.null`, { method: 'DELETE' });
+    }
+    clearCache();
+    return true;
+  } catch (e) {
+    console.error('Delete all error:', e);
+    throw e;
+  }
+}
+// ===== RETURN CALCULATIONS =====
+function calculateReturnTotal(returnItem) {
+  const qty = Number(returnItem.qty) || 1;
+  const weight = Number(returnItem.weight) || 0;
+  const rate = Number(returnItem.rate) || 0;
+  const discount = Number(returnItem.discount) || 0;
+  
+  const totalWeight = qty * weight;
+  const metal = totalWeight * rate;
+  const gst = Math.round(metal * 0.03);
+  const total = metal + gst - discount;
+  
+  return { totalWeight, metal, gst, total };
+}
 async function initDB() { return true; }
