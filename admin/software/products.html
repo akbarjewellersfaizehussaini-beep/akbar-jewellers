@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="style-software.css">
   <style>
     .product-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
-    .product-image-item { position: relative; border-radius: 8px; overflow: hidden; border: 2px solid var(--gold-primary); }
+    .product-image-item { border-radius: 8px; overflow: hidden; border: 2px solid var(--gold-primary); }
     .product-image-item img { width: 100%; height: 80px; object-fit: cover; }
     .product-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
     .product-card-item { background: var(--black-soft); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; overflow: hidden; transition: all 0.3s; }
@@ -19,15 +19,10 @@
     .product-card-code { color: #93C5FD; font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 8px; }
     .product-card-price { color: var(--gold-primary); font-weight: 700; font-size: 1.1rem; font-family: var(--font-mono); }
     .product-card-cost { color: var(--text-muted); font-size: 0.75rem; }
-    .profit-tag { display: inline-block; background: rgba(37,211,102,0.2); color: #86EFAC; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 5px; }
     .stock-tag { display: inline-block; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 5px; }
     .stock-in { background: rgba(37,211,102,0.2); color: #86EFAC; }
     .stock-out { background: rgba(220,38,38,0.2); color: #FCA5A5; }
-    .product-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .product-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,215,0,0.15); }
-    .stat-mini { text-align: center; }
-    .stat-mini-label { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
-    .stat-mini-value { color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 0.85rem; }
+    .product-actions { display: flex; gap: 8px; margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -35,14 +30,14 @@
   <div class="sw-header">
     <div class="sw-logo">
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
-      Product & Inventory
+      Products
     </div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Product Management</h1>
-    <p class="page-subtitle">Unique Product ID — Purchase, Sale, Return sab isi ID se linked</p>
+    <p class="page-subtitle">Unique Product ID — Primary Key System</p>
 
     <div class="form-card">
       <h3 class="form-card-title" id="formTitle">➕ Add New Product</h3>
@@ -51,7 +46,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Product Name <span class="required">*</span></label>
-          <input type="text" id="prName" class="form-input" placeholder="e.g., Gold Necklace Set">
+          <input type="text" id="prName" class="form-input" placeholder="e.g., Gold Necklace">
         </div>
         <div class="form-group">
           <label class="form-label">Category <span class="required">*</span></label>
@@ -71,7 +66,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Subcategory</label>
-          <input type="text" id="prSubcategory" class="form-input" placeholder="e.g., Rings, Necklace">
+          <input type="text" id="prSubcategory" class="form-input" placeholder="e.g., Rings">
         </div>
       </div>
 
@@ -116,11 +111,11 @@
         </div>
       </div>
 
-      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">💰 Pricing (Per Unit)</h4>
+      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">💰 Pricing</h4>
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Cost Price (Per Unit) <span class="required">*</span></label>
+          <label class="form-label">Cost Price <span class="required">*</span></label>
           <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
             <input type="number" id="prCost" class="form-input number-input" placeholder="0">
             <select id="prCostUnit" class="form-select">
@@ -130,7 +125,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Sale Price (Per Unit — Optional)</label>
+          <label class="form-label">Sale Price (Optional)</label>
           <input type="number" id="prSale" class="form-input number-input" placeholder="0 (optional)">
         </div>
       </div>
@@ -139,11 +134,11 @@
       
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Stock (Qty)</label>
-          <input type="number" id="prOpeningStock" class="form-input number-input" value="0" placeholder="0">
+          <label class="form-label">Opening Stock</label>
+          <input type="number" id="prOpeningStock" class="form-input number-input" value="0">
         </div>
         <div class="form-group">
-          <label class="form-label">Featured (Homepage)</label>
+          <label class="form-label">Featured</label>
           <select id="prFeatured" class="form-select">
             <option value="false">No</option>
             <option value="true">Yes</option>
@@ -152,14 +147,14 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Product Images (Max 5) <span class="required">*</span></label>
+        <label class="form-label">Images (Max 5) <span class="required">*</span></label>
         <input type="file" id="prImages" class="form-input" accept="image/*" multiple style="padding:10px;" onchange="previewImages(this)">
         <div id="prImagesPreview" class="product-image-grid"></div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Description</label>
-        <textarea id="prDescription" class="form-input" rows="3" placeholder="Product description..."></textarea>
+        <textarea id="prDescription" class="form-input" rows="3"></textarea>
       </div>
 
       <div style="display:flex; gap:10px; margin-top:20px;">
@@ -169,7 +164,7 @@
     </div>
 
     <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search by name, code..." style="flex:1; min-width:200px;" oninput="filterProducts()">
+      <input type="text" id="searchProducts" class="form-input" placeholder="🔍 Search..." style="flex:1; min-width:200px;" oninput="filterProducts()">
       <select id="filterCategory" class="form-select" style="width:auto;" onchange="filterProducts()">
         <option value="">All Categories</option>
         <option value="gold">Gold</option>
@@ -179,7 +174,7 @@
       </select>
     </div>
 
-    <h2 class="section-title">📋 All Products (<span id="productCount">0</span>) — Product-wise Stats</h2>
+    <h2 class="section-title">📋 All Products (<span id="productCount">0</span>)</h2>
     <div id="productsGrid" class="product-card-grid">
       <div class="empty-state"><p>Loading...</p></div>
     </div>
@@ -190,13 +185,13 @@
   <script>
     let uploadedImages = [];
     let allProducts = [];
-    let productStats = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      if (typeof clearCache === 'function') clearCache();
       document.getElementById('prPurchaseDate').value = new Date().toISOString().slice(0, 10);
       await generateProductCode();
-      await loadProductsWithStats();
+      loadProducts();
     });
 
     async function generateProductCode() {
@@ -216,8 +211,7 @@
       const preview = document.getElementById('prImagesPreview');
       preview.innerHTML = '';
       Array.from(input.files).slice(0, 5).forEach(file => {
-        const url = URL.createObjectURL(file);
-        preview.innerHTML += `<div class="product-image-item"><img src="${url}"></div>`;
+        preview.innerHTML += `<div class="product-image-item"><img src="${URL.createObjectURL(file)}"></div>`;
       });
     }
 
@@ -234,10 +228,10 @@
       const editId = document.getElementById('editProductId').value;
       const isEdit = !!editId;
       
-      if (!name) { alert('❌ Product name required'); return; }
+      if (!name) { alert('❌ Name required'); return; }
       if (weight <= 0) { alert('❌ Weight required'); return; }
-      if (cost <= 0) { alert('❌ Cost price required'); return; }
-      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Upload at least 1 image'); return; }
+      if (cost <= 0) { alert('❌ Cost required'); return; }
+      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Upload image'); return; }
 
       const btn = document.getElementById('saveBtn');
       btn.textContent = '⏳ Saving...'; btn.disabled = true;
@@ -250,8 +244,7 @@
         const imageUrls = [...uploadedImages];
         if (images.length > 0) {
           for (const file of Array.from(images).slice(0, 5)) {
-            const url = await uploadImage(file);
-            imageUrls.push(url);
+            imageUrls.push(await uploadImage(file));
           }
         }
 
@@ -266,7 +259,7 @@
           cost_price: totalCost,
           sale_price: sale,
           opening_stock: openingStock,
-          current_stock: openingStock,
+          current_stock: isEdit ? (allProducts.find(p => p.id === editId)?.current_stock || openingStock) : openingStock,
           featured: document.getElementById('prFeatured').value === 'true',
           images: imageUrls.slice(0, 5),
           description: document.getElementById('prDescription').value.trim(),
@@ -279,12 +272,12 @@
           alert('✅ Product updated!');
         } else {
           await addRecord('products', productData);
-          alert('✅ Product saved!\n\nID: ' + code + '\n\nAb is ID se purchase/sale karein.');
+          alert('✅ Product saved!\n\nID: ' + code);
         }
 
         clearForm();
         await generateProductCode();
-        await loadProductsWithStats();
+        loadProducts();
       } catch (error) {
         alert('❌ Error: ' + error.message);
       } finally {
@@ -307,64 +300,37 @@
 
     function cancelEdit() { clearForm(); }
 
-    async function loadProductsWithStats() {
+    async function loadProducts() {
       try {
         allProducts = await getRecordsFast('products', true);
-        const purchases = await getRecordsFast('purchases', true);
-        const sales = await getRecordsFast('sales', true);
-        const payments = await getRecordsFast('payments', true);
-        const customers = await getRecordsFast('customers', true);
-
-        // Calculate product-wise stats
-        productStats = calculateAllProductsStats(allProducts, purchases, sales, payments, customers);
-        renderProducts(productStats);
+        renderProducts(allProducts);
       } catch (e) {
         document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
       }
     }
 
-    function renderProducts(stats) {
+    function renderProducts(products) {
       const container = document.getElementById('productsGrid');
-      document.getElementById('productCount').textContent = stats.length;
+      document.getElementById('productCount').textContent = products.length;
 
-      if (!stats || stats.length === 0) {
+      if (!products || products.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products yet</p></div>';
         return;
       }
 
-      container.innerHTML = stats.map(s => {
-        const p = s.product;
+      container.innerHTML = products.map(p => {
         const img = p.images && p.images[0] ? p.images[0] : '../../images/placeholder.svg';
-        
+        const stock = p.current_stock || 0;
         return `
           <div class="product-card-item">
             <img src="${img}" class="product-card-img" onerror="this.src='../../images/placeholder.svg'">
             <div class="product-card-body">
               <div class="product-card-title">${p.name}</div>
               <div class="product-card-code">${p.product_code || 'N/A'}</div>
-              <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${p.weight || 0}g</div>
-              
-              <div class="product-card-price">Sale: ${formatPKR(s.totalSaleAmount)}</div>
-              <div class="product-card-cost">Purchase: ${formatPKR(s.totalPurchaseAmount)}</div>
-              
-              ${s.netProfit > 0 ? `<span class="profit-tag">📈 Profit: ${formatPKR(s.netProfit)}</span>` : s.netProfit < 0 ? `<span class="profit-tag" style="background:rgba(220,38,38,0.2); color:#FCA5A5;">📉 Loss: ${formatPKR(Math.abs(s.netProfit))}</span>` : ''}
-              <div><span class="stock-tag ${s.currentStock > 0 ? 'stock-in' : 'stock-out'}">${s.currentStock > 0 ? '✅ Stock: ' + s.currentStock : '❌ Out of Stock'}</span></div>
-              
-              <div class="product-stats">
-                <div class="stat-mini">
-                  <div class="stat-mini-label">Purchased</div>
-                  <div class="stat-mini-value">${s.totalPurchasedQty}</div>
-                </div>
-                <div class="stat-mini">
-                  <div class="stat-mini-label">Sold</div>
-                  <div class="stat-mini-value">${s.totalSoldQty}</div>
-                </div>
-                <div class="stat-mini">
-                  <div class="stat-mini-label">Stock</div>
-                  <div class="stat-mini-value">${s.currentStock}</div>
-                </div>
-              </div>
-              
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${formatWeight(p.weight)}</div>
+              <div class="product-card-price">Sale: ${formatPKR(p.sale_price)}</div>
+              <div class="product-card-cost">Cost: ${formatPKR(p.cost_price)}</div>
+              <div><span class="stock-tag ${stock > 0 ? 'stock-in' : 'stock-out'}">${stock > 0 ? '✅ Stock: ' + stock : '❌ Out of Stock'}</span></div>
               <div class="product-actions">
                 <button class="btn-secondary" style="flex:1; padding:8px; font-size:0.8rem;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Edit</button>
                 ${deleteButtonHTML('deleteProduct', p.id)}
@@ -402,25 +368,17 @@
       if (!confirmDelete('this product')) return;
       try {
         await deleteRecord('products', id);
-        alert('✅ Product deleted');
-        await loadProductsWithStats();
-      } catch (e) {
-        alert('❌ ' + e.message);
-      }
+        alert('✅ Deleted');
+        loadProducts();
+      } catch (e) { alert('❌ ' + e.message); }
     }
 
     function filterProducts() {
       const search = document.getElementById('searchProducts').value.toLowerCase();
       const category = document.getElementById('filterCategory').value;
-      let filtered = productStats;
-      if (search) {
-        filtered = filtered.filter(s => 
-          (s.productName || '').toLowerCase().includes(search) || 
-          (s.productCode || '').toLowerCase().includes(search) ||
-          (s.category || '').toLowerCase().includes(search)
-        );
-      }
-      if (category) filtered = filtered.filter(s => s.category === category);
+      let filtered = allProducts;
+      if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search) || (p.product_code || '').toLowerCase().includes(search));
+      if (category) filtered = filtered.filter(p => p.category === category);
       renderProducts(filtered);
     }
   </script>
