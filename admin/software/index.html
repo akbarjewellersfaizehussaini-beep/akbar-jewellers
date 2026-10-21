@@ -24,7 +24,8 @@
     .loss-card::before { background: linear-gradient(90deg, #DC2626, #991B1B) !important; }
     .payment-card { border-color: #93C5FD; background: linear-gradient(135deg, rgba(59,130,246,0.1), #1C1C1C); }
     .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; }
-    .summary-box { background: linear-gradient(135deg, var(--black-soft), #252525); border: 1px solid rgba(255,215,0,0.15); border-radius: 14px; padding: 18px; text-align: center; position: relative; overflow: hidden; }
+    .summary-box { background: linear-gradient(135deg, var(--black-soft), #252525); border: 1px solid rgba(255,215,0,0.15); border-radius: 14px; padding: 18px; text-align: center; position: relative; overflow: hidden; cursor: pointer; transition: all 0.3s; }
+    .summary-box:hover { transform: translateY(-3px); border-color: var(--gold-primary); box-shadow: 0 10px 30px rgba(255,215,0,0.2); }
     .summary-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
     .summary-box.gold::before { background: linear-gradient(90deg, #FFD700, #C9A227); }
     .summary-box.green::before { background: linear-gradient(90deg, #25D366, #128C7E); }
@@ -81,22 +82,37 @@
     <p class="page-subtitle" id="currentDate"></p>
     <p style="color: #FFD700; font-family: 'Noto Nastaliq Urdu', serif; font-size: 1.1rem; margin-bottom: 20px;" dir="rtl">فیض حسینی</p>
 
+    <!-- TODAY'S PERFORMANCE -->
+    <h2 class="section-title" style="margin-top: 20px;">⚡ Today's Performance</h2>
     <div class="stats-grid">
-      <div class="stat-card gold">
+      <div class="stat-card success">
+        <div class="stat-icon">💰</div>
         <div class="stat-label">Today's Sales</div>
-        <div class="stat-value" id="todaySales">Rs 0</div>
+        <div class="stat-value" id="todaySales" style="color:#25D366;">Rs 0</div>
+        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="todaySalesCount">0 sales</div>
       </div>
-      <div class="stat-card silver">
-        <div class="stat-label">This Month Purchases</div>
-        <div class="stat-value" id="monthPurchases">Rs 0</div>
+      <div class="stat-card danger">
+        <div class="stat-icon">💸</div>
+        <div class="stat-label">Today's Expense</div>
+        <div class="stat-value" id="todayExpense" style="color:#FCA5A5;">Rs 0</div>
+        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="todayExpenseCount">0 entries</div>
       </div>
-      <div class="stat-card diamond">
-        <div class="stat-label">Total Customers</div>
-        <div class="stat-value" id="totalCustomers">0</div>
+      <div class="stat-card info">
+        <div class="stat-icon">💳</div>
+        <div class="stat-label">Today's Payments</div>
+        <div class="stat-value" id="todayPayments" style="color:#93C5FD;">Rs 0</div>
+        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="todayPaymentsBreakdown">In / Out</div>
+      </div>
+      <div class="stat-card" id="todayProfitCard" style="border-color:#FFD700;">
+        <div class="stat-icon" id="todayProfitIcon">📈</div>
+        <div class="stat-label">Today's Profit</div>
+        <div class="stat-value" id="todayProfit">Rs 0</div>
+        <div class="stat-label" style="font-size:0.7rem; margin-top:5px;" id="todayProfitSubtext">Sale - Purchase - GST - Expense</div>
       </div>
     </div>
 
-    <h2 class="section-title" style="margin-top: 30px;">📊 Business Summary</h2>
+    <!-- BUSINESS SUMMARY -->
+    <h2 class="section-title" style="margin-top: 30px;">📊 Business Summary (All Time)</h2>
     <div class="stats-grid">
       <div class="stat-card profit-card">
         <div class="stat-icon">💰</div>
@@ -126,11 +142,12 @@
       </div>
     </div>
 
+    <!-- MONEY TABS -->
     <h2 class="section-title" style="margin-top: 30px;">💵 Money Summary</h2>
     
     <div class="money-tabs">
       <button class="money-tab active" onclick="switchMoneyTab('cash', this)">💵 Cash in Hand</button>
-      <button class="money-tab" onclick="switchMoneyTab('online', this)">🏦 Online (Bank/Easypaisa/JazzCash)</button>
+      <button class="money-tab" onclick="switchMoneyTab('online', this)">🏦 Online</button>
       <button class="money-tab" onclick="switchMoneyTab('available', this)">💼 Available Amount</button>
       <button class="money-tab" onclick="switchMoneyTab('gst', this)">🏛️ GST Collection</button>
     </div>
@@ -237,6 +254,43 @@
       </div>
     </div>
 
+    <!-- ASSETS & LIABILITIES -->
+    <h2 class="section-title" style="margin-top: 30px;">💎 Assets & Liabilities</h2>
+    <div class="summary-grid">
+      <div class="summary-box gold" onclick="showGoldStockDetails()">
+        <div class="summary-label">🪙 Gold in Stock</div>
+        <div class="summary-value" id="goldInStock" style="color:#FFD700;">0g</div>
+      </div>
+      <div class="summary-box gold" onclick="showStockValueDetails()">
+        <div class="summary-label">💰 Stock Value</div>
+        <div class="summary-value" id="stockValue" style="color:#FFD700;">Rs 0</div>
+      </div>
+      <div class="summary-box orange" onclick="showKarigarDetails()">
+        <div class="summary-label">⚖️ Gold with Karigar</div>
+        <div class="summary-value" id="goldWithKarigar" style="color:#F59E0B;">0g</div>
+      </div>
+      <div class="summary-box green" onclick="showBankDetails()">
+        <div class="summary-label">🏦 Available Online</div>
+        <div class="summary-value" id="bankBalance" style="color:#25D366;">Rs 0</div>
+      </div>
+      <div class="summary-box green" onclick="showCashDetails()">
+        <div class="summary-label">💵 Cash in Hand</div>
+        <div class="summary-value" id="cashInHandAsset" style="color:#25D366;">Rs 0</div>
+      </div>
+      <div class="summary-box red" onclick="showReceivables()">
+        <div class="summary-label">📥 Receivables (Lena Hai)</div>
+        <div class="summary-value" id="receivables" style="color:#FCA5A5;">Rs 0</div>
+      </div>
+      <div class="summary-box red" onclick="showPayables()">
+        <div class="summary-label">📤 Payables (Dena Hai)</div>
+        <div class="summary-value" id="payables" style="color:#FCA5A5;">Rs 0</div>
+      </div>
+      <div class="summary-box blue" onclick="showTotalAssets()">
+        <div class="summary-label">💼 Total Assets</div>
+        <div class="summary-value" id="totalAssets" style="color:#93C5FD;">Rs 0</div>
+      </div>
+    </div>
+
     <!-- PRODUCT-WISE STATS -->
     <h2 class="section-title" style="margin-top: 30px;">📦 Product-wise Stats (Purchase vs Sale vs Profit)</h2>
     <div style="overflow-x: auto;">
@@ -260,17 +314,20 @@
       </table>
     </div>
 
+    <!-- QUICK ACTIONS -->
     <h2 class="section-title" style="margin-top: 30px;">Quick Actions</h2>
     <div class="action-grid">
       <a href="sales.html" class="action-card" onclick="clearCacheBeforeNav(event, 'sales.html')"><div class="action-name">New Sale</div></a>
       <a href="purchase.html" class="action-card" onclick="clearCacheBeforeNav(event, 'purchase.html')"><div class="action-name">New Purchase</div></a>
-      <a href="payments.html" class="action-card payment-card" onclick="clearCacheBeforeNav(event, 'payments.html')"><div class="action-name">💳 Payment Receipt</div></a>
+      <a href="payments.html" class="action-card payment-card" onclick="clearCacheBeforeNav(event, 'payments.html')"><div class="action-name">💳 Payment</div></a>
       <a href="expenses.html" class="action-card expense" onclick="clearCacheBeforeNav(event, 'expenses.html')"><div class="action-name">Add Expense</div></a>
-      <a href="bank-accounts.html" class="action-card bank" onclick="clearCacheBeforeNav(event, 'bank-accounts.html')"><div class="action-name">🏦 Bank Accounts</div></a>
-      <a href="karigars.html" class="action-card karigar" onclick="clearCacheBeforeNav(event, 'karigars.html')"><div class="action-name">👷 Karigars</div></a>
-      <a href="suppliers.html" class="action-card" onclick="clearCacheBeforeNav(event, 'suppliers.html')"><div class="action-name">🏭 Suppliers</div></a>
+      <a href="bank-accounts.html" class="action-card bank" onclick="clearCacheBeforeNav(event, 'bank-accounts.html')"><div class="action-name">🏦 Bank</div></a>
+      <a href="karigars.html" class="action-card karigar" onclick="clearCacheBeforeNav(event, 'karigars.html')"><div class="action-name">👷 Karigar</div></a>
+      <a href="suppliers.html" class="action-card" onclick="clearCacheBeforeNav(event, 'suppliers.html')"><div class="action-name">🏭 Supplier</div></a>
       <a href="products.html" class="action-card product" onclick="clearCacheBeforeNav(event, 'products.html')"><div class="action-name">Add Product</div></a>
-      <a href="reports.html" class="action-card" onclick="clearCacheBeforeNav(event, 'reports.html')"><div class="action-name">View Reports</div></a>
+      <a href="inventory.html" class="action-card" onclick="clearCacheBeforeNav(event, 'inventory.html')"><div class="action-name">📦 Inventory</div></a>
+      <a href="store.html" class="action-card" onclick="clearCacheBeforeNav(event, 'store.html')"><div class="action-name">🏪 Store</div></a>
+      <a href="reports.html" class="action-card" onclick="clearCacheBeforeNav(event, 'reports.html')"><div class="action-name">Reports</div></a>
     </div>
 
     <h2 class="section-title">Recent Sales (Click to view Invoice)</h2>
@@ -301,6 +358,16 @@
     </div>
   </div>
 
+  <div id="detailsModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 class="modal-title" style="margin:0;" id="detailsTitle">Details</h2>
+        <button onclick="document.getElementById('detailsModal').classList.remove('active')" style="background:none; border:none; color:var(--gold-primary); font-size:1.5rem; cursor:pointer;">×</button>
+      </div>
+      <div id="detailsContent"></div>
+    </div>
+  </div>
+
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
@@ -321,14 +388,10 @@
       const making = Number(sale.making) || 0;
       const polish = Number(sale.polish) || 0;
       const gstPct = Number(sale.gst_pct) || 3;
-      
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
-      const makingTotal = making * qty;
-      const polishTotal = polish * qty;
-      const subtotal = metal + makingTotal + polishTotal;
+      const subtotal = metal + (making * qty) + (polish * qty);
       const gst = Math.round(subtotal * (gstPct / 100));
-      
       return { gst, gstPct, subtotal };
     }
 
@@ -351,6 +414,8 @@
       navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'customers.html\')">Customers</button>';
       navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'karigars.html\')">Karigars</button>';
       navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'suppliers.html\')">Suppliers</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'inventory.html\')">Inventory</button>';
+      navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'store.html\')">Store</button>';
       navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'reports.html\')">Reports</button>';
       navHtml += '<button class="nav-btn" onclick="clearCacheBeforeNav(event, \'settings.html\')">Settings</button>';
       document.getElementById('navMenu').innerHTML = navHtml;
@@ -375,13 +440,69 @@
       const customers = allData.customers;
       const expenses = allData.expenses;
       const payments = allData.payments;
+      const products = allData.products;
+      const karigars = allData.karigars;
+      const suppliers = allData.suppliers;
+      const services = allData.services;
       const bankAccounts = allData.bankAccounts;
       const bankTransactions = allData.bankTransactions;
 
-      document.getElementById('todaySales').textContent = formatPKR(sales.filter(s => s.date?.startsWith(today)).reduce((sum, s) => sum + (Number(s.total)||0), 0));
-      document.getElementById('monthPurchases').textContent = formatPKR(purchases.filter(p => p.date?.startsWith(thisMonth)).reduce((sum, p) => sum + (Number(p.total)||0), 0));
-      document.getElementById('totalCustomers').textContent = customers.length;
+      // ===== TODAY'S PERFORMANCE =====
+      const todaySales = sales.filter(s => (s.sale_date || s.date)?.startsWith(today));
+      const todayExpenses = expenses.filter(e => (e.expense_date || e.date)?.startsWith(today));
+      const todayPayments = payments.filter(p => (p.payment_date || p.date)?.startsWith(today));
+      
+      const todaySalesTotal = todaySales.reduce((sum, s) => sum + (Number(s.total)||0), 0);
+      const todayExpenseTotal = todayExpenses.reduce((sum, e) => sum + (Number(e.amount)||0), 0);
+      const todayPaymentsIn = todayPayments.filter(p => p.person_type === 'customer').reduce((sum, p) => sum + (Number(p.amount)||0), 0);
+      const todayPaymentsOut = todayPayments.filter(p => p.person_type !== 'customer').reduce((sum, p) => sum + (Number(p.amount)||0), 0);
+      
+      document.getElementById('todaySales').textContent = formatPKR(todaySalesTotal);
+      document.getElementById('todaySalesCount').textContent = todaySales.length + ' sales';
+      document.getElementById('todayExpense').textContent = formatPKR(todayExpenseTotal);
+      document.getElementById('todayExpenseCount').textContent = todayExpenses.length + ' entries';
+      document.getElementById('todayPayments').textContent = formatPKR(todayPaymentsIn + todayPaymentsOut);
+      document.getElementById('todayPaymentsBreakdown').textContent = 'In: ' + formatPKR(todayPaymentsIn) + ' | Out: ' + formatPKR(todayPaymentsOut);
+      
+      // Today's profit = (sale_rate - purchase_rate of sold items) - GST - expense
+      let todayProfit = 0;
+      let todayGST = 0;
+      todaySales.forEach(s => {
+        const { gst } = calculateSaleGST(s);
+        todayGST += gst;
+        const prod = products.find(p => p.product_code === s.product_id);
+        const purchaseRate = prod ? (Number(prod.cost_price) / (Number(prod.weight) || 1)) : (Number(s.rate) || 0);
+        const soldWeight = (Number(s.qty) || 1) * (Number(s.weight) || 0);
+        todayProfit += (Number(s.total) || 0) - (purchaseRate * soldWeight) - gst;
+      });
+      todayProfit -= todayExpenseTotal;
+      
+      const todayProfitEl = document.getElementById('todayProfit');
+      const todayProfitCard = document.getElementById('todayProfitCard');
+      const todayProfitIcon = document.getElementById('todayProfitIcon');
+      const todayProfitSubtext = document.getElementById('todayProfitSubtext');
+      
+      if (todayProfit > 0) {
+        todayProfitEl.textContent = '+ ' + formatPKR(todayProfit);
+        todayProfitEl.style.color = '#25D366';
+        todayProfitCard.style.borderColor = '#25D366';
+        todayProfitIcon.textContent = '📈';
+        todayProfitSubtext.textContent = 'Sale - Purchase - GST - Expense';
+      } else if (todayProfit < 0) {
+        todayProfitEl.textContent = '- ' + formatPKR(Math.abs(todayProfit));
+        todayProfitEl.style.color = '#DC2626';
+        todayProfitCard.style.borderColor = '#DC2626';
+        todayProfitIcon.textContent = '📉';
+        todayProfitSubtext.textContent = 'Cost > Sales (Loss)';
+      } else {
+        todayProfitEl.textContent = formatPKR(0);
+        todayProfitEl.style.color = '#FFD700';
+        todayProfitCard.style.borderColor = '#FFD700';
+        todayProfitIcon.textContent = '⚖️';
+        todayProfitSubtext.textContent = 'No profit, no loss';
+      }
 
+      // ===== ALL-TIME TOTALS =====
       let totalGST = 0;
       sales.forEach(s => {
         const { gst } = calculateSaleGST(s);
@@ -428,31 +549,23 @@
         profitSubtext.textContent = 'Sales = Cost';
       }
 
+      // ===== CASH CALCULATIONS =====
       let cashInSales = 0, cashInPayments = 0, cashOutPurchases = 0, cashOutExpenses = 0, cashOutPayments = 0;
       
       sales.forEach(s => {
-        if ((s.payment_mode === 'cash' || !s.payment_mode) && s.received) {
-          cashInSales += Number(s.received) || 0;
-        }
+        if ((s.payment_mode === 'cash' || !s.payment_mode) && s.received) cashInSales += Number(s.received) || 0;
       });
-      
       payments.forEach(p => {
         if (p.payment_mode === 'cash' || !p.payment_mode) {
           if (p.person_type === 'customer') cashInPayments += Number(p.amount) || 0;
           else cashOutPayments += Number(p.amount) || 0;
         }
       });
-      
       purchases.forEach(p => {
-        if ((p.payment_mode === 'cash' || !p.payment_mode) && p.paid) {
-          cashOutPurchases += Number(p.paid) || 0;
-        }
+        if ((p.payment_mode === 'cash' || !p.payment_mode) && p.paid) cashOutPurchases += Number(p.paid) || 0;
       });
-      
       expenses.forEach(e => {
-        if (e.payment_mode === 'cash' || !e.payment_mode) {
-          cashOutExpenses += Number(e.amount) || 0;
-        }
+        if (e.payment_mode === 'cash' || !e.payment_mode) cashOutExpenses += Number(e.amount) || 0;
       });
       
       const cashInHand = cashInSales + cashInPayments - cashOutPurchases - cashOutExpenses - cashOutPayments;
@@ -464,8 +577,8 @@
       document.getElementById('cashPaymentsOut').textContent = formatPKR(cashOutPayments);
       document.getElementById('cashInHand').textContent = formatPKR(cashInHand);
 
+      // ===== ONLINE =====
       let bankTotal = 0, easypaisaTotal = 0, jazzcashTotal = 0;
-      
       bankAccounts.forEach(acc => {
         let balance = Number(acc.opening_balance) || 0;
         const accTxns = bankTransactions.filter(t => t.account_id === acc.id);
@@ -473,7 +586,6 @@
           if (t.transaction_type === 'deposit') balance += Number(t.amount) || 0;
           else if (t.transaction_type === 'withdraw') balance -= Number(t.amount) || 0;
         });
-        
         if (acc.account_type === 'bank') bankTotal += balance;
         else if (acc.account_type === 'easypaisa') easypaisaTotal += balance;
         else if (acc.account_type === 'jazzcash') jazzcashTotal += balance;
@@ -485,45 +597,117 @@
       document.getElementById('easypaisaBalance').textContent = formatPKR(easypaisaTotal);
       document.getElementById('jazzcashBalance').textContent = formatPKR(jazzcashTotal);
       document.getElementById('onlineTotal').textContent = formatPKR(onlineTotal);
-
       document.getElementById('availCash').textContent = formatPKR(cashInHand);
       document.getElementById('availOnline').textContent = formatPKR(onlineTotal);
       document.getElementById('availTotal').textContent = formatPKR(cashInHand + onlineTotal);
 
+      // ===== ASSETS & LIABILITIES =====
+      let goldInStock = 0, stockValue = 0;
+      products.forEach(p => {
+        const stock = Number(p.current_stock) || 0;
+        if (stock > 0) {
+          goldInStock += stock * (Number(p.weight) || 0);
+          stockValue += stock * (Number(p.cost_price) || 0);
+        }
+      });
+      document.getElementById('goldInStock').textContent = formatWeight(goldInStock);
+      document.getElementById('stockValue').textContent = formatPKR(stockValue);
+      
+      let goldWithKarigar = 0;
+      karigars.forEach(k => {
+        let opening = Number(k.opening_gold) || 0;
+        const kServices = services.filter(s => s.karigar_name === k.name);
+        let given = 0, returned = 0;
+        kServices.forEach(s => {
+          given += Number(s.gold_given_weight) || 0;
+          returned += Number(s.gold_returned_weight) || 0;
+        });
+        goldWithKarigar += opening + given - returned;
+      });
+      document.getElementById('goldWithKarigar').textContent = formatWeight(goldWithKarigar);
+      
+      document.getElementById('cashInHandAsset').textContent = formatPKR(cashInHand);
+      
+      // Receivables (customers se lena)
+      let receivables = 0;
+      customers.forEach(c => {
+        let opening = Number(c.opening_balance) || 0;
+        const cSales = sales.filter(s => s.customer_name === c.name);
+        const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+        let totalBill = opening, totalPaid = 0;
+        cSales.forEach(s => totalBill += Number(s.total) || 0);
+        cPays.forEach(p => totalPaid += Number(p.amount) || 0);
+        const bal = totalBill - totalPaid;
+        if (bal > 0) receivables += bal;
+      });
+      document.getElementById('receivables').textContent = formatPKR(receivables);
+      
+      // Payables (suppliers + karigars ko dena)
+      let payables = 0;
+      suppliers.forEach(s => {
+        let opening = Number(s.opening_cash) || 0;
+        const sPurch = purchases.filter(p => p.supplier_name === s.name);
+        const sPays = payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+        let totalBill = opening, totalPaid = 0;
+        sPurch.forEach(p => totalBill += Number(p.total) || 0);
+        sPays.forEach(p => totalPaid += Number(p.amount) || 0);
+        const bal = totalBill - totalPaid;
+        if (bal > 0) payables += bal;
+      });
+      karigars.forEach(k => {
+        let opening = Number(k.opening_cash) || 0;
+        const kServices = services.filter(s => s.karigar_name === k.name);
+        const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
+        let totalCharges = opening, totalPaid = 0;
+        kServices.forEach(s => totalCharges += Number(s.charges) || 0);
+        kPays.forEach(p => totalPaid += Number(p.amount) || 0);
+        const bal = totalCharges - totalPaid;
+        if (bal > 0) payables += bal;
+      });
+      document.getElementById('payables').textContent = formatPKR(payables);
+      
+      // Total assets
+      const totalAssets = Math.max(0, cashInHand) + onlineTotal + stockValue + receivables;
+      document.getElementById('totalAssets').textContent = formatPKR(totalAssets);
+
+      // ===== GST TABLE =====
       loadGSTTable();
 
       // ===== PRODUCT-WISE STATS =====
-      if (typeof calculateAllProductsStats === 'function') {
-        const productStats = calculateAllProductsStats(allData.products, allData.purchases, allData.sales, allData.payments, allData.customers);
-        const statsBody = document.getElementById('productStatsBody');
-        if (statsBody) {
-          if (productStats.length === 0) {
-            statsBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px; color: var(--text-muted);">No products yet</td></tr>';
-          } else {
-            statsBody.innerHTML = productStats.map(s => `
-              <tr>
-                <td style="font-family: var(--font-mono); color: #93C5FD;">${s.productCode}</td>
-                <td>${s.productName}</td>
-                <td style="text-align: center;">${s.totalPurchasedQty}</td>
-                <td style="text-align: center;">${s.totalSoldQty}</td>
-                <td style="text-align: center; color: ${s.currentStock > 0 ? '#86EFAC' : '#FCA5A5'}; font-weight: 700;">${s.currentStock}</td>
-                <td style="text-align: right;">${formatPKR(s.totalPurchaseAmount)}</td>
-                <td style="text-align: right;">${formatPKR(s.totalSaleAmount)}</td>
-                <td style="text-align: right; color: #FCD34D;">${formatPKR(s.totalGST)}</td>
-                <td style="text-align: right;" class="profit-cell ${s.netProfit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPKR(s.netProfit)}</td>
-              </tr>
-            `).join('');
+      try {
+        if (typeof calculateAllProductsStats === 'function') {
+          const productStats = calculateAllProductsStats(products, purchases, sales);
+          const statsBody = document.getElementById('productStatsBody');
+          if (statsBody) {
+            if (!productStats || productStats.length === 0) {
+              statsBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px; color: var(--text-muted);">No products yet</td></tr>';
+            } else {
+              statsBody.innerHTML = productStats.map(s => `
+                <tr>
+                  <td style="font-family: var(--font-mono); color: #93C5FD;">${s.productCode}</td>
+                  <td>${s.productName}</td>
+                  <td style="text-align: center;">${s.totalPurchasedQty}</td>
+                  <td style="text-align: center;">${s.totalSoldQty}</td>
+                  <td style="text-align: center; color: ${s.currentStock > 0 ? '#86EFAC' : '#FCA5A5'}; font-weight: 700;">${s.currentStock}</td>
+                  <td style="text-align: right;">${formatPKR(s.totalPurchaseAmount)}</td>
+                  <td style="text-align: right;">${formatPKR(s.totalSaleAmount)}</td>
+                  <td style="text-align: right; color: #FCD34D;">${formatPKR(s.totalGST)}</td>
+                  <td style="text-align: right;" class="profit-cell ${s.netProfit >= 0 ? 'profit-positive' : 'profit-negative'}">${formatPKR(s.netProfit)}</td>
+                </tr>
+              `).join('');
+            }
           }
         }
-      }
+      } catch (e) { console.error('Product stats error:', e); }
 
+      // ===== RECENT SALES =====
       const recent = sales.slice(0, 5);
       const container = document.getElementById('recentSales');
       container.innerHTML = recent.length === 0 ? '<p style="color:#B8B8B8;">No sales yet</p>' : recent.map(s => `
         <div class="data-item" style="cursor:pointer;" onclick='viewInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
           <div>
             <div class="data-item-title">${s.customer_name}</div>
-            <div class="data-item-sub">${s.items_summary || 'Sale'} • ${formatDate(s.date)}</div>
+            <div class="data-item-sub">${s.items_summary || 'Sale'} • ${formatDate(s.sale_date || s.date)}</div>
           </div>
           <div class="data-item-value">${formatPKR(s.total)}</div>
         </div>
@@ -534,63 +718,168 @@
       document.querySelectorAll('.money-tab').forEach(t => t.classList.remove('active'));
       btn.classList.add('active');
       document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      
       if (tab === 'cash') document.getElementById('cashTab').classList.add('active');
       else if (tab === 'online') document.getElementById('onlineTab').classList.add('active');
       else if (tab === 'available') document.getElementById('availableTab').classList.add('active');
-      else if (tab === 'gst') {
-        document.getElementById('gstTab').classList.add('active');
-        loadGSTTable();
-      }
+      else if (tab === 'gst') { document.getElementById('gstTab').classList.add('active'); loadGSTTable(); }
     }
 
     function loadGSTTable() {
       const filter = document.getElementById('gstFilter')?.value || 'all';
       const sales = allData.sales;
-      
       let filteredSales = sales;
-      if (filter === 'today') {
-        const today = new Date().toISOString().slice(0,10);
-        filteredSales = sales.filter(s => s.date?.startsWith(today));
-      } else if (filter === 'month') {
-        const thisMonth = new Date().toISOString().slice(0,7);
-        filteredSales = sales.filter(s => s.date?.startsWith(thisMonth));
-      } else if (filter === 'year') {
-        const thisYear = new Date().getFullYear().toString();
-        filteredSales = sales.filter(s => s.date?.startsWith(thisYear));
-      }
+      if (filter === 'today') { const today = new Date().toISOString().slice(0,10); filteredSales = sales.filter(s => (s.sale_date || s.date)?.startsWith(today)); }
+      else if (filter === 'month') { const thisMonth = new Date().toISOString().slice(0,7); filteredSales = sales.filter(s => (s.sale_date || s.date)?.startsWith(thisMonth)); }
+      else if (filter === 'year') { const thisYear = new Date().getFullYear().toString(); filteredSales = sales.filter(s => (s.sale_date || s.date)?.startsWith(thisYear)); }
       
       let totalGST = 0;
       const rows = filteredSales.map(s => {
         const { gst, gstPct } = calculateSaleGST(s);
         totalGST += gst;
-        return `
-          <tr>
-            <td>${formatDate(s.sale_date || s.created_at)}</td>
-            <td style="font-family: var(--font-mono); font-size: 0.8rem;">${s.invoice_number || '—'}</td>
-            <td>${s.customer_name || '—'}</td>
-            <td style="text-align: right;">${formatPKR(s.total)}</td>
-            <td style="text-align: right;">${gstPct}%</td>
-            <td style="text-align: right; color: #25D366; font-weight: 700;">${formatPKR(gst)}</td>
-          </tr>
-        `;
+        return `<tr><td>${formatDate(s.sale_date || s.date)}</td><td style="font-family: var(--font-mono); font-size: 0.8rem;">${s.invoice_number || '—'}</td><td>${s.customer_name || '—'}</td><td style="text-align: right;">${formatPKR(s.total)}</td><td style="text-align: right;">${gstPct}%</td><td style="text-align: right; color: #25D366; font-weight: 700;">${formatPKR(gst)}</td></tr>`;
       }).join('');
       
       const tbody = document.getElementById('gstTableBody');
-      if (tbody) {
-        tbody.innerHTML = filteredSales.length === 0 
-          ? '<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">No invoices found</td></tr>' 
-          : rows;
-      }
-      
+      if (tbody) tbody.innerHTML = filteredSales.length === 0 ? '<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">No invoices found</td></tr>' : rows;
       const gstTotalEl = document.getElementById('gstTotal');
       if (gstTotalEl) gstTotalEl.textContent = formatPKR(totalGST);
+    }
+
+    function showGoldStockDetails() {
+      document.getElementById('detailsTitle').textContent = '🪙 Gold in Stock Details';
+      const products = allData.products.filter(p => (p.current_stock || 0) > 0);
+      document.getElementById('detailsContent').innerHTML = products.length === 0 ? '<p style="text-align:center; padding:30px;">No stock available</p>' : `
+        <table class="professional-table"><thead><tr><th>Product ID</th><th>Name</th><th>Stock</th><th>Weight</th><th>Total Weight</th></tr></thead>
+        <tbody>${products.map(p => `<tr><td>${p.product_code}</td><td>${p.name}</td><td>${p.current_stock}</td><td>${p.weight}g</td><td>${((p.current_stock || 0) * (p.weight || 0)).toFixed(3)}g</td></tr>`).join('')}</tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showStockValueDetails() {
+      document.getElementById('detailsTitle').textContent = '💰 Stock Value Details';
+      const products = allData.products.filter(p => (p.current_stock || 0) > 0);
+      document.getElementById('detailsContent').innerHTML = products.length === 0 ? '<p style="text-align:center; padding:30px;">No stock available</p>' : `
+        <table class="professional-table"><thead><tr><th>Product</th><th>Stock</th><th>Cost/Unit</th><th>Total Value</th></tr></thead>
+        <tbody>${products.map(p => `<tr><td>${p.name}</td><td>${p.current_stock}</td><td>${formatPKR(p.cost_price)}</td><td>${formatPKR((p.current_stock || 0) * (p.cost_price || 0))}</td></tr>`).join('')}</tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showKarigarDetails() {
+      document.getElementById('detailsTitle').textContent = '⚖️ Gold with Karigars';
+      const karigars = allData.karigars.map(k => {
+        let opening = Number(k.opening_gold) || 0;
+        const kServices = allData.services.filter(s => s.karigar_name === k.name);
+        let given = 0, returned = 0;
+        kServices.forEach(s => { given += Number(s.gold_given_weight) || 0; returned += Number(s.gold_returned_weight) || 0; });
+        return { name: k.name, phone: k.phone, balance: opening + given - returned };
+      }).filter(k => k.balance !== 0);
+      
+      document.getElementById('detailsContent').innerHTML = karigars.length === 0 ? '<p style="text-align:center; padding:30px;">No gold with any karigar</p>' : `
+        <table class="professional-table"><thead><tr><th>Karigar</th><th>Phone</th><th>Gold Balance</th><th>Action</th></tr></thead>
+        <tbody>${karigars.map(k => `<tr><td>${k.name}</td><td>${k.phone || '—'}</td><td style="color:#FCD34D; font-weight:700;">${formatWeight(k.balance)}</td><td><a href="karigar-ledger.html?name=${encodeURIComponent(k.name)}" class="btn-secondary" style="padding:4px 10px; font-size:0.75rem; text-decoration:none;">View Ledger</a></td></tr>`).join('')}</tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showBankDetails() {
+      document.getElementById('detailsTitle').textContent = '🏦 Bank Accounts';
+      const accounts = allData.bankAccounts.map(acc => {
+        let balance = Number(acc.opening_balance) || 0;
+        const accTxns = allData.bankTransactions.filter(t => t.account_id === acc.id);
+        accTxns.forEach(t => { if (t.transaction_type === 'deposit') balance += Number(t.amount) || 0; else balance -= Number(t.amount) || 0; });
+        return { ...acc, calculated_balance: balance };
+      });
+      
+      document.getElementById('detailsContent').innerHTML = accounts.length === 0 ? '<p style="text-align:center; padding:30px;">No accounts</p>' : `
+        <div style="margin-bottom:15px; display:flex; gap:10px;">
+          <a href="bank-accounts.html" class="btn-primary" style="padding:8px 16px; text-decoration:none; font-size:0.85rem;">+ Add Bank</a>
+        </div>
+        <table class="professional-table"><thead><tr><th>Type</th><th>Name</th><th>Account #</th><th style="text-align:right;">Balance</th></tr></thead>
+        <tbody>${accounts.map(a => `<tr><td>${a.account_type.toUpperCase()}</td><td>${a.account_name}</td><td style="font-family:var(--font-mono); font-size:0.8rem;">${a.account_number}</td><td style="text-align:right; color:#25D366; font-weight:700;">${formatPKR(a.calculated_balance)}</td></tr>`).join('')}</tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showCashDetails() {
+      document.getElementById('detailsTitle').textContent = '💵 Cash in Hand';
+      document.getElementById('detailsContent').innerHTML = `<p style="text-align:center; padding:30px; font-size:1.5rem; color:var(--gold-primary); font-weight:700;">${document.getElementById('cashInHand').textContent}</p><p style="text-align:center; color:var(--text-muted);">See Cash tab for breakdown</p>`;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showReceivables() {
+      document.getElementById('detailsTitle').textContent = '📥 Receivables (Lena Hai)';
+      const items = [];
+      allData.customers.forEach(c => {
+        let opening = Number(c.opening_balance) || 0;
+        const cSales = allData.sales.filter(s => s.customer_name === c.name);
+        const cPays = allData.payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+        let bill = opening, paid = 0;
+        cSales.forEach(s => bill += Number(s.total) || 0);
+        cPays.forEach(p => paid += Number(p.amount) || 0);
+        const bal = bill - paid;
+        if (bal > 0) items.push({ type: 'Customer', name: c.name, phone: c.phone, balance: bal });
+      });
+      document.getElementById('detailsContent').innerHTML = items.length === 0 ? '<p style="text-align:center; padding:30px;">Nothing to receive</p>' : `
+        <table class="professional-table"><thead><tr><th>Type</th><th>Name</th><th>Phone</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>${items.map(i => `<tr><td>${i.type}</td><td>${i.name}</td><td>${i.phone || '—'}</td><td style="text-align:right; color:#FCA5A5; font-weight:700;">${formatPKR(i.balance)}</td></tr>`).join('')}</tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showPayables() {
+      document.getElementById('detailsTitle').textContent = '📤 Payables (Dena Hai)';
+      const items = [];
+      allData.suppliers.forEach(s => {
+        let opening = Number(s.opening_cash) || 0;
+        const sPurch = allData.purchases.filter(p => p.supplier_name === s.name);
+        const sPays = allData.payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+        let bill = opening, paid = 0;
+        sPurch.forEach(p => bill += Number(p.total) || 0);
+        sPays.forEach(p => paid += Number(p.amount) || 0);
+        const bal = bill - paid;
+        if (bal > 0) items.push({ type: 'Supplier', name: s.name, phone: s.phone, balance: bal });
+      });
+      allData.karigars.forEach(k => {
+        let opening = Number(k.opening_cash) || 0;
+        const kServ = allData.services.filter(s => s.karigar_name === k.name);
+        const kPays = allData.payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
+        let bill = opening, paid = 0;
+        kServ.forEach(s => bill += Number(s.charges) || 0);
+        kPays.forEach(p => paid += Number(p.amount) || 0);
+        const bal = bill - paid;
+        if (bal > 0) items.push({ type: 'Karigar', name: k.name, phone: k.phone, balance: bal });
+      });
+      document.getElementById('detailsContent').innerHTML = items.length === 0 ? '<p style="text-align:center; padding:30px;">Nothing to pay</p>' : `
+        <table class="professional-table"><thead><tr><th>Type</th><th>Name</th><th>Phone</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>${items.map(i => `<tr><td>${i.type}</td><td>${i.name}</td><td>${i.phone || '—'}</td><td style="text-align:right; color:#FCA5A5; font-weight:700;">${formatPKR(i.balance)}</td></tr>`).join('')}</tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
+    }
+
+    function showTotalAssets() {
+      document.getElementById('detailsTitle').textContent = '💼 Total Assets Breakdown';
+      const cash = parseFloat(document.getElementById('cashInHand').textContent.replace(/[^0-9]/g, '')) || 0;
+      const online = parseFloat(document.getElementById('onlineTotal').textContent.replace(/[^0-9]/g, '')) || 0;
+      const stock = parseFloat(document.getElementById('stockValue').textContent.replace(/[^0-9]/g, '')) || 0;
+      const recv = parseFloat(document.getElementById('receivables').textContent.replace(/[^0-9]/g, '')) || 0;
+      
+      document.getElementById('detailsContent').innerHTML = `
+        <table class="professional-table"><thead><tr><th>Asset Type</th><th style="text-align:right;">Amount</th></tr></thead>
+        <tbody>
+          <tr><td>💵 Cash in Hand</td><td style="text-align:right;">${formatPKR(cash)}</td></tr>
+          <tr><td>🏦 Online Balance</td><td style="text-align:right;">${formatPKR(online)}</td></tr>
+          <tr><td>📦 Stock Value</td><td style="text-align:right;">${formatPKR(stock)}</td></tr>
+          <tr><td>📥 Receivables</td><td style="text-align:right;">${formatPKR(recv)}</td></tr>
+          <tr style="border-top:2px solid var(--gold-primary);"><td style="font-weight:700; color:var(--gold-primary);">💼 TOTAL ASSETS</td><td style="text-align:right; font-weight:700; color:var(--gold-primary); font-size:1.2rem;">${formatPKR(cash + online + stock + recv)}</td></tr>
+        </tbody></table>
+      `;
+      document.getElementById('detailsModal').classList.add('active');
     }
 
     async function viewInvoice(sale) {
       currentInvoiceData = sale;
       const shop = await getShopSettings();
-      
       const qty = sale.qty || 1;
       const weight = sale.weight || 0;
       const rate = sale.rate || 0;
@@ -604,89 +893,36 @@
       const subtotal = metal + makingTotal + polishTotal;
       const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
       
-      const html = `
+      document.getElementById('printableInvoice').innerHTML = `
         <div class="invoice-container">
-          <div class="invoice-header" style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
             <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
             <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
             <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
           </div>
           <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <div>
-              <p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.date)}</p>
-            </div>
-            <div style="text-align:right;">
-              <p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p>
-              <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p>
-            </div>
+            <div><p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p><p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date || sale.date)}</p></div>
+            <div style="text-align:right;"><p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p><p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p></div>
           </div>
           <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-            <thead>
-              <tr style="background:#FAF7F0;">
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th>
-                <th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td>
-                <td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td>
-              </tr>
-            </tbody>
+            <thead><tr style="background:#FAF7F0;"><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th></tr></thead>
+            <tbody><tr><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td></tr></tbody>
           </table>
-          
           <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
-            <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase; letter-spacing:1px;">💰 Price Breakdown</h3>
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Metal Value</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Making Charges</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">Polish Charges</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;">
-              <span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span>
-              <strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;">
-              <span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span>
-              <strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong>
-            </div>
-            ${discount > 0 ? `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);">
-              <span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span>
-              <strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong>
-            </div>
-            ` : ''}
-            <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;">
-              <span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span>
-              <strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong>
-            </div>
+            <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase;">💰 Price Breakdown</h3>
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Metal Value</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Making Charges</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Polish Charges</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;"><span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span><strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong></div>
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong></div>
+            ${discount > 0 ? `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5; background:rgba(37,211,102,0.05);"><span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span><strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong></div>` : ''}
+            <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;"><span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span><strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong></div>
           </div>
-          
-          <div style="text-align:right; font-size:14px; margin-bottom:10px;">
-            <p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p>
-            <p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p>
-          </div>
-          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">
-            Thank you for shopping with ${shop.name}
-            <div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div>
-          </div>
+          <div style="text-align:right; font-size:14px; margin-bottom:10px;"><p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p><p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p></div>
+          <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">Thank you for shopping with ${shop.name}<div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || 'Diamond aur Kundan Antique Jewellery ke Expert'}</div></div>
         </div>
       `;
-      
-      document.getElementById('printableInvoice').innerHTML = html;
       document.getElementById('invoiceModal').classList.add('active');
     }
 
@@ -705,20 +941,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', loadDashboard);
-
-    window.addEventListener('pageshow', (event) => {
-      if (event.persisted) {
-        window.location.reload();
-      }
-    });
+    window.addEventListener('pageshow', (event) => { if (event.persisted) window.location.reload(); });
   </script>
 
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(reg => console.log('✅ Service Worker registered:', reg.scope))
-          .catch(err => console.log('❌ Service Worker failed:', err));
+        navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
       });
     }
   </script>
