@@ -4,130 +4,271 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Store – Akbar Jewellers Software</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/png" href="../images/logo.png">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
+  <style>
+    .store-card { background: linear-gradient(135deg, var(--black-soft), #252525); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s; }
+    .store-card:hover { border-color: var(--gold-primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,215,0,0.2); }
+    .store-card-in { border-left: 4px solid #86EFAC; }
+    .store-card-out { border-left: 4px solid #FCA5A5; }
+    .store-card-low { border-left: 4px solid #FCD34D; }
+    .store-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
+    .store-stat { text-align: center; padding: 8px; background: var(--black-royal); border-radius: 8px; }
+    .store-stat-label { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
+    .store-stat-value { color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 0.9rem; margin-top: 3px; }
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 8px 18px; background: transparent; border: 2px solid rgba(255,215,0,0.3); color: var(--text-light); border-radius: 50px; cursor: pointer; font-size: 0.8rem; font-family: var(--font-body); font-weight: 600; transition: all 0.3s; }
+    .filter-btn:hover { border-color: var(--gold-primary); }
+    .filter-btn.active { background: linear-gradient(135deg, var(--gold-primary), var(--gold-deep)); color: var(--black-royal); border-color: var(--gold-primary); }
+  </style>
 </head>
 <body>
-  <div class="sw-header">
-    <div class="sw-logo">Store</div>
-    <button onclick="navigate('index.html')" style="background: transparent; color: #FFD700; border: 1px solid #FFD700; padding: 6px 15px; border-radius: 50px; cursor: pointer; font-family: 'Poppins', sans-serif;">← Back</button>
-  </div>
 
-  <div class="sw-nav">
-    <button class="nav-btn" onclick="navigate('index.html')">Dashboard</button>
-    <button class="nav-btn" onclick="navigate('sales.html')">Sales</button>
-    <button class="nav-btn" onclick="navigate('purchase.html')">Purchase</button>
-    <button class="nav-btn active">Store</button>
-    <button class="nav-btn" onclick="navigate('reports.html')">Reports</button>
+  <div class="sw-header">
+    <div class="sw-logo">
+      <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
+      Store
+    </div>
+    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
-    <h1 class="page-title">Store Inventory</h1>
-    
-    <div class="form-card">
-      <h3 class="form-card-title">Add Stock Item</h3>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Category</label>
-          <select id="stCategory" class="form-select">
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-            <option value="diamond">Diamond</option>
-          </select>
-        </div>
-        <div class="form-group"><label class="form-label">Item Name *</label><input type="text" id="stItem" class="form-input" placeholder="e.g., Gold Chain"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Weight (g)</label><input type="number" id="stWeight" class="form-input" placeholder="0.00"></div>
-        <div class="form-group"><label class="form-label">Cost Price (Rs)</label><input type="number" id="stCost" class="form-input" placeholder="0"></div>
-      </div>
-      
-      <div class="form-group">
-        <label class="form-label">Product Images (Min 5)</label>
-        <input type="file" id="stImages" class="form-input" accept="image/*" multiple style="padding:10px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Product Video (1)</label>
-        <input type="file" id="stVideo" class="form-input" accept="video/*" style="padding:10px;">
-      </div>
+    <h1 class="page-title">Store — Complete Inventory</h1>
+    <p class="page-subtitle">Har product ka total hisaab: purchase, sale, stock, profit</p>
 
-      <button class="btn-primary" onclick="saveStock()" style="width:100%;">Save Item</button>
+    <!-- TOTAL SUMMARY -->
+    <div class="stats-grid">
+      <div class="stat-card gold">
+        <div class="stat-label">Total Products</div>
+        <div class="stat-value" id="totalProducts">0</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">In Stock</div>
+        <div class="stat-value" id="inStock" style="color:#86EFAC;">0</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-label">Out of Stock</div>
+        <div class="stat-value" id="outStock" style="color:#FCA5A5;">0</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-label">Total Stock Value</div>
+        <div class="stat-value" id="totalValue" style="color:#93C5FD;">Rs 0</div>
+      </div>
     </div>
 
-    <h2 class="section-title">Inventory List</h2>
-    <div class="data-list" id="storeList"></div>
+    <!-- FILTERS -->
+    <div class="filter-bar">
+      <input type="text" id="searchStore" class="form-input" placeholder="🔍 Search by name, code..." style="flex:1; min-width:200px;" oninput="renderStore()">
+      <button class="filter-btn active" onclick="filterStore('all', this)">All</button>
+      <button class="filter-btn" onclick="filterStore('in', this)">In Stock</button>
+      <button class="filter-btn" onclick="filterStore('out', this)">Out of Stock</button>
+      <button class="filter-btn" onclick="filterStore('low', this)">Low Stock (≤5)</button>
+    </div>
+
+    <h2 class="section-title">📦 All Products (<span id="productCount">0</span>)</h2>
+    <div id="storeGrid">
+      <div class="empty-state"><p>Loading...</p></div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div id="productDetailModal" class="modal">
+    <div class="modal-content" style="max-width: 900px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="modal-title" style="margin: 0;" id="detailTitle">Product Details</h2>
+        <button onclick="document.getElementById('productDetailModal').classList.remove('active')" style="background: none; border: none; color: var(--gold-primary); font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
   </div>
 
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    async function saveStock() {
-      const item = document.getElementById('stItem').value.trim();
-      if (!item) { alert('❌ Enter item name'); return; }
+    let allProducts = [];
+    let allPurchases = [];
+    let allSales = [];
+    let currentFilter = 'all';
 
-      const btn = event.target;
-      btn.textContent = 'Uploading Images...'; btn.disabled = true;
-
-      try {
-        const imgFiles = document.getElementById('stImages').files;
-        const vidFile = document.getElementById('stVideo').files[0];
-        
-        const imageUrls = await uploadMultipleImages(imgFiles);
-        let videoUrl = null;
-        if (vidFile) videoUrl = await uploadVideo(vidFile);
-
-        await addRecord('stock', {
-          category: document.getElementById('stCategory').value,
-          item: item,
-          weight: parseFloat(document.getElementById('stWeight').value) || 0,
-          cost: parseFloat(document.getElementById('stCost').value) || 0,
-          images: imageUrls,
-          video: videoUrl
-        });
-
-        alert('✅ Stock added!');
-        clearForm(); loadStore();
-      } catch (e) {
-        alert('❌ ' + e.message);
-      } finally {
-        btn.textContent = 'Save Item'; btn.disabled = false;
-      }
-    }
-
-    function clearForm() {
-      ['stItem','stWeight','stCost'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('stImages').value = '';
-      document.getElementById('stVideo').value = '';
-    }
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
+      if (typeof clearCache === 'function') clearCache();
+      await loadStore();
+    });
 
     async function loadStore() {
-      const stock = await getRecordsFast('stock');
-      const container = document.getElementById('storeList');
-      if (!stock || stock.length === 0) { container.innerHTML = '<div class="empty-state"><p>No items yet</p></div>'; return; }
-      
-      container.innerHTML = stock.map(s => `
-        <div class="data-item">
-          <div style="display:flex; gap:10px;">
-            ${s.images && s.images.length > 0 ? `<img src="${s.images[0]}" style="width:50px; height:50px; border-radius:8px; object-fit:cover;">` : `<img src="../images/placeholder.svg" style="width:50px; height:50px; border-radius:8px;">`}
-            <div>
-              <div class="data-item-title">${s.item}</div>
-              <div class="data-item-sub">${(s.category||'').toUpperCase()} • ${s.weight}g</div>
-            </div>
-          </div>
-          <div class="data-item-value">${formatPKR(s.cost)}</div>
-        </div>
-      `).join('');
+      allProducts = await getRecordsFast('products', true);
+      allPurchases = await getRecordsFast('purchases', true);
+      allSales = await getRecordsFast('sales', true);
+      renderStore();
     }
 
-    document.addEventListener('DOMContentLoaded', async () => { await initDB(); loadStore(); });
+    function renderStore() {
+      const search = document.getElementById('searchStore').value.toLowerCase();
+      let filtered = allProducts;
+
+      if (search) {
+        filtered = filtered.filter(p => 
+          (p.name || '').toLowerCase().includes(search) || 
+          (p.product_code || '').toLowerCase().includes(search) ||
+          (p.category || '').toLowerCase().includes(search)
+        );
+      }
+
+      if (currentFilter === 'in') filtered = filtered.filter(p => (p.current_stock || 0) > 0);
+      else if (currentFilter === 'out') filtered = filtered.filter(p => (p.current_stock || 0) <= 0);
+      else if (currentFilter === 'low') filtered = filtered.filter(p => (p.current_stock || 0) > 0 && (p.current_stock || 0) <= 5);
+
+      // Total stats
+      const total = allProducts.length;
+      const inStock = allProducts.filter(p => (p.current_stock || 0) > 0).length;
+      const outStock = allProducts.filter(p => (p.current_stock || 0) <= 0).length;
+      let totalValue = 0;
+      allProducts.forEach(p => { totalValue += (p.current_stock || 0) * (p.cost_price || 0); });
+
+      document.getElementById('totalProducts').textContent = total;
+      document.getElementById('inStock').textContent = inStock;
+      document.getElementById('outStock').textContent = outStock;
+      document.getElementById('totalValue').textContent = formatPKR(totalValue);
+      document.getElementById('productCount').textContent = filtered.length;
+
+      const container = document.getElementById('storeGrid');
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products found</p></div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(p => {
+        const stock = p.current_stock || 0;
+        const pPurchases = allPurchases.filter(pu => pu.product_id === p.product_code);
+        const pSales = allSales.filter(s => s.product_id === p.product_code);
+        const purchasedQty = pPurchases.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
+        const soldQty = pSales.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
+        const purchaseAmt = pPurchases.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
+        const saleAmt = pSales.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
+        const stockValue = stock * (p.cost_price || 0);
+        
+        const cardClass = stock > 5 ? 'store-card-in' : stock > 0 ? 'store-card-low' : 'store-card-out';
+        
+        return `
+          <div class="store-card ${cardClass}" onclick='showProductDetail(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
+              <div style="flex: 1; min-width: 200px;">
+                <div style="color: var(--gold-primary); font-weight: 700; font-size: 1.1rem;">${p.name}</div>
+                <div style="color: #93C5FD; font-size: 0.8rem; font-family: var(--font-mono);">${p.product_code}</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${formatWeight(p.weight)}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="color: ${stock > 5 ? '#86EFAC' : stock > 0 ? '#FCD34D' : '#FCA5A5'}; font-weight: 700; font-size: 1.3rem;">${stock}</div>
+                <div style="color: var(--text-muted); font-size: 0.7rem;">In Stock</div>
+              </div>
+            </div>
+            
+            <div class="store-stats">
+              <div class="store-stat"><div class="store-stat-label">Purchased</div><div class="store-stat-value">${purchasedQty}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Sold</div><div class="store-stat-value">${soldQty}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Purchase Amt</div><div class="store-stat-value">${formatPKR(purchaseAmt)}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Sale Amt</div><div class="store-stat-value">${formatPKR(saleAmt)}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Stock Value</div><div class="store-stat-value">${formatPKR(stockValue)}</div></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterStore(type, btn) {
+      currentFilter = type;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderStore();
+    }
+
+    function showProductDetail(p) {
+      const pPurchases = allPurchases.filter(pu => pu.product_id === p.product_code).sort((a, b) => new Date(b.purchase_date || b.created_at) - new Date(a.purchase_date || a.created_at));
+      const pSales = allSales.filter(s => s.product_id === p.product_code).sort((a, b) => new Date(b.sale_date || b.created_at) - new Date(a.sale_date || a.created_at));
+      
+      const purchasedQty = pPurchases.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
+      const soldQty = pSales.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
+      const purchaseAmt = pPurchases.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
+      const saleAmt = pSales.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
+      const stock = p.current_stock || 0;
+
+      document.getElementById('detailTitle').textContent = p.name;
+      document.getElementById('detailContent').innerHTML = `
+        <div style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.02)); border: 2px solid var(--gold-primary); border-radius: 14px; padding: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; text-align: center;">
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Product ID</div>
+              <div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono);">${p.product_code}</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Purchased</div>
+              <div style="color: #86EFAC; font-weight: 700;">${purchasedQty}</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Sold</div>
+              <div style="color: #FCD34D; font-weight: 700;">${soldQty}</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">In Stock</div>
+              <div style="color: ${stock > 0 ? '#86EFAC' : '#FCA5A5'}; font-weight: 700;">${stock}</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Purchase Amt</div>
+              <div style="color: #FFF8DC; font-weight: 700;">${formatPKR(purchaseAmt)}</div>
+            </div>
+            <div>
+              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Sale Amt</div>
+              <div style="color: #FFF8DC; font-weight: 700;">${formatPKR(saleAmt)}</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-family: var(--font-heading);">📥 Purchase History (${pPurchases.length})</h3>
+        <div style="overflow-x: auto; margin-bottom: 20px;">
+          <table class="professional-table">
+            <thead><tr><th>Date</th><th>Supplier</th><th>Qty</th><th>Rate/g</th><th style="text-align: right;">Total</th></tr></thead>
+            <tbody>
+              ${pPurchases.length === 0 ? '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No purchases</td></tr>' : pPurchases.map(pu => `
+                <tr>
+                  <td>${formatDate(pu.purchase_date || pu.created_at)}</td>
+                  <td>${pu.supplier_name || '—'}</td>
+                  <td>${pu.qty || 1}</td>
+                  <td>${formatPKR(pu.rate)}</td>
+                  <td style="text-align: right; font-weight: 700;">${formatPKR(pu.total)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-family: var(--font-heading);">📤 Sale History (${pSales.length})</h3>
+        <div style="overflow-x: auto; margin-bottom: 20px;">
+          <table class="professional-table">
+            <thead><tr><th>Date</th><th>Customer</th><th>Qty</th><th>Rate/g</th><th style="text-align: right;">Total</th></tr></thead>
+            <tbody>
+              ${pSales.length === 0 ? '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No sales</td></tr>' : pSales.map(s => `
+                <tr>
+                  <td>${formatDate(s.sale_date || s.created_at)}</td>
+                  <td>${s.customer_name || '—'}</td>
+                  <td>${s.qty || 1}</td>
+                  <td>${formatPKR(s.rate)}</td>
+                  <td style="text-align: right; font-weight: 700;">${formatPKR(s.total)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="background: rgba(37,211,102,0.1); border: 2px solid #25D366; border-radius: 12px; padding: 15px; text-align: center;">
+          <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Net Profit from This Product</div>
+          <div style="color: #25D366; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; margin-top: 5px;">${formatPKR(saleAmt - purchaseAmt)}</div>
+        </div>
+      `;
+      
+      document.getElementById('productDetailModal').classList.add('active');
+    }
   </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-    });
-  }
-</script>
 </body>
 </html>
