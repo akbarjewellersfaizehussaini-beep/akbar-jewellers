@@ -14,21 +14,19 @@
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       New Purchase
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">New Purchase</h1>
-    <p class="page-subtitle">Product select karein — sirf existing products</p>
+    <p class="page-subtitle">Sirf existing products — stock auto update</p>
 
     <div class="form-card">
       <h3 class="form-card-title">🏭 Supplier Info</h3>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Select Supplier</label>
-          <select id="selectSupplier" class="form-select" onchange="fillSupplier()">
-            <option value="">-- New Supplier --</option>
-          </select>
+          <select id="selectSupplier" class="form-select" onchange="fillSupplier()"><option value="">-- New Supplier --</option></select>
         </div>
         <div class="form-group">
           <label class="form-label">Purchase Date</label>
@@ -48,83 +46,52 @@
     </div>
 
     <div class="form-card">
-      <h3 class="form-card-title">🪙 Item Details (Product Select — Primary Key)</h3>
+      <h3 class="form-card-title">🪙 Item Details (Existing Product Only)</h3>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Product <span class="required">*</span></label>
-          <select id="pProductId" class="form-select" onchange="autoFillProduct()">
-            <option value="">-- Select Product --</option>
-          </select>
+          <select id="pProductId" class="form-select" onchange="autoFillProduct()"><option value="">-- Select Product --</option></select>
         </div>
         <div class="form-group">
           <label class="form-label">Item Description</label>
           <input type="text" id="pItem" class="form-input" readonly style="background:var(--charcoal);">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Current Stock</label>
           <input type="text" id="pStock" class="form-input" readonly style="background:var(--charcoal); color:#86EFAC; font-weight:700;">
         </div>
         <div class="form-group">
-          <label class="form-label">Quantity <span class="required">*</span></label>
-          <input type="number" id="pQty" class="form-input number-input" value="1" min="1" oninput="autoCalc()">
+          <label class="form-label">Per Piece Weight</label>
+          <input type="text" id="pPerPcWeight" class="form-input" readonly style="background:var(--charcoal); color:#93C5FD; font-weight:700;">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Weight (per piece) <span class="required">*</span></label>
-          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
-            <input type="number" id="pWeight" class="form-input number-input" step="0.001" placeholder="0.000" oninput="autoCalc()">
-            <select id="pWeightUnit" class="form-select" onchange="autoCalc()">
-              <option value="gram">Gram</option>
-              <option value="tola">Tola</option>
-              <option value="masha">Masha</option>
-              <option value="ratti">Ratti</option>
-            </select>
-          </div>
+          <label class="form-label">Quantity to Purchase <span class="required">*</span></label>
+          <input type="number" id="pQty" class="form-input number-input" value="1" min="1" oninput="autoCalc()">
         </div>
         <div class="form-group">
-          <label class="form-label">Karat</label>
-          <select id="pKarat" class="form-select">
-            <option value="24K">24K</option>
-            <option value="22K">22K</option>
-            <option value="21K">21K</option>
-            <option value="18K">18K</option>
-            <option value="16K">16K</option>
-            <option value="14K">14K</option>
-          </select>
+          <label class="form-label">Total Weight (auto)</label>
+          <input type="text" id="pTotalWeight" class="form-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700;">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Rate/gram (Rs) <span class="required">*</span></label>
           <input type="number" id="pRate" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
         <div class="form-group">
-          <label class="form-label">Total Cost (Rs)</label>
-          <input type="number" id="pTotal" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700;">
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
           <label class="form-label">Discount (Rs)</label>
           <input type="number" id="pDiscount" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
       </div>
-    </div>
-
-    <div class="form-card" style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,215,0,0.02)); border-color:var(--gold-primary);">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <div style="color:var(--gold-primary); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">Total Purchase Amount</div>
-          <div style="color:var(--text-muted); font-size:0.75rem;" id="totalWeightDisplay">0g</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Total Cost (Rs)</label>
+          <input type="number" id="pTotal" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700;">
         </div>
-        <div style="color:var(--gold-primary); font-family:var(--font-heading); font-size:2rem; font-weight:700;" id="grandTotal">Rs 0</div>
       </div>
     </div>
 
@@ -138,7 +105,7 @@
             <option value="bank">Bank Transfer</option>
             <option value="easypaisa">Easypaisa</option>
             <option value="jazzcash">JazzCash</option>
-            <option value="credit">Credit (Udhaar)</option>
+            <option value="credit">Credit</option>
           </select>
         </div>
       </div>
@@ -169,7 +136,6 @@
       <div class="action-buttons-grid">
         <button class="action-btn print-btn" onclick="printElement('printableInvoice')"><span class="btn-icon">🖨</span><span class="btn-text">Print</span></button>
         <button class="action-btn whatsapp-btn" onclick="sendInvoiceWhatsApp()"><span class="btn-icon">📱</span><span class="btn-text">WhatsApp</span></button>
-        <button class="action-btn email-btn" onclick="sendInvoiceEmail()"><span class="btn-icon">📧</span><span class="btn-text">Email</span></button>
         <button class="action-btn close-btn" onclick="document.getElementById('invoiceModal').classList.remove('active')"><span class="btn-icon">✕</span><span class="btn-text">Close</span></button>
       </div>
     </div>
@@ -181,26 +147,31 @@
     let currentInvoice = null;
     let suppliers = [];
     let allProducts = [];
+    let allPurchases = [];
+    let allSales = [];
+    let allReturns = [];
+    let selectedProduct = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'purchase'])) return;
       if (typeof clearCache === 'function') clearCache();
-      
       document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
-      
+
       suppliers = await getRecordsFast('suppliers', true);
       allProducts = await getRecordsFast('products', true);
-      
+      allPurchases = await getRecordsFast('purchases', true);
+      allSales = await getRecordsFast('sales', true);
+      allReturns = await getRecordsFast('returns', true);
+
       const supSelect = document.getElementById('selectSupplier');
-      suppliers.forEach(s => {
-        supSelect.innerHTML += `<option value="${s.name}">${s.name} - ${s.phone || ''}</option>`;
-      });
-      
+      suppliers.forEach(s => { supSelect.innerHTML += `<option value="${s.name}">${s.name} - ${s.phone || ''}</option>`; });
+
       const prodSelect = document.getElementById('pProductId');
       allProducts.forEach(p => {
-        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name} (Stock: ${p.current_stock || 0})</option>`;
+        const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name} (Stock: ${live.current})</option>`;
       });
-      
+
       loadPurchases();
       autoCalc();
     });
@@ -209,42 +180,33 @@
       const name = document.getElementById('selectSupplier').value;
       if (!name) return;
       const s = suppliers.find(x => x.name === name);
-      if (s) {
-        document.getElementById('pSupplier').value = s.name || '';
-        document.getElementById('pPhone').value = s.phone || '';
-      }
+      if (s) { document.getElementById('pSupplier').value = s.name || ''; document.getElementById('pPhone').value = s.phone || ''; }
     }
 
     function autoFillProduct() {
       const code = document.getElementById('pProductId').value;
-      if (!code) return;
+      if (!code) { selectedProduct = null; return; }
       const prod = allProducts.find(p => p.product_code === code);
       if (prod) {
+        selectedProduct = prod;
         document.getElementById('pItem').value = prod.name;
-        document.getElementById('pWeight').value = prod.weight;
-        document.getElementById('pWeightUnit').value = 'gram';
-        document.getElementById('pStock').value = (prod.current_stock || 0) + ' units';
-        document.getElementById('pKarat').value = prod.karat || '24K';
+        const live = calculateLiveStock(prod.product_code, allProducts, allPurchases, allSales, allReturns);
+        document.getElementById('pStock').value = live.current + ' units';
+        document.getElementById('pPerPcWeight').value = (Number(prod.weight) || 0).toFixed(3) + 'g';
         autoCalc();
       }
     }
 
     function autoCalc() {
-      const qty = parseFloat(document.getElementById('pQty').value) || 1;
-      const weight = parseFloat(document.getElementById('pWeight').value) || 0;
-      const unit = document.getElementById('pWeightUnit').value;
+      const qty = parseFloat(document.getElementById('pQty').value) || 0;
+      const weight = selectedProduct ? (Number(selectedProduct.weight) || 0) : 0;
       const rate = parseFloat(document.getElementById('pRate').value) || 0;
       const discount = parseFloat(document.getElementById('pDiscount').value) || 0;
-      
-      const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
-      const totalWeight = qty * weightInGrams;
+      const totalWeight = qty * weight;
       const metal = totalWeight * rate;
       const total = metal - discount;
-      
+      document.getElementById('pTotalWeight').value = formatWeight(totalWeight);
       document.getElementById('pTotal').value = Math.round(total);
-      document.getElementById('grandTotal').textContent = formatPKR(total);
-      document.getElementById('totalWeightDisplay').textContent = formatWeight(totalWeight);
-      
       const paid = parseFloat(document.getElementById('pPaid').value) || 0;
       document.getElementById('pBalance').value = Math.max(0, Math.round(total - paid));
     }
@@ -253,31 +215,30 @@
       const supplier = document.getElementById('pSupplier').value.trim();
       const phone = document.getElementById('pPhone').value.trim();
       const productCode = document.getElementById('pProductId').value;
-      const item = document.getElementById('pItem').value.trim();
+      if (!supplier || !phone) { alert('❌ Supplier name + phone'); return; }
+      if (!productCode || !selectedProduct) { alert('❌ Product select karein'); return; }
+
+      const qty = parseFloat(document.getElementById('pQty').value) || 0;
+      if (qty <= 0) { alert('❌ Valid quantity'); return; }
       const total = parseFloat(document.getElementById('pTotal').value) || 0;
-      
-      if (!supplier || !phone || !productCode || !item || total <= 0) { alert('❌ Fill all required fields'); return; }
+      if (total <= 0) { alert('❌ Total 0'); return; }
 
       const btn = document.getElementById('savePurchaseBtn');
       btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
-        const qty = parseFloat(document.getElementById('pQty').value) || 1;
-        const weight = parseFloat(document.getElementById('pWeight').value) || 0;
-        const unit = document.getElementById('pWeightUnit').value;
-        const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
-
+        const weight = Number(selectedProduct.weight) || 0;
         const purchase = {
           invoice_no: 'PUR-' + Date.now(),
           product_id: productCode,
           supplier_name: supplier,
           supplier_phone: phone,
-          item: item,
+          item: selectedProduct.name,
           qty: qty,
-          weight: weightInGrams,
-          total_weight: qty * weightInGrams,
-          gold_weight: qty * weightInGrams,
-          gold_karat: document.getElementById('pKarat').value,
+          weight: weight,
+          total_weight: qty * weight,
+          gold_weight: qty * weight,
+          gold_karat: selectedProduct.karat || '24K',
           gold_rate: parseFloat(document.getElementById('pRate').value) || 0,
           rate: parseFloat(document.getElementById('pRate').value) || 0,
           discount: parseFloat(document.getElementById('pDiscount').value) || 0,
@@ -287,81 +248,59 @@
           payment_mode: document.getElementById('pPaymentMode').value,
           purchase_date: document.getElementById('pDate').value
         };
-
         const saved = await addRecord('purchases', purchase);
-        
-        // Update product stock
-        const prod = allProducts.find(p => p.product_code === productCode);
-        if (prod) {
-          const newStock = (Number(prod.current_stock) || 0) + qty;
-          await updateRecord('products', prod.id, { current_stock: newStock });
-        }
-        
         if (sendWA) {
           const shop = await getShopSettings();
-          const msg = `*PURCHASE BILL: ${purchase.invoice_no}*\nSupplier: ${supplier}\nItem: ${item}\nTotal: ${formatPKR(total)}\nPaid: ${formatPKR(purchase.paid)}\nBalance: ${formatPKR(purchase.balance)}\n\n${shop.name}`;
+          const msg = `*PURCHASE: ${purchase.invoice_no}*\nSupplier: ${supplier}\nItem: ${selectedProduct.name} x ${qty}\nTotal: ${formatPKR(total)}\nPaid: ${formatPKR(purchase.paid)}\nBalance: ${formatPKR(purchase.balance)}\n\n${shop.name}`;
           openWhatsApp(phone, msg);
         }
-        
         currentInvoice = saved;
         showInvoice(saved);
-        clearForm(); 
+        clearForm();
+        allPurchases = await getRecordsFast('purchases', true);
+        allProducts = await getRecordsFast('products', true);
         loadPurchases();
-      } catch (e) {
-        alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Invoice';
-        btn.disabled = false;
-      }
+      } catch (e) { alert('❌ ' + e.message); }
+      finally { btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Invoice'; btn.disabled = false; }
     }
 
-    async function showInvoice(purchase) {
+    async function showInvoice(p) {
       const shop = await getShopSettings();
-      const qty = purchase.qty || 1;
-      const weight = purchase.weight || 0;
+      const qty = p.qty || 1;
+      const weight = p.weight || 0;
       const totalWeight = qty * weight;
-      
       document.getElementById('printableInvoice').innerHTML = `
         <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
           <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
-          <p style="margin:5px 0; font-size:16px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
           <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
         </div>
-        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif; margin-bottom:20px;">PURCHASE BILL</h2>
+        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif;">PURCHASE BILL</h2>
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-          <div><p style="margin:0; font-size:14px;"><strong>Purchase #:</strong> ${purchase.invoice_no}</p><p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(purchase.purchase_date)}</p></div>
-          <div style="text-align:right;"><p style="margin:0; font-size:14px;"><strong>Supplier:</strong> ${purchase.supplier_name}</p><p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${purchase.supplier_phone || '—'}</p></div>
+          <div><p><strong>Purchase #:</strong> ${p.invoice_no}</p><p><strong>Date:</strong> ${formatDate(p.purchase_date)}</p></div>
+          <div style="text-align:right;"><p><strong>Supplier:</strong> ${p.supplier_name}</p><p><strong>Phone:</strong> ${p.supplier_phone || '—'}</p></div>
         </div>
-        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
-          <thead><tr style="background:#FAF7F0;"><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Item</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Qty</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Weight</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Rate/g</th><th style="border:1px solid #ddd; padding:10px; text-align:left; font-size:12px; color:#D4AF37;">Total</th></tr></thead>
-          <tbody><tr><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${purchase.item}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.rate)}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(purchase.total)}</td></tr></tbody>
+        <table style="width:100%; border-collapse:collapse;">
+          <thead><tr style="background:#FAF7F0;"><th style="padding:10px; text-align:left;">Item</th><th style="padding:10px; text-align:left;">Qty</th><th style="padding:10px; text-align:left;">Weight</th><th style="padding:10px; text-align:left;">Rate/g</th><th style="padding:10px; text-align:left;">Total</th></tr></thead>
+          <tbody><tr><td style="padding:10px; border:1px solid #ddd;">${p.item}</td><td style="padding:10px; border:1px solid #ddd;">${qty}</td><td style="padding:10px; border:1px solid #ddd;">${formatWeight(totalWeight)}</td><td style="padding:10px; border:1px solid #ddd;">${formatPKR(p.rate)}</td><td style="padding:10px; border:1px solid #ddd;">${formatPKR(p.total)}</td></tr></tbody>
         </table>
-        <div style="text-align:right; font-size:14px; margin-bottom:10px;"><p style="margin:5px 0;">Paid: <strong>${formatPKR(purchase.paid)}</strong></p><p style="margin:5px 0;">Balance: <strong style="color:${purchase.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(purchase.balance)}</strong></p></div>
-        <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">TOTAL: ${formatPKR(purchase.total)}</div>
+        <div style="text-align:right; margin-top:20px;"><p>Paid: <strong>${formatPKR(p.paid)}</strong></p><p>Balance: <strong style="color:${p.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(p.balance)}</strong></p></div>
+        <div style="text-align:right; font-size:20px; font-weight:bold; color:#D4AF37; border-top:2px solid #D4AF37; padding-top:10px;">TOTAL: ${formatPKR(p.total)}</div>
       `;
       document.getElementById('invoiceModal').classList.add('active');
     }
 
     function sendInvoiceWhatsApp() {
       if (!currentInvoice) return;
-      const msg = `*PURCHASE: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nItem: ${currentInvoice.item}\nTotal: ${formatPKR(currentInvoice.total)}\nPaid: ${formatPKR(currentInvoice.paid)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
-      openWhatsApp(currentInvoice.supplier_phone, msg);
-    }
-
-    function sendInvoiceEmail() {
-      if (!currentInvoice) return;
-      const email = prompt('Enter supplier email:', '');
-      if (!email) return;
-      const body = `Purchase: ${currentInvoice.invoice_no}\nSupplier: ${currentInvoice.supplier_name}\nTotal: ${formatPKR(currentInvoice.total)}`;
-      sendEmail(email, `Purchase ${currentInvoice.invoice_no}`, body);
+      openWhatsApp(currentInvoice.supplier_phone, `*PURCHASE: ${currentInvoice.invoice_no}*\nSupplier: ${currentInvoice.supplier_name}\nTotal: ${formatPKR(currentInvoice.total)}`);
     }
 
     function clearForm() {
-      ['pSupplier','pPhone','pItem','pWeight','pRate','pTotal','pPaid','pBalance','pDiscount','pStock'].forEach(id => document.getElementById(id).value = '');
+      ['pSupplier','pPhone','pItem','pRate','pDiscount','pTotal','pPaid','pBalance','pStock','pPerPcWeight','pTotalWeight'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       document.getElementById('pQty').value = '1';
       document.getElementById('pProductId').value = '';
       document.getElementById('selectSupplier').value = '';
       document.getElementById('pDate').value = new Date().toISOString().slice(0,10);
+      selectedProduct = null;
       autoCalc();
     }
 
@@ -369,7 +308,6 @@
       const purchases = await getRecordsFast('purchases', true);
       const container = document.getElementById('purchasesList');
       if (purchases.length === 0) { container.innerHTML = '<div class="empty-state"><p>No purchases yet</p></div>'; return; }
-      
       container.innerHTML = purchases.slice(0, 20).map(p => `
         <div class="data-item">
           <div style="cursor:pointer; flex:1;" onclick='showInvoice(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
@@ -386,11 +324,8 @@
 
     async function deletePurchase(id) {
       if (!confirmDelete('this purchase')) return;
-      try {
-        await deleteRecord('purchases', id);
-        alert('✅ Purchase deleted');
-        loadPurchases();
-      } catch (e) { alert('❌ ' + e.message); }
+      try { await deleteRecord('purchases', id); alert('✅ Deleted'); loadPurchases(); }
+      catch (e) { alert('❌ ' + e.message); }
     }
   </script>
 </body>

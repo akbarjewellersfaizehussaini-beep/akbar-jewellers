@@ -14,13 +14,33 @@
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       New Sale
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">New Sale</h1>
-    <p class="page-subtitle">Product select karein — purchase rate auto-fetch hoga</p>
+    <p class="page-subtitle">Product select karein — cash ya credit sale</p>
 
+    <!-- SALE TYPE -->
+    <div class="form-card" style="border-color: var(--gold-primary);">
+      <h3 class="form-card-title">💳 Sale Type <span class="required">*</span></h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <label style="padding: 18px; background: var(--black-royal); border: 2px solid #25D366; border-radius: 14px; cursor: pointer; text-align: center; transition: all 0.3s;" id="cashLabel">
+          <input type="radio" name="saleType" value="cash" checked onchange="onSaleTypeChange()" style="margin-right: 8px;">
+          <span style="font-size: 2rem;">💵</span>
+          <div style="color: #25D366; font-weight: 700; margin-top: 8px;">CASH SALE</div>
+          <div style="color: var(--text-muted); font-size: 0.75rem;">Poori payment abhi</div>
+        </label>
+        <label style="padding: 18px; background: var(--black-royal); border: 2px solid #FCD34D; border-radius: 14px; cursor: pointer; text-align: center; transition: all 0.3s;" id="creditLabel">
+          <input type="radio" name="saleType" value="credit" onchange="onSaleTypeChange()" style="margin-right: 8px;">
+          <span style="font-size: 2rem;">📝</span>
+          <div style="color: #FCD34D; font-weight: 700; margin-top: 8px;">CREDIT SALE (UDHAAR)</div>
+          <div style="color: var(--text-muted); font-size: 0.75rem;">Udhaar / advance</div>
+        </label>
+      </div>
+    </div>
+
+    <!-- CUSTOMER -->
     <div class="form-card">
       <h3 class="form-card-title">👤 Customer Info</h3>
       <div class="form-row">
@@ -47,11 +67,12 @@
       </div>
     </div>
 
+    <!-- ITEM -->
     <div class="form-card">
-      <h3 class="form-card-title">📿 Item Details (Product Select — Primary Key)</h3>
+      <h3 class="form-card-title">📿 Item Details</h3>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Product <span class="required">*</span></label>
+          <label class="form-label">Product (Existing Only) <span class="required">*</span></label>
           <select id="sProductId" class="form-select" onchange="autoFillProduct()">
             <option value="">-- Select Product --</option>
           </select>
@@ -68,8 +89,8 @@
           <input type="text" id="sStock" class="form-input" readonly style="background:var(--charcoal); color:#86EFAC; font-weight:700;">
         </div>
         <div class="form-group">
-          <label class="form-label">Purchase Rate (Auto)</label>
-          <input type="text" id="sPurchaseRate" class="form-input" readonly style="background:var(--charcoal); color:#93C5FD; font-weight:700;">
+          <label class="form-label">Per Piece Weight</label>
+          <input type="text" id="sPerPcWeight" class="form-input" readonly style="background:var(--charcoal); color:#93C5FD; font-weight:700;">
         </div>
       </div>
 
@@ -79,16 +100,8 @@
           <input type="number" id="sQty" class="form-input number-input" value="1" min="1" oninput="autoCalc()">
         </div>
         <div class="form-group">
-          <label class="form-label">Weight (per piece) <span class="required">*</span></label>
-          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
-            <input type="number" id="sWeight" class="form-input number-input" step="0.001" placeholder="0.000" oninput="autoCalc()">
-            <select id="sWeightUnit" class="form-select" onchange="autoCalc()">
-              <option value="gram">Gram</option>
-              <option value="tola">Tola</option>
-              <option value="masha">Masha</option>
-              <option value="ratti">Ratti</option>
-            </select>
-          </div>
+          <label class="form-label">Total Weight (auto)</label>
+          <input type="text" id="sTotalWeight" class="form-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700;">
         </div>
       </div>
 
@@ -98,14 +111,14 @@
           <input type="number" id="sRate" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
         <div class="form-group">
-          <label class="form-label">Making Charges (Rs)</label>
+          <label class="form-label">Making Charges (per piece)</label>
           <input type="number" id="sMaking" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Polish Charges (Rs)</label>
+          <label class="form-label">Polish (per piece)</label>
           <input type="number" id="sPolish" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
         <div class="form-group">
@@ -115,12 +128,13 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">GST % (Auto)</label>
+          <label class="form-label">GST %</label>
           <input type="number" id="sGST" class="form-input number-input" readonly style="background:var(--charcoal); color:var(--gold-primary);">
         </div>
       </div>
     </div>
 
+    <!-- PRICE BREAKDOWN -->
     <div class="form-card" style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,215,0,0.02)); border-color:var(--gold-primary);">
       <h3 class="form-card-title">💰 Price Breakdown</h3>
       <div style="display:grid; grid-template-columns:1fr auto; gap:10px; font-size:0.95rem;">
@@ -141,32 +155,28 @@
       </div>
     </div>
 
+    <!-- PAYMENT -->
     <div class="form-card">
       <h3 class="form-card-title">💳 Payment</h3>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Payment Type</label>
-          <select id="sPaymentType" class="form-select">
-            <option value="full">100% Full Payment</option>
-            <option value="advance">Advance Payment</option>
-            <option value="credit">Credit (Udhaar)</option>
-          </select>
-        </div>
-        <div class="form-group">
           <label class="form-label">Payment Mode</label>
-          <select id="sPaymentMode" class="form-select">
+          <select id="sPaymentMode" class="form-select" onchange="onPaymentModeChange()">
             <option value="cash">Cash</option>
             <option value="bank">Bank Transfer</option>
             <option value="easypaisa">Easypaisa</option>
             <option value="jazzcash">JazzCash</option>
-            <option value="credit">Credit</option>
           </select>
+        </div>
+        <div class="form-group" id="advanceGroup" style="display:none;">
+          <label class="form-label">Advance Received (Rs)</label>
+          <input type="number" id="sPaid" class="form-input number-input" placeholder="0" oninput="autoCalc()">
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Received (Rs)</label>
-          <input type="number" id="sPaid" class="form-input number-input" placeholder="0" oninput="autoCalc()">
+          <input type="number" id="sReceived" class="form-input number-input" placeholder="0" readonly style="background:var(--charcoal); color:#86EFAC; font-weight:700;">
         </div>
         <div class="form-group">
           <label class="form-label">Balance (Rs)</label>
@@ -201,79 +211,101 @@
   <script>
     let shopRules = { gst_pct: 3 };
     let allProducts = [];
+    let allPurchases = [];
+    let allSales = [];
+    let allReturns = [];
     let customers = [];
     let currentInvoice = null;
+    let selectedProduct = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales'])) return;
       if (typeof clearCache === 'function') clearCache();
-      
       document.getElementById('sDate').value = new Date().toISOString().slice(0, 10);
       shopRules = await getShopSettings();
       document.getElementById('sGST').value = shopRules.gst_pct || 3;
-      
+
       allProducts = await getRecordsFast('products', true);
+      allPurchases = await getRecordsFast('purchases', true);
+      allSales = await getRecordsFast('sales', true);
+      allReturns = await getRecordsFast('returns', true);
       customers = await getRecordsFast('customers', true);
-      
+
       const prodSelect = document.getElementById('sProductId');
       allProducts.forEach(p => {
-        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name} (Stock: ${p.current_stock || 0})</option>`;
+        const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+        prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name} (Stock: ${live.current})</option>`;
       });
-      
+
       const custSelect = document.getElementById('selectCustomer');
       customers.forEach(c => {
         custSelect.innerHTML += `<option value="${c.name}">${c.name} - ${c.phone || ''}</option>`;
       });
-      
+
+      onSaleTypeChange();
       loadSales();
       autoCalc();
     });
+
+    function onSaleTypeChange() {
+      const type = document.querySelector('input[name="saleType"]:checked').value;
+      const cashLabel = document.getElementById('cashLabel');
+      const creditLabel = document.getElementById('creditLabel');
+      if (type === 'cash') {
+        cashLabel.style.background = 'rgba(37,211,102,0.15)';
+        creditLabel.style.background = 'var(--black-royal)';
+        document.getElementById('advanceGroup').style.display = 'none';
+      } else {
+        creditLabel.style.background = 'rgba(252,211,77,0.15)';
+        cashLabel.style.background = 'var(--black-royal)';
+        document.getElementById('advanceGroup').style.display = 'block';
+      }
+      autoCalc();
+    }
+
+    function onPaymentModeChange() { autoCalc(); }
 
     function fillCustomer() {
       const name = document.getElementById('selectCustomer').value;
       if (!name) return;
       const c = customers.find(x => x.name === name);
-      if (c) {
-        document.getElementById('cName').value = c.name || '';
-        document.getElementById('cPhone').value = c.phone || '';
-      }
+      if (c) { document.getElementById('cName').value = c.name || ''; document.getElementById('cPhone').value = c.phone || ''; }
     }
 
     function autoFillProduct() {
       const code = document.getElementById('sProductId').value;
-      if (!code) return;
+      if (!code) { selectedProduct = null; return; }
       const prod = allProducts.find(p => p.product_code === code);
       if (prod) {
+        selectedProduct = prod;
         document.getElementById('sItem').value = prod.name;
-        document.getElementById('sWeight').value = prod.weight;
-        document.getElementById('sWeightUnit').value = 'gram';
-        document.getElementById('sStock').value = (prod.current_stock || 0) + ' units';
-        
-        // Purchase rate per gram = cost_price / weight
-        const purchaseRate = prod.weight > 0 ? (Number(prod.cost_price) / Number(prod.weight)) : 0;
-        document.getElementById('sPurchaseRate').value = formatPKR(purchaseRate) + '/g';
+        const live = calculateLiveStock(prod.product_code, allProducts, allPurchases, allSales, allReturns);
+        const perPc = Number(prod.weight) || 0;
+        document.getElementById('sStock').value = live.current + ' units';
+        document.getElementById('sStock').style.color = live.current > 0 ? '#86EFAC' : '#FCA5A5';
+        document.getElementById('sPerPcWeight').value = perPc.toFixed(3) + 'g';
         autoCalc();
       }
     }
 
     function autoCalc() {
-      const qty = parseFloat(document.getElementById('sQty').value) || 1;
-      const weight = parseFloat(document.getElementById('sWeight').value) || 0;
-      const unit = document.getElementById('sWeightUnit').value;
+      const qty = parseFloat(document.getElementById('sQty').value) || 0;
+      const weight = selectedProduct ? (Number(selectedProduct.weight) || 0) : 0;
       const rate = parseFloat(document.getElementById('sRate').value) || 0;
       const making = parseFloat(document.getElementById('sMaking').value) || 0;
       const polish = parseFloat(document.getElementById('sPolish').value) || 0;
       const discount = parseFloat(document.getElementById('sDiscount').value) || 0;
-      
-      const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
-      const totalWeight = qty * weightInGrams;
+
+      const totalWeight = qty * weight;
       const metal = totalWeight * rate;
       const makingTotal = making * qty;
       const polishTotal = polish * qty;
       const subtotal = metal + makingTotal + polishTotal;
-      const gst = subtotal * ((shopRules.gst_pct || 3) / 100);
+      const gstPct = shopRules.gst_pct || 3;
+      const gst = subtotal * (gstPct / 100);
       const total = subtotal + gst - discount;
-      
+
+      document.getElementById('sTotalWeight').value = formatWeight(totalWeight);
       document.getElementById('bdMetal').textContent = formatPKR(metal);
       document.getElementById('bdMaking').textContent = formatPKR(makingTotal);
       document.getElementById('bdPolish').textContent = formatPKR(polishTotal);
@@ -281,75 +313,85 @@
       document.getElementById('bdGST').textContent = formatPKR(gst);
       document.getElementById('bdDiscount').textContent = '- ' + formatPKR(discount);
       document.getElementById('bdTotal').textContent = formatPKR(total);
-      
-      const paid = parseFloat(document.getElementById('sPaid').value) || 0;
-      document.getElementById('sRemaining').value = Math.max(0, Math.round(total - paid));
+
+      const type = document.querySelector('input[name="saleType"]:checked').value;
+      let received = 0;
+      if (type === 'cash') {
+        received = Math.round(total);
+      } else {
+        received = Math.round(parseFloat(document.getElementById('sPaid').value) || 0);
+      }
+      document.getElementById('sReceived').value = received;
+      document.getElementById('sRemaining').value = Math.max(0, Math.round(total - received));
     }
 
     async function saveSale(sendWA) {
       const customer = document.getElementById('cName').value.trim();
       const productCode = document.getElementById('sProductId').value;
-      const item = document.getElementById('sItem').value.trim();
+      if (!customer) { alert('❌ Customer name required'); return; }
+      if (!productCode || !selectedProduct) { alert('❌ Product select karein'); return; }
+
+      // STOCK CHECK
+      const live = calculateLiveStock(productCode, allProducts, allPurchases, allSales, allReturns);
+      const qty = parseFloat(document.getElementById('sQty').value) || 0;
+      if (live.current <= 0) { alert('❌ Stock khatam hai! Pehle purchase karein.'); return; }
+      if (qty > live.current) { alert(`❌ Sirf ${live.current} units available hain.`); return; }
+      if (qty <= 0) { alert('❌ Valid quantity'); return; }
+
       const total = parseFloat(document.getElementById('bdTotal').textContent.replace(/[^0-9]/g, '')) || 0;
-      
-      if (!customer || !productCode || !item || total <= 0) { alert('❌ Fill all required fields'); return; }
+      if (total <= 0) { alert('❌ Total 0 hai'); return; }
 
       const btn = document.getElementById('saveSaleBtn');
       btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
-        const qty = parseFloat(document.getElementById('sQty').value) || 1;
-        const weight = parseFloat(document.getElementById('sWeight').value) || 0;
-        const unit = document.getElementById('sWeightUnit').value;
-        const weightInGrams = unit === 'tola' ? weight * 11.664 : unit === 'masha' ? weight * 0.972 : unit === 'ratti' ? weight * 0.1215 : weight;
-        
+        const type = document.querySelector('input[name="saleType"]:checked').value;
+        const weight = Number(selectedProduct.weight) || 0;
+        const received = parseFloat(document.getElementById('sReceived').value) || 0;
+
         const sale = {
           invoice_number: 'AKBAR-' + Date.now(),
           product_id: productCode,
           customer_name: customer,
           customer_phone: document.getElementById('cPhone').value.trim(),
-          items_summary: item,
+          items_summary: selectedProduct.name,
           qty: qty,
-          weight: weightInGrams,
-          total_weight: qty * weightInGrams,
+          weight: weight,
+          total_weight: qty * weight,
           rate: parseFloat(document.getElementById('sRate').value) || 0,
           making: parseFloat(document.getElementById('sMaking').value) || 0,
           polish: parseFloat(document.getElementById('sPolish').value) || 0,
           discount: parseFloat(document.getElementById('sDiscount').value) || 0,
           gst_pct: shopRules.gst_pct || 3,
           total: total,
-          received: parseFloat(document.getElementById('sPaid').value) || 0,
-          balance: parseFloat(document.getElementById('sRemaining').value) || 0,
-          payment_type: document.getElementById('sPaymentType').value,
-          payment_mode: document.getElementById('sPaymentMode').value,
+          received: received,
+          balance: Math.max(0, total - received),
+          payment_type: type === 'cash' ? 'full' : 'credit',
+          payment_mode: type === 'cash' ? document.getElementById('sPaymentMode').value : 'credit',
           sale_date: document.getElementById('sDate').value
         };
 
         const saved = await addRecord('sales', sale);
-        
-        // Update product stock
-        const prod = allProducts.find(p => p.product_code === productCode);
-        if (prod) {
-          const newStock = (Number(prod.current_stock) || 0) - qty;
-          await updateRecord('products', prod.id, { current_stock: newStock });
-        }
-        
         if (sendWA) {
           const shop = await getShopSettings();
-          const msg = `*INVOICE: ${sale.invoice_number}*\n\nCustomer: ${customer}\nItem: ${item}\nTotal: ${formatPKR(total)}\nReceived: ${formatPKR(sale.received)}\nBalance: ${formatPKR(sale.balance)}\n\nThank you! ${shop.name}`;
+          const msg = `*INVOICE: ${sale.invoice_number}*\nCustomer: ${customer}\nItem: ${selectedProduct.name} x ${qty}\nTotal: ${formatPKR(total)}\nReceived: ${formatPKR(received)}\nBalance: ${formatPKR(sale.balance)}\n\n${shop.name}`;
           openWhatsApp(sale.customer_phone, msg);
         }
-        
         currentInvoice = saved;
         showInvoice(saved);
-        clearForm(); 
+        clearForm();
+        // Refresh data
+        allSales = await getRecordsFast('sales', true);
+        allProducts = await getRecordsFast('products', true);
+        const prodSelect = document.getElementById('sProductId');
+        prodSelect.innerHTML = '<option value="">-- Select Product --</option>';
+        allProducts.forEach(p => {
+          const lv = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+          prodSelect.innerHTML += `<option value="${p.product_code}">${p.product_code} - ${p.name} (Stock: ${lv.current})</option>`;
+        });
         loadSales();
-      } catch (e) {
-        alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Invoice';
-        btn.disabled = false;
-      }
+      } catch (e) { alert('❌ Error: ' + e.message); }
+      finally { btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & View Invoice'; btn.disabled = false; }
     }
 
     async function showInvoice(sale) {
@@ -362,11 +404,8 @@
       const discount = sale.discount || 0;
       const totalWeight = qty * weight;
       const metal = totalWeight * rate;
-      const makingTotal = making * qty;
-      const polishTotal = polish * qty;
-      const subtotal = metal + makingTotal + polishTotal;
+      const subtotal = metal + (making * qty) + (polish * qty);
       const gst = Math.round(subtotal * ((sale.gst_pct || 3) / 100));
-      
       document.getElementById('printableInvoice').innerHTML = `
         <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
           <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:28px;">${shop.name}</h1>
@@ -375,7 +414,7 @@
           <p style="margin:5px 0; font-size:12px; color:#666;">Phone: ${shop.phone}</p>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-          <div><p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p><p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date)}</p></div>
+          <div><p style="margin:0; font-size:14px;"><strong>Invoice #:</strong> ${sale.invoice_number}</p><p style="margin:5px 0; font-size:14px;"><strong>Date:</strong> ${formatDate(sale.sale_date)}</p><p style="margin:5px 0; font-size:14px;"><strong>Type:</strong> ${sale.payment_type === 'full' ? 'CASH' : 'CREDIT'}</p></div>
           <div style="text-align:right;"><p style="margin:0; font-size:14px;"><strong>Customer:</strong> ${sale.customer_name}</p><p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> ${sale.customer_phone || '—'}</p></div>
         </div>
         <table style="width:100%; border-collapse:collapse; margin-bottom:20px;">
@@ -383,41 +422,38 @@
           <tbody><tr><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${sale.items_summary}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${qty}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatWeight(totalWeight)}</td><td style="border:1px solid #ddd; padding:10px; font-size:14px;">${formatPKR(rate)}</td></tr></tbody>
         </table>
         <div style="background:#FAF7F0; padding:20px; border-radius:8px; margin-bottom:20px;">
-          <h3 style="margin:0 0 15px 0; font-size:14px; color:#D4AF37; text-transform:uppercase;">💰 Price Breakdown</h3>
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Metal Value</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(metal)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Making Charges</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(makingTotal)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Polish Charges</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(polishTotal)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:2px solid #D4AF37; margin-top:5px;"><span style="font-size:13px; color:#D4AF37; font-weight:700;">Subtotal</span><strong style="font-size:15px; color:#D4AF37;">${formatPKR(subtotal)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">GST (${sale.gst_pct || 3}%)</span><strong style="font-size:14px; color:#1A1A1A;">${formatPKR(gst)}</strong></div>
-          ${discount > 0 ? `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#25D366; font-weight:600;">🎉 Discount</span><strong style="font-size:14px; color:#25D366;">- ${formatPKR(discount)}</strong></div>` : ''}
-          <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37; margin-top:5px;"><span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span><strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Metal Value</span><strong>${formatPKR(metal)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Making</span><strong>${formatPKR(making*qty)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">Polish</span><strong>${formatPKR(polish*qty)}</strong></div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #E5E5E5;"><span style="font-size:13px; color:#666;">GST</span><strong>${formatPKR(gst)}</strong></div>
+          ${discount > 0 ? `<div style="display:flex; justify-content:space-between; padding:8px 0; color:#25D366;"><span>Discount</span><strong>- ${formatPKR(discount)}</strong></div>` : ''}
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:2px solid #D4AF37;"><span style="font-size:16px; color:#D4AF37; font-weight:700;">TOTAL</span><strong style="font-size:20px; color:#D4AF37;">${formatPKR(sale.total)}</strong></div>
         </div>
-        <div style="text-align:right; font-size:14px; margin-bottom:10px;"><p style="margin:5px 0;">Received: <strong>${formatPKR(sale.received)}</strong></p><p style="margin:5px 0;">Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p></div>
-        <div style="text-align:center; margin-top:40px; font-size:12px; color:#888; border-top:1px solid #eee; padding-top:15px;">Thank you for shopping with ${shop.name}<div style="color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif; direction:rtl; margin-top:10px;">${shop.tagline || ''}</div></div>
+        <div style="text-align:right;"><p>Received: <strong>${formatPKR(sale.received)}</strong></p><p>Balance: <strong style="color:${sale.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(sale.balance)}</strong></p></div>
       `;
       document.getElementById('invoiceModal').classList.add('active');
     }
 
     function sendInvoiceWhatsApp() {
       if (!currentInvoice) return;
-      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}\n\nThank you!`;
+      const msg = `*INVOICE: ${currentInvoice.invoice_number}*\nCustomer: ${currentInvoice.customer_name}\nItem: ${currentInvoice.items_summary}\nTotal: ${formatPKR(currentInvoice.total)}\nReceived: ${formatPKR(currentInvoice.received)}\nBalance: ${formatPKR(currentInvoice.balance)}`;
       openWhatsApp(currentInvoice.customer_phone, msg);
     }
 
     function sendInvoiceEmail() {
       if (!currentInvoice) return;
-      const email = prompt('Enter customer email:', '');
+      const email = prompt('Customer email:', '');
       if (!email) return;
-      const body = `Invoice: ${currentInvoice.invoice_number}\nCustomer: ${currentInvoice.customer_name}\nTotal: ${formatPKR(currentInvoice.total)}`;
-      sendEmail(email, `Invoice ${currentInvoice.invoice_number}`, body);
+      sendEmail(email, `Invoice ${currentInvoice.invoice_number}`, `Invoice: ${currentInvoice.invoice_number}\nTotal: ${formatPKR(currentInvoice.total)}`);
     }
 
     function clearForm() {
-      ['cName','cPhone','sItem','sWeight','sRate','sMaking','sPolish','sDiscount','sPaid','sRemaining','sStock','sPurchaseRate'].forEach(id => document.getElementById(id).value = '');
+      ['cName','cPhone','sItem','sRate','sMaking','sPolish','sDiscount','sPaid','sReceived','sRemaining','sStock','sPerPcWeight','sTotalWeight'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       document.getElementById('sQty').value = '1';
       document.getElementById('sProductId').value = '';
       document.getElementById('selectCustomer').value = '';
       document.getElementById('sDate').value = new Date().toISOString().slice(0,10);
+      selectedProduct = null;
       autoCalc();
     }
 
@@ -425,12 +461,11 @@
       const sales = await getRecordsFast('sales', true);
       const container = document.getElementById('salesList');
       if (sales.length === 0) { container.innerHTML = '<div class="empty-state"><p>No sales yet</p></div>'; return; }
-      
       container.innerHTML = sales.slice(0, 20).map(s => `
         <div class="data-item">
           <div style="cursor:pointer; flex:1;" onclick='showInvoice(${JSON.stringify(s).replace(/'/g, "&#39;")})'>
             <div class="data-item-title">${s.items_summary} <span style="color:var(--gold-primary); font-size:0.8rem;">(Qty: ${s.qty || 1})</span></div>
-            <div class="data-item-sub">${s.customer_name} • ${formatDate(s.sale_date)}</div>
+            <div class="data-item-sub">${s.customer_name} • ${formatDate(s.sale_date)} • ${s.payment_type === 'full' ? '💵 Cash' : '📝 Credit'}</div>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
             <div class="data-item-value">${formatPKR(s.total)}</div>
@@ -442,11 +477,8 @@
 
     async function deleteSale(id) {
       if (!confirmDelete('this sale')) return;
-      try {
-        await deleteRecord('sales', id);
-        alert('✅ Sale deleted');
-        loadSales();
-      } catch (e) { alert('❌ ' + e.message); }
+      try { await deleteRecord('sales', id); alert('✅ Deleted'); allSales = await getRecordsFast('sales', true); loadSales(); }
+      catch (e) { alert('❌ ' + e.message); }
     }
   </script>
 </body>

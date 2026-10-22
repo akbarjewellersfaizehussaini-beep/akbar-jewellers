@@ -17,8 +17,6 @@
     .product-card-body { padding: 15px; }
     .product-card-title { font-family: var(--font-heading); color: var(--gold-primary); font-size: 1.05rem; margin-bottom: 5px; }
     .product-card-code { color: #93C5FD; font-size: 0.75rem; font-family: var(--font-mono); margin-bottom: 8px; }
-    .product-card-price { color: var(--gold-primary); font-weight: 700; font-size: 1.1rem; font-family: var(--font-mono); }
-    .product-card-cost { color: var(--text-muted); font-size: 0.75rem; }
     .stock-tag { display: inline-block; padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 600; margin-top: 5px; }
     .stock-in { background: rgba(37,211,102,0.2); color: #86EFAC; }
     .stock-out { background: rgba(220,38,38,0.2); color: #FCA5A5; }
@@ -32,21 +30,21 @@
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       Products
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Product Management</h1>
-    <p class="page-subtitle">Unique Product ID — Primary Key System</p>
+    <p class="page-subtitle">Total weight + total qty → per piece weight auto</p>
 
     <div class="form-card">
       <h3 class="form-card-title" id="formTitle">➕ Add New Product</h3>
       <input type="hidden" id="editProductId">
-      
+
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Product Name <span class="required">*</span></label>
-          <input type="text" id="prName" class="form-input" placeholder="e.g., Gold Necklace">
+          <input type="text" id="prName" class="form-input" placeholder="e.g., Baby Rings">
         </div>
         <div class="form-group">
           <label class="form-label">Category <span class="required">*</span></label>
@@ -61,16 +59,9 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Product ID (Auto — PRIMARY KEY)</label>
+          <label class="form-label">Product ID (Auto — Primary Key)</label>
           <input type="text" id="prCode" class="form-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700; font-family:var(--font-mono);">
         </div>
-        <div class="form-group">
-          <label class="form-label">Subcategory</label>
-          <input type="text" id="prSubcategory" class="form-input" placeholder="e.g., Rings">
-        </div>
-      </div>
-
-      <div class="form-row">
         <div class="form-group">
           <label class="form-label">Karat</label>
           <select id="prKarat" class="form-select">
@@ -82,67 +73,67 @@
             <option value="16K">16K</option>
             <option value="14K">14K</option>
             <option value="12K">12K</option>
-            <option value="10K">10K</option>
-            <option value="8K">8K</option>
           </select>
         </div>
+      </div>
+
+      <!-- MAIN: QTY + TOTAL WEIGHT -->
+      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">📦 Quantity & Weight</h4>
+
+      <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Weight <span class="required">*</span></label>
-          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
-            <input type="number" id="prWeight" class="form-input number-input" step="0.001" placeholder="0.000">
-            <select id="prWeightUnit" class="form-select">
-              <option value="gram">Gram</option>
-              <option value="tola">Tola</option>
-              <option value="masha">Masha</option>
-              <option value="ratti">Ratti</option>
-            </select>
-          </div>
+          <label class="form-label">Total Quantity (pcs) <span class="required">*</span></label>
+          <input type="number" id="prOpeningStock" class="form-input number-input" value="10" min="0" oninput="calcPerPiece()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Weight (grams) <span class="required">*</span></label>
+          <input type="number" id="prTotalWeight" class="form-input number-input" step="0.001" placeholder="0.000" oninput="calcPerPiece()">
         </div>
       </div>
 
       <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Per Piece Weight (auto)</label>
+          <input type="text" id="prWeight" class="form-input" readonly style="background:var(--charcoal); color:var(--gold-primary); font-weight:700; font-size:1.1rem;">
+        </div>
         <div class="form-group">
           <label class="form-label">Size</label>
           <input type="text" id="prSize" class="form-input" placeholder="e.g., 16">
         </div>
-        <div class="form-group">
-          <label class="form-label">Purchase Date</label>
-          <input type="date" id="prPurchaseDate" class="form-input">
-        </div>
       </div>
 
       <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">💰 Pricing</h4>
-      
+
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Cost Price <span class="required">*</span></label>
-          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:8px;">
-            <input type="number" id="prCost" class="form-input number-input" placeholder="0">
-            <select id="prCostUnit" class="form-select">
-              <option value="tola">Per Tola</option>
-              <option value="gram">Per Gram</option>
-            </select>
-          </div>
+          <label class="form-label">Cost Price per Gram (Rs) <span class="required">*</span></label>
+          <input type="number" id="prCostPerGram" class="form-input number-input" placeholder="0" oninput="calcPerPiece()">
         </div>
         <div class="form-group">
-          <label class="form-label">Sale Price (Optional)</label>
-          <input type="number" id="prSale" class="form-input number-input" placeholder="0 (optional)">
+          <label class="form-label">Sale Price per Gram (Rs)</label>
+          <input type="number" id="prSalePerGram" class="form-input number-input" placeholder="0" oninput="calcPerPiece()">
         </div>
       </div>
 
-      <h4 style="color:var(--gold-primary); margin:20px 0 10px; font-family:var(--font-heading);">📦 Inventory</h4>
-      
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Opening Stock</label>
-          <input type="number" id="prOpeningStock" class="form-input number-input" value="0">
+          <label class="form-label">Cost per Piece (auto)</label>
+          <input type="text" id="prCost" class="form-input" readonly style="background:var(--charcoal); color:#93C5FD; font-weight:700;">
         </div>
         <div class="form-group">
+          <label class="form-label">Sale per Piece (auto)</label>
+          <input type="text" id="prSale" class="form-input" readonly style="background:var(--charcoal); color:#25D366; font-weight:700;">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
           <label class="form-label">Featured</label>
-          <select id="prFeatured" class="form-select">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
+          <select id="prFeatured" class="form-select"><option value="false">No</option><option value="true">Yes</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purchase Date</label>
+          <input type="date" id="prPurchaseDate" class="form-input">
         </div>
       </div>
 
@@ -185,6 +176,9 @@
   <script>
     let uploadedImages = [];
     let allProducts = [];
+    let allPurchases = [];
+    let allSales = [];
+    let allReturns = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
@@ -196,15 +190,28 @@
 
     async function generateProductCode() {
       const cat = document.getElementById('prCategory').value;
-      const catPrefix = cat.toUpperCase().slice(0, 3);
+      const prefix = cat.toUpperCase().slice(0, 3);
       try {
         const products = await getRecordsFast('products', true);
-        const catCount = products.filter(p => p.category === cat).length;
-        const num = String(catCount + 1).padStart(3, '0');
-        document.getElementById('prCode').value = `AKBAR-${catPrefix}-${num}`;
-      } catch (e) {
-        document.getElementById('prCode').value = `AKBAR-${catPrefix}-001`;
-      }
+        const count = products.filter(p => p.category === cat).length;
+        const num = String(count + 1).padStart(3, '0');
+        document.getElementById('prCode').value = `AKBAR-${prefix}-${num}`;
+      } catch (e) { document.getElementById('prCode').value = `AKBAR-${prefix}-001`; }
+    }
+
+    function calcPerPiece() {
+      const qty = parseFloat(document.getElementById('prOpeningStock').value) || 0;
+      const totalWeight = parseFloat(document.getElementById('prTotalWeight').value) || 0;
+      const costPerGram = parseFloat(document.getElementById('prCostPerGram').value) || 0;
+      const salePerGram = parseFloat(document.getElementById('prSalePerGram').value) || 0;
+
+      const perPc = qty > 0 ? (totalWeight / qty) : 0;
+      document.getElementById('prWeight').value = perPc.toFixed(3) + 'g';
+
+      const costPerPc = perPc * costPerGram;
+      const salePerPc = perPc * salePerGram;
+      document.getElementById('prCost').value = formatPKR(costPerPc);
+      document.getElementById('prSale').value = formatPKR(salePerPc);
     }
 
     function previewImages(input) {
@@ -217,29 +224,28 @@
 
     async function saveProduct() {
       const name = document.getElementById('prName').value.trim();
-      const weight = parseFloat(document.getElementById('prWeight').value) || 0;
-      const weightUnit = document.getElementById('prWeightUnit').value;
-      const cost = parseFloat(document.getElementById('prCost').value) || 0;
-      const costUnit = document.getElementById('prCostUnit').value;
-      const sale = parseFloat(document.getElementById('prSale').value) || 0;
-      const openingStock = parseInt(document.getElementById('prOpeningStock').value) || 0;
+      const totalQty = parseFloat(document.getElementById('prOpeningStock').value) || 0;
+      const totalWeight = parseFloat(document.getElementById('prTotalWeight').value) || 0;
+      const costPerGram = parseFloat(document.getElementById('prCostPerGram').value) || 0;
+      const salePerGram = parseFloat(document.getElementById('prSalePerGram').value) || 0;
       const code = document.getElementById('prCode').value;
       const images = document.getElementById('prImages').files;
       const editId = document.getElementById('editProductId').value;
       const isEdit = !!editId;
-      
+
       if (!name) { alert('❌ Name required'); return; }
-      if (weight <= 0) { alert('❌ Weight required'); return; }
-      if (cost <= 0) { alert('❌ Cost required'); return; }
-      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Upload image'); return; }
+      if (totalQty <= 0) { alert('❌ Total quantity required'); return; }
+      if (totalWeight <= 0) { alert('❌ Total weight required'); return; }
+      if (costPerGram <= 0) { alert('❌ Cost price required'); return; }
+      if (!isEdit && images.length === 0 && uploadedImages.length === 0) { alert('❌ Image upload karein'); return; }
 
       const btn = document.getElementById('saveBtn');
       btn.textContent = '⏳ Saving...'; btn.disabled = true;
 
       try {
-        const weightInGrams = weightUnit === 'tola' ? weight * 11.664 : weightUnit === 'masha' ? weight * 0.972 : weightUnit === 'ratti' ? weight * 0.1215 : weight;
-        const costPerGram = costUnit === 'tola' ? cost / 11.664 : cost;
-        const totalCost = costPerGram * weightInGrams;
+        const perPieceWeight = totalWeight / totalQty;
+        const costPerPc = perPieceWeight * costPerGram;
+        const salePerPc = perPieceWeight * salePerGram;
 
         const imageUrls = [...uploadedImages];
         if (images.length > 0) {
@@ -252,14 +258,13 @@
           product_code: code,
           name: name,
           category: document.getElementById('prCategory').value,
-          subcategory: document.getElementById('prSubcategory').value.trim(),
           karat: document.getElementById('prKarat').value,
-          weight: weightInGrams,
+          weight: perPieceWeight,
           size: document.getElementById('prSize').value.trim(),
-          cost_price: totalCost,
-          sale_price: sale,
-          opening_stock: openingStock,
-          current_stock: isEdit ? (allProducts.find(p => p.id === editId)?.current_stock || openingStock) : openingStock,
+          cost_price: costPerPc,
+          sale_price: salePerPc,
+          opening_stock: totalQty,
+          current_stock: totalQty,
           featured: document.getElementById('prFeatured').value === 'true',
           images: imageUrls.slice(0, 5),
           description: document.getElementById('prDescription').value.trim(),
@@ -272,24 +277,21 @@
           alert('✅ Product updated!');
         } else {
           await addRecord('products', productData);
-          alert('✅ Product saved!\n\nID: ' + code);
+          alert('✅ Product saved!\n\nID: ' + code + '\nPer piece weight: ' + perPieceWeight.toFixed(3) + 'g');
         }
 
         clearForm();
         await generateProductCode();
         loadProducts();
-      } catch (error) {
-        alert('❌ Error: ' + error.message);
-      } finally {
-        btn.textContent = '💾 Save Product'; btn.disabled = false;
-      }
+      } catch (error) { alert('❌ ' + error.message); }
+      finally { btn.textContent = '💾 Save Product'; btn.disabled = false; }
     }
 
     function clearForm() {
-      ['prName','prWeight','prCost','prSale','prSubcategory','prDescription','prSize','editProductId'].forEach(id => document.getElementById(id).value = '');
+      ['prName','prTotalWeight','prCostPerGram','prSalePerGram','prDescription','prSize','editProductId','prWeight','prCost','prSale'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('prImages').value = '';
       document.getElementById('prImagesPreview').innerHTML = '';
-      document.getElementById('prOpeningStock').value = '0';
+      document.getElementById('prOpeningStock').value = '10';
       document.getElementById('prFeatured').value = 'false';
       document.getElementById('prPurchaseDate').value = new Date().toISOString().slice(0, 10);
       document.getElementById('formTitle').textContent = '➕ Add New Product';
@@ -303,6 +305,9 @@
     async function loadProducts() {
       try {
         allProducts = await getRecordsFast('products', true);
+        allPurchases = await getRecordsFast('purchases', true);
+        allSales = await getRecordsFast('sales', true);
+        allReturns = await getRecordsFast('returns', true);
         renderProducts(allProducts);
       } catch (e) {
         document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>';
@@ -312,25 +317,24 @@
     function renderProducts(products) {
       const container = document.getElementById('productsGrid');
       document.getElementById('productCount').textContent = products.length;
-
       if (!products || products.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products yet</p></div>';
         return;
       }
-
       container.innerHTML = products.map(p => {
+        const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
         const img = p.images && p.images[0] ? p.images[0] : '../../images/placeholder.svg';
-        const stock = p.current_stock || 0;
         return `
           <div class="product-card-item">
             <img src="${img}" class="product-card-img" onerror="this.src='../../images/placeholder.svg'">
             <div class="product-card-body">
               <div class="product-card-title">${p.name}</div>
               <div class="product-card-code">${p.product_code || 'N/A'}</div>
-              <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${formatWeight(p.weight)}</div>
-              <div class="product-card-price">Sale: ${formatPKR(p.sale_price)}</div>
-              <div class="product-card-cost">Cost: ${formatPKR(p.cost_price)}</div>
-              <div><span class="stock-tag ${stock > 0 ? 'stock-in' : 'stock-out'}">${stock > 0 ? '✅ Stock: ' + stock : '❌ Out of Stock'}</span></div>
+              <div style="color:var(--text-muted); font-size:0.75rem; margin-bottom:8px;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''}</div>
+              <div style="color:#93C5FD; font-family:var(--font-mono); font-size:0.85rem;">Per pc: ${(Number(p.weight)||0).toFixed(3)}g</div>
+              <div style="color:var(--gold-primary); font-family:var(--font-mono); font-weight:700; margin-top:5px;">Cost/pc: ${formatPKR(p.cost_price)}</div>
+              <div style="color:#25D366; font-family:var(--font-mono); font-weight:700;">Sale/pc: ${formatPKR(p.sale_price)}</div>
+              <div><span class="stock-tag ${live.current > 0 ? 'stock-in' : 'stock-out'}">${live.current > 0 ? '✅ Stock: ' + live.current : '❌ Out of Stock'}</span></div>
               <div class="product-actions">
                 <button class="btn-secondary" style="flex:1; padding:8px; font-size:0.8rem;" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>✏️ Edit</button>
                 ${deleteButtonHTML('deleteProduct', p.id)}
@@ -347,30 +351,26 @@
       document.getElementById('prName').value = p.name || '';
       document.getElementById('prCategory').value = p.category || 'gold';
       document.getElementById('prCode').value = p.product_code || '';
-      document.getElementById('prSubcategory').value = p.subcategory || '';
       document.getElementById('prKarat').value = p.karat || '';
-      document.getElementById('prWeight').value = p.weight || '';
-      document.getElementById('prWeightUnit').value = 'gram';
-      document.getElementById('prSize').value = p.size || '';
-      document.getElementById('prCost').value = p.cost_price || '';
-      document.getElementById('prCostUnit').value = 'gram';
-      document.getElementById('prSale').value = p.sale_price || '';
       document.getElementById('prOpeningStock').value = p.opening_stock || 0;
+      document.getElementById('prTotalWeight').value = ((Number(p.weight) || 0) * (Number(p.opening_stock) || 0)).toFixed(3);
+      document.getElementById('prSize').value = p.size || '';
+      const perPc = Number(p.weight) || 0;
+      document.getElementById('prCostPerGram').value = perPc > 0 ? Math.round(Number(p.cost_price) / perPc) : 0;
+      document.getElementById('prSalePerGram').value = perPc > 0 ? Math.round(Number(p.sale_price) / perPc) : 0;
       document.getElementById('prFeatured').value = p.featured ? 'true' : 'false';
       document.getElementById('prDescription').value = p.description || '';
       document.getElementById('prPurchaseDate').value = p.purchase_date || new Date().toISOString().slice(0, 10);
       uploadedImages = p.images || [];
       document.getElementById('cancelBtn').style.display = 'block';
+      calcPerPiece();
       document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
     }
 
     async function deleteProduct(id) {
       if (!confirmDelete('this product')) return;
-      try {
-        await deleteRecord('products', id);
-        alert('✅ Deleted');
-        loadProducts();
-      } catch (e) { alert('❌ ' + e.message); }
+      try { await deleteRecord('products', id); alert('✅ Deleted'); loadProducts(); }
+      catch (e) { alert('❌ ' + e.message); }
     }
 
     function filterProducts() {
