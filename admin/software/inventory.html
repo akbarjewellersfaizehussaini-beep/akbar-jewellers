@@ -3,245 +3,319 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inventory – Akbar Jewellers Software</title>
+  <title>Payments – Akbar Jewellers Software</title>
   <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
-  <style>
-    .inventory-card { background: linear-gradient(135deg, var(--black-soft), #252525); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s; }
-    .inventory-card:hover { border-color: var(--gold-primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,215,0,0.2); }
-    .inventory-card.selected { border-color: var(--gold-primary); background: rgba(255,215,0,0.05); }
-  </style>
 </head>
 <body>
 
   <div class="sw-header">
     <div class="sw-logo">
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
-      Add Inventory
+      Payments
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
-    <h1 class="page-title">Add Inventory Stock</h1>
-    <p class="page-subtitle">Sirf existing products select kar sakte hain</p>
+    <h1 class="page-title">Payment Receipt</h1>
+    <p class="page-subtitle">Sirf balance wale log dikhaye ja rahe hain</p>
 
     <div class="form-card">
-      <h3 class="form-card-title">📦 Select Product (Primary Key)</h3>
-      
-      <div class="form-group">
-        <label class="form-label">Search Product</label>
-        <input type="text" id="searchProduct" class="form-input" placeholder="🔍 Search by name or code..." oninput="filterProducts()">
+      <h3 class="form-card-title">📋 Select Person</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Person Type</label>
+          <select id="pType" class="form-select" onchange="loadPersonsWithBalance()">
+            <option value="customer">👥 Customers</option>
+            <option value="supplier">🏭 Suppliers</option>
+            <option value="karigar">👷 Karigars</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Search</label>
+          <input type="text" id="searchPerson" class="form-input" placeholder="🔍 Name ya phone..." oninput="filterPersonCards()">
+        </div>
       </div>
-
-      <div id="productsList" style="max-height: 400px; overflow-y: auto;">
-        <div class="empty-state"><p>Loading products...</p></div>
+      <div id="personsList" style="max-height: 400px; overflow-y: auto;">
+        <div class="empty-state"><p>Loading...</p></div>
       </div>
     </div>
 
-    <div id="addStockForm" style="display: none;">
+    <div id="paymentFormContainer" style="display: none;">
       <div class="form-card">
-        <h3 class="form-card-title">➕ Add Stock to: <span id="selectedProductName" style="color: var(--gold-primary);"></span></h3>
-        
-        <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; text-align: center;">
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Product ID</div>
-              <div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono); font-size: 1rem;" id="infoProductCode">—</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Current Stock</div>
-              <div style="color: #86EFAC; font-weight: 700; font-family: var(--font-mono); font-size: 1rem;" id="infoCurrentStock">0</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Weight/Unit</div>
-              <div style="color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 1rem;" id="infoWeight">0g</div>
-            </div>
+        <h3 class="form-card-title">💰 Payment Entry</h3>
+        <div style="background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.03)); border: 2px solid var(--gold-primary); border-radius: 14px; padding: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; text-align: center;">
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">PERSON</div><div style="color: var(--gold-primary); font-weight: 700;" id="infoPersonName">—</div><div style="color: var(--text-muted); font-size: 0.75rem;" id="infoPersonPhone">—</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">BILL</div><div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono);" id="infoTotalBill">Rs 0</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">PAID</div><div style="color: #86EFAC; font-weight: 700; font-family: var(--font-mono);" id="infoTotalPaid">Rs 0</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">BALANCE</div><div style="color: #FCA5A5; font-weight: 700; font-family: var(--font-mono); font-size: 1.1rem;" id="infoBalance">Rs 0</div></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Quantity to Add <span class="required">*</span></label>
-            <input type="number" id="addQty" class="form-input number-input" placeholder="0" min="1">
+            <label class="form-label">Amount (Rs) <span class="required">*</span></label>
+            <input type="number" id="pAmount" class="form-input number-input" placeholder="0">
           </div>
           <div class="form-group">
-            <label class="form-label">Purchase Rate/gram (Rs) — Optional</label>
-            <input type="number" id="addRate" class="form-input number-input" placeholder="0">
+            <label class="form-label">Payment Type</label>
+            <select id="pPayType" class="form-select">
+              <option value="due">Against Due</option>
+              <option value="advance">Advance</option>
+              <option value="full">Full & Final</option>
+            </select>
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Supplier Name</label>
-            <input type="text" id="addSupplier" class="form-input" placeholder="Supplier">
+            <label class="form-label">Payment Mode</label>
+            <select id="pMode" class="form-select">
+              <option value="cash">Cash</option>
+              <option value="bank">Bank Transfer</option>
+              <option value="easypaisa">Easypaisa</option>
+              <option value="jazzcash">JazzCash</option>
+            </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Invoice/Bill No (Optional)</label>
-            <input type="text" id="addInvoiceNo" class="form-input" placeholder="Bill number">
+            <label class="form-label">Payment Date <span class="required">*</span></label>
+            <input type="date" id="pDate" class="form-input">
           </div>
         </div>
-
         <div class="form-group">
           <label class="form-label">Notes</label>
-          <textarea id="addNotes" class="form-input" rows="2" placeholder="Any details..."></textarea>
+          <input type="text" id="pNotes" class="form-input" placeholder="Any details...">
         </div>
-
-        <button class="btn-primary" onclick="saveStock()" id="saveStockBtn" style="width: 100%;">
-          💾 Add to Stock
-        </button>
+        <div style="display: flex; gap: 12px; margin-top: 15px;">
+          <button class="btn-primary" onclick="savePayment(false)" id="savePayBtn" style="flex: 1;">💾 Save & Receipt</button>
+          <button class="btn-success" onclick="savePayment(true)" style="flex: 1;">📱 Save & WhatsApp</button>
+        </div>
       </div>
     </div>
 
-    <h2 class="section-title">📋 Recent Stock Additions</h2>
-    <div class="data-list" id="recentAdditions"></div>
+    <h2 class="section-title">📋 Recent Payments</h2>
+    <div class="data-list" id="paymentsList"></div>
+  </div>
+
+  <div id="receiptModal" class="modal">
+    <div class="modal-content" style="max-width: 600px; background:#fff; color:#1A1A1A; padding: 40px;">
+      <div id="printableReceipt"></div>
+      <div class="action-buttons-grid">
+        <button class="action-btn print-btn" onclick="printElement('printableReceipt')"><span class="btn-icon">🖨</span><span class="btn-text">Print</span></button>
+        <button class="action-btn whatsapp-btn" onclick="sendReceiptWhatsApp()"><span class="btn-icon">📱</span><span class="btn-text">WhatsApp</span></button>
+        <button class="action-btn close-btn" onclick="document.getElementById('receiptModal').classList.remove('active')"><span class="btn-icon">✕</span><span class="btn-text">Close</span></button>
+      </div>
+    </div>
   </div>
 
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
-    let allProducts = [];
-    let selectedProduct = null;
+    let currentReceipt = null;
+    let allPersons = [];
+    let selectedPerson = null;
+    let currentType = 'customer';
 
     document.addEventListener('DOMContentLoaded', async () => {
-      if (!checkAuth(['admin', 'purchase'])) return;
+      if (!checkAuth(['admin', 'sales', 'purchase'])) return;
       if (typeof clearCache === 'function') clearCache();
-      await loadProductsList();
-      loadRecentAdditions();
+      document.getElementById('pDate').value = new Date().toISOString().slice(0, 10);
+      await loadPersonsWithBalance();
+      loadPayments();
     });
 
-    async function loadProductsList() {
-      allProducts = await getRecordsFast('products', true);
-      renderProductsList(allProducts);
+    async function loadPersonsWithBalance() {
+      currentType = document.getElementById('pType').value;
+      const container = document.getElementById('personsList');
+      container.innerHTML = '<div class="empty-state"><p>Loading...</p></div>';
+      document.getElementById('paymentFormContainer').style.display = 'none';
+      selectedPerson = null;
+      try {
+        const sales = await getRecordsFast('sales', true);
+        const purchases = await getRecordsFast('purchases', true);
+        const payments = await getRecordsFast('payments', true);
+        const services = await getRecordsFast('services', true);
+        allPersons = [];
+        if (currentType === 'customer') {
+          const customers = await getRecordsFast('customers', true);
+          allPersons = customers.map(c => {
+            const cSales = sales.filter(s => s.customer_name === c.name);
+            const cPays = payments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+            let bill = Number(c.opening_balance) || 0, paid = 0;
+            cSales.forEach(s => bill += Number(s.total) || 0);
+            cPays.forEach(p => paid += Number(p.amount) || 0);
+            return { id: c.id, name: c.name, phone: c.phone, type: 'customer', totalBill: bill, totalPaid: paid, balance: bill - paid };
+          }).filter(p => p.balance !== 0);
+        } else if (currentType === 'supplier') {
+          const suppliers = await getRecordsFast('suppliers', true);
+          allPersons = suppliers.map(s => {
+            const sPurch = purchases.filter(p => p.supplier_name === s.name);
+            const sPays = payments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+            let bill = Number(s.opening_cash) || 0, paid = 0;
+            sPurch.forEach(p => bill += Number(p.total) || 0);
+            sPays.forEach(p => paid += Number(p.amount) || 0);
+            return { id: s.id, name: s.name, phone: s.phone, type: 'supplier', totalBill: bill, totalPaid: paid, balance: bill - paid };
+          }).filter(p => p.balance !== 0);
+        } else if (currentType === 'karigar') {
+          const karigars = await getRecordsFast('karigars', true);
+          allPersons = karigars.map(k => {
+            const kServices = services.filter(s => s.karigar_name === k.name);
+            const kPays = payments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
+            let bill = Number(k.opening_cash) || 0, paid = 0;
+            kServices.forEach(s => bill += Number(s.charges) || 0);
+            kPays.forEach(p => paid += Number(p.amount) || 0);
+            return { id: k.id, name: k.name, phone: k.phone, type: 'karigar', totalBill: bill, totalPaid: paid, balance: bill - paid };
+          }).filter(p => p.balance !== 0);
+        }
+        renderPersonsList();
+      } catch (e) { container.innerHTML = '<div class="empty-state"><p>Error: ' + e.message + '</p></div>'; }
     }
 
-    function renderProductsList(products) {
-      const container = document.getElementById('productsList');
-      if (!products || products.length === 0) {
-        container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products yet. Pehle products add karein.</p></div>';
+    function renderPersonsList() {
+      const container = document.getElementById('personsList');
+      if (allPersons.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">✅</div><p>No ${currentType}s with balance</p></div>`;
         return;
       }
-
-      container.innerHTML = products.map(p => `
-        <div class="inventory-card" data-name="${(p.name || '').toLowerCase()}" data-code="${(p.product_code || '').toLowerCase()}" onclick='selectProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-            <div>
-              <div style="color: var(--gold-primary); font-weight: 700; font-size: 1rem;">${p.name}</div>
-              <div style="color: #93C5FD; font-size: 0.75rem; font-family: var(--font-mono);">${p.product_code}</div>
-              <div style="color: var(--text-muted); font-size: 0.8rem;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${formatWeight(p.weight)}</div>
-            </div>
-            <div style="text-align: right;">
-              <div style="color: ${(p.current_stock || 0) > 0 ? '#86EFAC' : '#FCA5A5'}; font-weight: 700; font-size: 1.1rem;">${p.current_stock || 0} units</div>
-              <div style="color: var(--text-muted); font-size: 0.75rem;">Current Stock</div>
+      container.innerHTML = allPersons.map((p, idx) => {
+        const isDue = p.balance > 0;
+        const badgeColor = isDue ? '#FCA5A5' : '#86EFAC';
+        const badgeBg = isDue ? 'rgba(220,38,38,0.2)' : 'rgba(37,211,102,0.2)';
+        const balanceText = isDue ? `Due: ${formatPKR(p.balance)}` : `Advance: ${formatPKR(Math.abs(p.balance))}`;
+        return `
+          <div class="person-card" data-name="${p.name.toLowerCase()}" data-phone="${(p.phone || '').toLowerCase()}" onclick="selectPerson(${idx})" style="background:var(--black-royal); border:1px solid rgba(255,215,0,0.2); border-radius:12px; padding:15px; margin-bottom:10px; cursor:pointer;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div><div style="color: var(--gold-primary); font-weight: 700;">${p.name}</div><div style="color: var(--text-muted); font-size: 0.8rem;">📞 ${p.phone || '—'}</div></div>
+              <span style="padding:2px 10px; border-radius:50px; font-size:0.7rem; font-weight:700; background:${badgeBg}; color:${badgeColor};">${balanceText}</span>
             </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
-    function filterProducts() {
-      const search = document.getElementById('searchProduct').value.toLowerCase();
-      const cards = document.querySelectorAll('.inventory-card');
-      cards.forEach(card => {
+    function filterPersonCards() {
+      const search = document.getElementById('searchPerson').value.toLowerCase();
+      document.querySelectorAll('.person-card').forEach(card => {
         const name = card.getAttribute('data-name');
-        const code = card.getAttribute('data-code');
-        card.style.display = (name.includes(search) || code.includes(search)) ? 'block' : 'none';
+        const phone = card.getAttribute('data-phone');
+        card.style.display = (name.includes(search) || phone.includes(search)) ? 'block' : 'none';
       });
     }
 
-    function selectProduct(p) {
-      selectedProduct = p;
-      document.querySelectorAll('.inventory-card').forEach(c => c.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
-      
-      document.getElementById('addStockForm').style.display = 'block';
-      document.getElementById('selectedProductName').textContent = p.name;
-      document.getElementById('infoProductCode').textContent = p.product_code;
-      document.getElementById('infoCurrentStock').textContent = (p.current_stock || 0) + ' units';
-      document.getElementById('infoWeight').textContent = formatWeight(p.weight);
-      document.getElementById('addQty').value = '';
-      document.getElementById('addRate').value = '';
-      document.getElementById('addSupplier').value = '';
-      document.getElementById('addInvoiceNo').value = '';
-      document.getElementById('addNotes').value = '';
-      
-      document.getElementById('addStockForm').scrollIntoView({ behavior: 'smooth' });
+    function selectPerson(idx) {
+      selectedPerson = allPersons[idx];
+      document.querySelectorAll('.person-card').forEach((c, i) => {
+        c.style.borderColor = i === idx ? 'var(--gold-primary)' : 'rgba(255,215,0,0.2)';
+        c.style.background = i === idx ? 'rgba(255,215,0,0.1)' : 'var(--black-royal)';
+      });
+      document.getElementById('paymentFormContainer').style.display = 'block';
+      document.getElementById('infoPersonName').textContent = selectedPerson.name;
+      document.getElementById('infoPersonPhone').textContent = selectedPerson.phone || '—';
+      document.getElementById('infoTotalBill').textContent = formatPKR(selectedPerson.totalBill);
+      document.getElementById('infoTotalPaid').textContent = formatPKR(selectedPerson.totalPaid);
+      document.getElementById('infoBalance').textContent = formatPKR(Math.abs(selectedPerson.balance));
+      document.getElementById('pAmount').value = Math.round(Math.abs(selectedPerson.balance));
+      document.getElementById('pPayType').value = selectedPerson.balance > 0 ? 'due' : 'advance';
+      document.getElementById('paymentFormContainer').scrollIntoView({ behavior: 'smooth' });
     }
 
-    async function saveStock() {
-      if (!selectedProduct) { alert('❌ Product select karein'); return; }
-      
-      const qty = parseInt(document.getElementById('addQty').value) || 0;
-      if (qty <= 0) { alert('❌ Valid quantity enter karein'); return; }
-
-      const btn = document.getElementById('saveStockBtn');
+    async function savePayment(sendWA) {
+      if (!selectedPerson) { alert('❌ Select person'); return; }
+      const amount = parseFloat(document.getElementById('pAmount').value) || 0;
+      const payDate = document.getElementById('pDate').value;
+      if (amount <= 0) { alert('❌ Valid amount'); return; }
+      if (!payDate) { alert('❌ Date'); return; }
+      const btn = document.getElementById('savePayBtn');
       btn.textContent = '⏳ Saving...'; btn.disabled = true;
-
       try {
-        const newStock = (Number(selectedProduct.current_stock) || 0) + qty;
-        
-        // Update product stock
-        await updateRecord('products', selectedProduct.id, { current_stock: newStock });
-        
-        // Also add to purchases table for tracking
-        const rate = parseFloat(document.getElementById('addRate').value) || 0;
-        const purchaseData = {
-          invoice_no: 'INV-' + Date.now(),
-          product_id: selectedProduct.product_code,
-          supplier_name: document.getElementById('addSupplier').value.trim() || 'Stock Addition',
-          supplier_phone: '',
-          item: selectedProduct.name,
-          qty: qty,
-          weight: selectedProduct.weight || 0,
-          total_weight: qty * (selectedProduct.weight || 0),
-          gold_weight: qty * (selectedProduct.weight || 0),
-          gold_karat: selectedProduct.karat || '24K',
-          gold_rate: rate,
-          rate: rate,
-          total: rate * qty * (selectedProduct.weight || 0),
-          paid: 0,
-          balance: rate * qty * (selectedProduct.weight || 0),
-          payment_mode: 'credit',
-          purchase_date: new Date().toISOString().slice(0, 10)
+        const payment = {
+          receipt_number: 'RCV-' + Date.now(),
+          person_type: selectedPerson.type,
+          person_name: selectedPerson.name,
+          person_phone: selectedPerson.phone,
+          amount: amount,
+          payment_type: document.getElementById('pPayType').value,
+          payment_mode: document.getElementById('pMode').value,
+          notes: document.getElementById('pNotes').value.trim(),
+          payment_date: payDate
         };
-        
-        if (rate > 0) {
-          await addRecord('purchases', purchaseData);
+        const saved = await addRecord('payments', payment);
+        currentReceipt = saved;
+        if (sendWA) {
+          const action = selectedPerson.type === 'customer' ? 'Received from' : 'Paid to';
+          openWhatsApp(selectedPerson.phone, `*PAYMENT RECEIPT*\nReceipt #: ${payment.receipt_number}\n${action}: ${selectedPerson.name}\nAmount: ${formatPKR(amount)}\nDate: ${formatDate(payment.payment_date)}\nMode: ${payment.payment_mode.toUpperCase()}`);
         }
-        
-        alert('✅ Stock added! ' + qty + ' units added to ' + selectedProduct.name + '\n\nNew Stock: ' + newStock + ' units');
-        
-        selectedProduct = null;
-        document.getElementById('addStockForm').style.display = 'none';
-        
-        await loadProductsList();
-        loadRecentAdditions();
-      } catch (e) {
-        alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = '💾 Add to Stock'; btn.disabled = false;
-      }
+        showReceipt(saved);
+        document.getElementById('pAmount').value = '';
+        document.getElementById('pNotes').value = '';
+        document.getElementById('paymentFormContainer').style.display = 'none';
+        selectedPerson = null;
+        await loadPersonsWithBalance();
+        loadPayments();
+      } catch (e) { alert('❌ ' + e.message); }
+      finally { btn.textContent = sendWA ? '📱 Save & WhatsApp' : '💾 Save & Receipt'; btn.disabled = false; }
     }
 
-    async function loadRecentAdditions() {
-      const purchases = await getRecordsFast('purchases', true);
-      const recent = purchases.slice(0, 10);
-      const container = document.getElementById('recentAdditions');
-      
-      if (recent.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No stock additions yet</p></div>';
-        return;
-      }
-
-      container.innerHTML = recent.map(p => `
-        <div class="data-item">
-          <div>
-            <div class="data-item-title">${p.item} <span style="color: var(--gold-primary); font-size: 0.8rem;">(Qty: ${p.qty || 1})</span></div>
-            <div class="data-item-sub">${p.supplier_name} • ${formatDate(p.purchase_date || p.created_at)}</div>
-          </div>
-          <div class="data-item-value">${formatPKR(p.total)}</div>
+    async function showReceipt(p) {
+      const shop = await getShopSettings();
+      const action = p.person_type === 'customer' ? 'RECEIVED FROM' : 'PAID TO';
+      document.getElementById('printableReceipt').innerHTML = `
+        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
+          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:24px;">${shop.name}</h1>
+          <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shop.name_urdu || 'فیض حسینی'}</p>
+          <p style="margin:5px 0; font-size:12px; color:#666;">${shop.address}</p>
         </div>
-      `).join('');
+        <h2 style="text-align:center; color:#1A1A1A; font-family:'Playfair Display',serif;">PAYMENT RECEIPT</h2>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; font-size:14px;">
+          <div><p><strong>Receipt #:</strong> ${p.receipt_number}</p><p><strong>Date:</strong> ${formatDate(p.payment_date)}</p></div>
+          <div style="text-align:right;"><p><strong>Mode:</strong> ${(p.payment_mode||'').toUpperCase()}</p><p><strong>Type:</strong> ${(p.payment_type||'').toUpperCase()}</p></div>
+        </div>
+        <div style="background:#FAF7F0; padding:15px; border-radius:8px; margin-bottom:20px;">
+          <p style="margin:5px 0; font-size:12px; color:#888;">${action}</p>
+          <h3 style="margin:5px 0; color:#D4AF37;">${p.person_name}</h3>
+        </div>
+        <div style="text-align:center; border-top:2px solid #D4AF37; border-bottom:2px solid #D4AF37; padding:20px 0; margin-bottom:20px;">
+          <p style="margin:0; font-size:12px; color:#888;">AMOUNT</p>
+          <h2 style="margin:5px 0; color:#D4AF37; font-family:'Playfair Display',serif; font-size:36px;">${formatPKR(p.amount)}</h2>
+        </div>
+      `;
+      document.getElementById('receiptModal').classList.add('active');
+    }
+
+    function sendReceiptWhatsApp() {
+      if (!currentReceipt) return;
+      const action = currentReceipt.person_type === 'customer' ? 'Received from' : 'Paid to';
+      openWhatsApp(currentReceipt.person_phone, `*PAYMENT RECEIPT*\nReceipt #: ${currentReceipt.receipt_number}\n${action}: ${currentReceipt.person_name}\nAmount: ${formatPKR(currentReceipt.amount)}`);
+    }
+
+    async function loadPayments() {
+      const payments = await getRecordsFast('payments', true);
+      const container = document.getElementById('paymentsList');
+      if (payments.length === 0) { container.innerHTML = '<div class="empty-state"><p>No payments yet</p></div>'; return; }
+      container.innerHTML = payments.slice(0, 20).map(p => {
+        const isReceive = p.person_type === 'customer';
+        const color = isReceive ? '#86EFAC' : '#FCA5A5';
+        const sign = isReceive ? '+' : '-';
+        return `
+          <div class="data-item">
+            <div style="cursor:pointer; flex:1;" onclick='showReceipt(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+              <div class="data-item-title">${p.person_name} <span style="font-size:0.7rem; color:#888;">(${p.person_type})</span></div>
+              <div class="data-item-sub">${p.receipt_number} • ${formatDate(p.payment_date)}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="data-item-value" style="color:${color};">${sign} ${formatPKR(p.amount)}</div>
+              ${deleteButtonHTML('deletePayment', p.id)}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function deletePayment(id) {
+      if (!confirmDelete('this payment')) return;
+      try { await deleteRecord('payments', id); alert('✅ Deleted'); loadPayments(); await loadPersonsWithBalance(); }
+      catch (e) { alert('❌ ' + e.message); }
     }
   </script>
 </body>

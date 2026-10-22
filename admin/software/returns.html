@@ -14,256 +14,180 @@
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       Returns
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
-    <h1 class="page-title">Return Management</h1>
-    <p class="page-subtitle">Customer se wapas aane wale products — stock auto-update</p>
+    <h1 class="page-title">Returns (Wapsi)</h1>
+    <p class="page-subtitle">Sale wapas — stock auto add hoga</p>
 
     <div class="form-card">
-      <h3 class="form-card-title">🔄 New Return Entry</h3>
-      
+      <h3 class="form-card-title">🔍 Find Sale Invoice</h3>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Select Invoice to Return <span class="required">*</span></label>
-          <select id="returnInvoice" class="form-select" onchange="loadInvoiceDetails()">
-            <option value="">-- Select Invoice --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Return Date</label>
-          <input type="date" id="returnDate" class="form-input">
+          <label class="form-label">Search by Customer / Invoice</label>
+          <input type="text" id="searchSale" class="form-input" placeholder="🔍 Customer name ya invoice number..." oninput="searchSales()">
         </div>
       </div>
+      <div id="salesList" style="max-height: 400px; overflow-y: auto;">
+        <div class="empty-state"><p>Search karein...</p></div>
+      </div>
+    </div>
 
-      <div id="invoiceDetails" style="display: none;">
-        <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; text-align: center;">
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Invoice #</div>
-              <div style="color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 0.95rem;" id="infoInvNum">—</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Customer</div>
-              <div style="color: #FFF8DC; font-weight: 700;" id="infoCustomer">—</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Product</div>
-              <div style="color: #93C5FD; font-weight: 700;" id="infoProduct">—</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total</div>
-              <div style="color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono);" id="infoTotal">—</div>
-            </div>
+    <div id="returnForm" style="display:none;">
+      <div class="form-card" style="border-color: var(--danger);">
+        <h3 class="form-card-title">🔄 Process Return</h3>
+        <div style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; text-align: center;">
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">INVOICE</div><div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono);" id="infoInvoice">—</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">CUSTOMER</div><div style="color: var(--gold-primary); font-weight: 700;" id="infoCustomer">—</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">SOLD QTY</div><div style="color: #FCD34D; font-weight: 700;" id="infoSoldQty">—</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem;">TOTAL</div><div style="color: #FFF8DC; font-weight: 700; font-family: var(--font-mono);" id="infoTotal">Rs 0</div></div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Return Qty <span class="required">*</span></label>
-            <input type="number" id="returnQty" class="form-input number-input" placeholder="0" min="1" oninput="calcReturn()">
+            <label class="form-label">Return Quantity <span class="required">*</span></label>
+            <input type="number" id="rQty" class="form-input number-input" placeholder="0" min="1" oninput="autoCalcReturn()">
           </div>
           <div class="form-group">
-            <label class="form-label">Return Weight (per piece)</label>
-            <input type="number" id="returnWeight" class="form-input number-input" step="0.001" placeholder="0.000" oninput="calcReturn()">
+            <label class="form-label">Return Amount (Refund) <span class="required">*</span></label>
+            <input type="number" id="rAmount" class="form-input number-input" placeholder="0" oninput="autoCalcReturn()">
           </div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Refund Rate/gram (Rs)</label>
-            <input type="number" id="returnRate" class="form-input number-input" placeholder="0" oninput="calcReturn()">
+            <label class="form-label">Return Date</label>
+            <input type="date" id="rDate" class="form-input">
           </div>
           <div class="form-group">
-            <label class="form-label">Discount (Rs)</label>
-            <input type="number" id="returnDiscount" class="form-input number-input" placeholder="0" oninput="calcReturn()">
-          </div>
-        </div>
-
-        <div style="background: linear-gradient(135deg, rgba(37,211,102,0.1), rgba(37,211,102,0.02)); border: 2px solid #25D366; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-          <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9rem;">
-            <span style="color: var(--text-muted);">Metal Value</span>
-            <strong style="color: #FFF8DC; font-family: var(--font-mono);" id="bdMetal">Rs 0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9rem;">
-            <span style="color: var(--text-muted);">GST</span>
-            <strong style="color: #FCA5A5; font-family: var(--font-mono);" id="bdGST">Rs 0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; padding: 5px 0; font-size: 0.9rem;">
-            <span style="color: var(--text-muted);">Discount</span>
-            <strong style="color: #86EFAC; font-family: var(--font-mono);" id="bdDiscount">Rs 0</strong>
-          </div>
-          <div style="display: flex; justify-content: space-between; padding: 10px 0; border-top: 2px solid #25D366; margin-top: 8px; font-size: 1.1rem;">
-            <span style="color: #25D366; font-weight: 700;">TOTAL REFUND</span>
-            <strong style="color: #25D366; font-family: var(--font-heading);" id="bdTotal">Rs 0</strong>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Refund Mode</label>
-            <select id="returnMode" class="form-select">
-              <option value="cash">Cash Refund</option>
-              <option value="bank">Bank Transfer</option>
-              <option value="easypaisa">Easypaisa</option>
-              <option value="jazzcash">JazzCash</option>
-              <option value="exchange">Exchange (New Item)</option>
+            <label class="form-label">Reason</label>
+            <select id="rReason" class="form-select">
+              <option value="damaged">Damaged</option>
+              <option value="wrong">Wrong Item</option>
+              <option value="customer_request">Customer Request</option>
+              <option value="other">Other</option>
             </select>
           </div>
         </div>
-
         <div class="form-group">
-          <label class="form-label">Reason for Return</label>
-          <textarea id="returnReason" class="form-input" rows="2" placeholder="e.g., Size issue, Design change, Defect..."></textarea>
+          <label class="form-label">Notes</label>
+          <textarea id="rNotes" class="form-input" rows="2"></textarea>
         </div>
 
-        <button class="btn-primary" onclick="saveReturn()" id="saveReturnBtn" style="width: 100%;">
-          🔄 Process Return
-        </button>
+        <div style="background:rgba(255,215,0,0.1); border:2px solid var(--gold-primary); border-radius:12px; padding:15px; margin-bottom:15px; text-align:center;">
+          <div style="color:var(--text-muted); font-size:0.75rem;">AUTO-CALCULATED REFUND</div>
+          <div style="color:var(--gold-primary); font-family:var(--font-heading); font-size:1.8rem; font-weight:700;" id="autoRefund">Rs 0</div>
+        </div>
+
+        <button class="btn-danger" onclick="saveReturn()" id="saveReturnBtn" style="width:100%;">🔄 Process Return</button>
       </div>
     </div>
 
     <h2 class="section-title">📋 Recent Returns</h2>
-    <div class="data-list" id="returnsList"></div>
+    <div class="data-list" id="recentReturns"></div>
   </div>
 
   <script src="db.js"></script>
   <script src="app.js"></script>
   <script>
     let allSales = [];
-    let allReturns = [];
-    let selectedInvoice = null;
+    let selectedSale = null;
+    let filteredSales = [];
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales'])) return;
       if (typeof clearCache === 'function') clearCache();
-      
-      document.getElementById('returnDate').value = new Date().toISOString().slice(0, 10);
-      
+      document.getElementById('rDate').value = new Date().toISOString().slice(0, 10);
       allSales = await getRecordsFast('sales', true);
-      allReturns = await getRecordsFast('returns', true) || [];
-      
-      const invoiceSelect = document.getElementById('returnInvoice');
-      allSales.forEach(s => {
-        invoiceSelect.innerHTML += `<option value="${s.id}">${s.invoice_number} - ${s.customer_name} - ${formatPKR(s.total)}</option>`;
-      });
-      
-      loadReturns();
+      loadRecentReturns();
     });
 
-    function loadInvoiceDetails() {
-      const invId = document.getElementById('returnInvoice').value;
-      if (!invId) {
-        document.getElementById('invoiceDetails').style.display = 'none';
-        return;
-      }
-      
-      selectedInvoice = allSales.find(s => s.id === invId);
-      if (!selectedInvoice) return;
-      
-      document.getElementById('invoiceDetails').style.display = 'block';
-      document.getElementById('infoInvNum').textContent = selectedInvoice.invoice_number;
-      document.getElementById('infoCustomer').textContent = selectedInvoice.customer_name;
-      document.getElementById('infoProduct').textContent = selectedInvoice.items_summary;
-      document.getElementById('infoTotal').textContent = formatPKR(selectedInvoice.total);
-      
-      document.getElementById('returnQty').value = selectedInvoice.qty || 1;
-      document.getElementById('returnWeight').value = selectedInvoice.weight || 0;
-      document.getElementById('returnRate').value = selectedInvoice.rate || 0;
-      
-      calcReturn();
+    function searchSales() {
+      const search = document.getElementById('searchSale').value.toLowerCase();
+      const container = document.getElementById('salesList');
+      if (!search) { container.innerHTML = '<div class="empty-state"><p>Type to search...</p></div>'; return; }
+      filteredSales = allSales.filter(s =>
+        (s.customer_name || '').toLowerCase().includes(search) ||
+        (s.invoice_number || '').toLowerCase().includes(search)
+      ).slice(0, 20);
+      if (filteredSales.length === 0) { container.innerHTML = '<div class="empty-state"><p>No invoices</p></div>'; return; }
+      container.innerHTML = filteredSales.map((s, idx) => `
+        <div class="data-item" style="cursor:pointer;" onclick='selectSale(${idx})'>
+          <div>
+            <div class="data-item-title">${s.invoice_number} - ${s.customer_name}</div>
+            <div class="data-item-sub">${s.items_summary} • Qty: ${s.qty || 1} • ${formatDate(s.sale_date)}</div>
+          </div>
+          <div class="data-item-value">${formatPKR(s.total)}</div>
+        </div>
+      `).join('');
     }
 
-    function calcReturn() {
-      const qty = parseFloat(document.getElementById('returnQty').value) || 0;
-      const weight = parseFloat(document.getElementById('returnWeight').value) || 0;
-      const rate = parseFloat(document.getElementById('returnRate').value) || 0;
-      const discount = parseFloat(document.getElementById('returnDiscount').value) || 0;
-      
-      const totalWeight = qty * weight;
-      const metal = totalWeight * rate;
-      const gst = Math.round(metal * 0.03);
-      const total = metal + gst - discount;
-      
-      document.getElementById('bdMetal').textContent = formatPKR(metal);
-      document.getElementById('bdGST').textContent = formatPKR(gst);
-      document.getElementById('bdDiscount').textContent = '- ' + formatPKR(discount);
-      document.getElementById('bdTotal').textContent = formatPKR(total);
+    function selectSale(idx) {
+      selectedSale = filteredSales[idx];
+      document.getElementById('returnForm').style.display = 'block';
+      document.getElementById('infoInvoice').textContent = selectedSale.invoice_number;
+      document.getElementById('infoCustomer').textContent = selectedSale.customer_name;
+      document.getElementById('infoSoldQty').textContent = (selectedSale.qty || 1) + ' pcs';
+      document.getElementById('infoTotal').textContent = formatPKR(selectedSale.total);
+      document.getElementById('rQty').value = selectedSale.qty || 1;
+      autoCalcReturn();
+      document.getElementById('returnForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function autoCalcReturn() {
+      if (!selectedSale) return;
+      const qty = parseFloat(document.getElementById('rQty').value) || 0;
+      const soldQty = Number(selectedSale.qty) || 1;
+      const perPcAmount = soldQty > 0 ? (Number(selectedSale.total) / soldQty) : 0;
+      const refund = qty * perPcAmount;
+      document.getElementById('rAmount').value = Math.round(refund);
+      document.getElementById('autoRefund').textContent = formatPKR(refund);
     }
 
     async function saveReturn() {
-      if (!selectedInvoice) { alert('❌ Invoice select karein'); return; }
-      
-      const qty = parseFloat(document.getElementById('returnQty').value) || 0;
-      if (qty <= 0) { alert('❌ Valid qty enter karein'); return; }
-      
+      if (!selectedSale) { alert('❌ Sale select karein'); return; }
+      const qty = parseFloat(document.getElementById('rQty').value) || 0;
+      const amount = parseFloat(document.getElementById('rAmount').value) || 0;
+      if (qty <= 0 || amount <= 0) { alert('❌ Valid qty + amount'); return; }
       const btn = document.getElementById('saveReturnBtn');
       btn.textContent = '⏳ Processing...'; btn.disabled = true;
-
       try {
-        const totalRefund = parseFloat(document.getElementById('bdTotal').textContent.replace(/[^0-9]/g, '')) || 0;
-        
         const returnData = {
-          return_number: 'RET-' + Date.now(),
-          original_invoice: selectedInvoice.invoice_number,
-          product_id: selectedInvoice.product_id,
-          customer_name: selectedInvoice.customer_name,
-          customer_phone: selectedInvoice.customer_phone,
+          sale_id: selectedSale.id,
+          invoice_number: selectedSale.invoice_number,
+          product_id: selectedSale.product_id,
+          customer_name: selectedSale.customer_name,
+          customer_phone: selectedSale.customer_phone,
           qty: qty,
-          weight: parseFloat(document.getElementById('returnWeight').value) || 0,
-          rate: parseFloat(document.getElementById('returnRate').value) || 0,
-          refund_amount: totalRefund,
-          refund_mode: document.getElementById('returnMode').value,
-          reason: document.getElementById('returnReason').value.trim(),
-          return_date: document.getElementById('returnDate').value
+          total: amount,
+          reason: document.getElementById('rReason').value,
+          notes: document.getElementById('rNotes').value.trim(),
+          return_date: document.getElementById('rDate').value
         };
-        
         await addRecord('returns', returnData);
-        
-        // Auto-update product stock (add back)
-        if (selectedInvoice.product_id) {
-          const products = await getRecordsFast('products', true);
-          const prod = products.find(p => p.product_code === selectedInvoice.product_id);
-          if (prod) {
-            const newStock = (Number(prod.current_stock) || 0) + qty;
-            await updateRecord('products', prod.id, { current_stock: newStock });
-          }
-        }
-        
-        alert('✅ Return processed!\n\nRefund: ' + formatPKR(totalRefund) + '\nStock updated!');
-        
-        document.getElementById('returnInvoice').value = '';
-        document.getElementById('invoiceDetails').style.display = 'none';
-        document.getElementById('returnReason').value = '';
-        selectedInvoice = null;
-        
-        allReturns = await getRecordsFast('returns', true) || [];
-        loadReturns();
-      } catch (e) {
-        alert('❌ Error: ' + e.message);
-      } finally {
-        btn.textContent = '🔄 Process Return'; btn.disabled = false;
-      }
+        alert('✅ Return processed! Stock auto add ho gaya.');
+        document.getElementById('returnForm').style.display = 'none';
+        selectedSale = null;
+        allSales = await getRecordsFast('sales', true);
+        loadRecentReturns();
+      } catch (e) { alert('❌ ' + e.message); }
+      finally { btn.textContent = '🔄 Process Return'; btn.disabled = false; }
     }
 
-    async function loadReturns() {
-      const container = document.getElementById('returnsList');
-      
-      if (allReturns.length === 0) {
-        container.innerHTML = '<div class="empty-state"><p>No returns yet</p></div>';
-        return;
-      }
-
-      container.innerHTML = allReturns.slice(0, 20).map(r => `
+    async function loadRecentReturns() {
+      const returns = await getRecordsFast('returns', true);
+      const container = document.getElementById('recentReturns');
+      if (returns.length === 0) { container.innerHTML = '<div class="empty-state"><p>No returns yet</p></div>'; return; }
+      container.innerHTML = returns.slice(0, 20).map(r => `
         <div class="data-item">
           <div>
-            <div class="data-item-title">${r.customer_name} <span style="color: #FCA5A5; font-size: 0.75rem;">(${r.return_number})</span></div>
-            <div class="data-item-sub">Invoice: ${r.original_invoice} • Qty: ${r.qty} • ${formatDate(r.return_date)}</div>
-            <div class="data-item-sub" style="font-size: 0.7rem;">Mode: ${(r.refund_mode || '').toUpperCase()}</div>
+            <div class="data-item-title">${r.invoice_number} - ${r.customer_name}</div>
+            <div class="data-item-sub">Qty: ${r.qty} • ${r.reason} • ${formatDate(r.return_date)}</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="data-item-value" style="color: #FCA5A5;">- ${formatPKR(r.refund_amount)}</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="data-item-value" style="color:#FCA5A5;">- ${formatPKR(r.total)}</div>
             ${deleteButtonHTML('deleteReturn', r.id)}
           </div>
         </div>
@@ -272,12 +196,8 @@
 
     async function deleteReturn(id) {
       if (!confirmDelete('this return')) return;
-      try {
-        await deleteRecord('returns', id);
-        alert('✅ Return deleted');
-        allReturns = await getRecordsFast('returns', true) || [];
-        loadReturns();
-      } catch (e) { alert('❌ ' + e.message); }
+      try { await deleteRecord('returns', id); alert('✅ Deleted'); loadRecentReturns(); }
+      catch (e) { alert('❌ ' + e.message); }
     }
   </script>
 </body>

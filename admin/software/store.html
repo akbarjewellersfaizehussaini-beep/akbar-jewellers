@@ -7,15 +7,31 @@
   <link rel="icon" type="image/png" href="../../images/logo.png">
   <link rel="stylesheet" href="style-software.css">
   <style>
+    .top-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .top-stat { position: relative; border-radius: 20px; padding: 26px 24px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.4); transition: all 0.4s; }
+    .top-stat:hover { transform: translateY(-6px); }
+    .top-stat.cash { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); }
+    .top-stat.qty { background: linear-gradient(135deg, #FFD700 0%, #C9A227 100%); color: #0A0A0A; }
+    .top-stat.recv { background: linear-gradient(135deg, #3B82F6 0%, #1E3A8A 100%); }
+    .top-stat.pay { background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); }
+    .top-stat::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%); }
+    .top-stat-inner { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: center; }
+    .top-stat-icon { font-size: 2.8rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+    .top-stat-content { text-align: right; }
+    .top-stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 6px; opacity: 0.9; }
+    .top-stat-value { font-family: var(--font-heading); font-size: 1.9rem; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .top-stat.qty .top-stat-label, .top-stat.qty .top-stat-value { color: #0A0A0A; }
+    .top-stat:not(.qty) .top-stat-label, .top-stat:not(.qty) .top-stat-value { color: #FFFFFF; }
+
     .store-card { background: linear-gradient(135deg, var(--black-soft), #252525); border: 1px solid rgba(255,215,0,0.2); border-radius: 14px; padding: 20px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s; }
     .store-card:hover { border-color: var(--gold-primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,215,0,0.2); }
     .store-card-in { border-left: 4px solid #86EFAC; }
     .store-card-out { border-left: 4px solid #FCA5A5; }
     .store-card-low { border-left: 4px solid #FCD34D; }
-    .store-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
+    .store-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 12px; }
     .store-stat { text-align: center; padding: 8px; background: var(--black-royal); border-radius: 8px; }
-    .store-stat-label { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; }
-    .store-stat-value { color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 0.9rem; margin-top: 3px; }
+    .store-stat-label { color: var(--text-muted); font-size: 0.62rem; text-transform: uppercase; }
+    .store-stat-value { color: var(--gold-primary); font-weight: 700; font-family: var(--font-mono); font-size: 0.85rem; margin-top: 3px; }
     .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
     .filter-btn { padding: 8px 18px; background: transparent; border: 2px solid rgba(255,215,0,0.3); color: var(--text-light); border-radius: 50px; cursor: pointer; font-size: 0.8rem; font-family: var(--font-body); font-weight: 600; transition: all 0.3s; }
     .filter-btn:hover { border-color: var(--gold-primary); }
@@ -29,30 +45,50 @@
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       Store
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Store — Complete Inventory</h1>
-    <p class="page-subtitle">Har product ka total hisaab: purchase, sale, stock, profit</p>
+    <p class="page-subtitle">Live stock, per-piece profit, total results — sab auto</p>
 
-    <!-- TOTAL SUMMARY -->
-    <div class="stats-grid">
-      <div class="stat-card gold">
-        <div class="stat-label">Total Products</div>
-        <div class="stat-value" id="totalProducts">0</div>
+    <!-- 4 BARE BOXES (TOP) -->
+    <div class="top-stat-grid">
+      <div class="top-stat cash">
+        <div class="top-stat-inner">
+          <div class="top-stat-icon">📦</div>
+          <div class="top-stat-content">
+            <div class="top-stat-label">Total Stock (in Cash)</div>
+            <div class="top-stat-value" id="topStockCash">Rs 0</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-card success">
-        <div class="stat-label">In Stock</div>
-        <div class="stat-value" id="inStock" style="color:#86EFAC;">0</div>
+      <div class="top-stat qty">
+        <div class="top-stat-inner">
+          <div class="top-stat-icon">🔢</div>
+          <div class="top-stat-content">
+            <div class="top-stat-label">Total Stock (in Qty)</div>
+            <div class="top-stat-value" id="topStockQty">0 pcs</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-card danger">
-        <div class="stat-label">Out of Stock</div>
-        <div class="stat-value" id="outStock" style="color:#FCA5A5;">0</div>
+      <div class="top-stat recv">
+        <div class="top-stat-inner">
+          <div class="top-stat-icon">📥</div>
+          <div class="top-stat-content">
+            <div class="top-stat-label">Total Receivables</div>
+            <div class="top-stat-value" id="topReceivables">Rs 0</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-card info">
-        <div class="stat-label">Total Stock Value</div>
-        <div class="stat-value" id="totalValue" style="color:#93C5FD;">Rs 0</div>
+      <div class="top-stat pay">
+        <div class="top-stat-inner">
+          <div class="top-stat-icon">📤</div>
+          <div class="top-stat-content">
+            <div class="top-stat-label">Total Payables</div>
+            <div class="top-stat-value" id="topPayables">Rs 0</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -71,7 +107,6 @@
     </div>
   </div>
 
-  <!-- PRODUCT DETAIL MODAL -->
   <div id="productDetailModal" class="modal">
     <div class="modal-content" style="max-width: 900px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -88,6 +123,12 @@
     let allProducts = [];
     let allPurchases = [];
     let allSales = [];
+    let allReturns = [];
+    let allCustomers = [];
+    let allSuppliers = [];
+    let allKarigars = [];
+    let allPayments = [];
+    let allServices = [];
     let currentFilter = 'all';
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -100,6 +141,12 @@
       allProducts = await getRecordsFast('products', true);
       allPurchases = await getRecordsFast('purchases', true);
       allSales = await getRecordsFast('sales', true);
+      allReturns = await getRecordsFast('returns', true);
+      allCustomers = await getRecordsFast('customers', true);
+      allSuppliers = await getRecordsFast('suppliers', true);
+      allKarigars = await getRecordsFast('karigars', true);
+      allPayments = await getRecordsFast('payments', true);
+      allServices = await getRecordsFast('services', true);
       renderStore();
     }
 
@@ -107,70 +154,108 @@
       const search = document.getElementById('searchStore').value.toLowerCase();
       let filtered = allProducts;
 
+      // ===== CALCULATE TOP STATS (ALL PRODUCTS) =====
+      let totalStockCash = 0, totalStockQty = 0;
+      allProducts.forEach(p => {
+        const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+        if (live.current > 0) {
+          totalStockQty += live.current;
+          totalStockCash += live.current * (Number(p.cost_price) || 0);
+        }
+      });
+
+      // Receivables = customers ka positive balance
+      let receivables = 0;
+      allCustomers.forEach(c => {
+        let opening = Number(c.opening_balance) || 0;
+        const cSales = allSales.filter(s => s.customer_name === c.name);
+        const cPays = allPayments.filter(p => p.person_name === c.name && p.person_type === 'customer');
+        let bill = opening, paid = 0;
+        cSales.forEach(s => bill += Number(s.total) || 0);
+        cPays.forEach(p => paid += Number(p.amount) || 0);
+        const bal = bill - paid;
+        if (bal > 0) receivables += bal;
+      });
+
+      // Payables = suppliers + karigars
+      let payables = 0;
+      allSuppliers.forEach(s => {
+        let opening = Number(s.opening_cash) || 0;
+        const sPurch = allPurchases.filter(p => p.supplier_name === s.name);
+        const sPays = allPayments.filter(p => p.person_name === s.name && p.person_type === 'supplier');
+        let bill = opening, paid = 0;
+        sPurch.forEach(p => bill += Number(p.total) || 0);
+        sPays.forEach(p => paid += Number(p.amount) || 0);
+        const bal = bill - paid;
+        if (bal > 0) payables += bal;
+      });
+      allKarigars.forEach(k => {
+        let opening = Number(k.opening_cash) || 0;
+        const kServ = allServices.filter(s => s.karigar_name === k.name);
+        const kPays = allPayments.filter(p => p.person_name === k.name && p.person_type === 'karigar');
+        let bill = opening, paid = 0;
+        kServ.forEach(s => bill += Number(s.charges) || 0);
+        kPays.forEach(p => paid += Number(p.amount) || 0);
+        const bal = bill - paid;
+        if (bal > 0) payables += bal;
+      });
+
+      document.getElementById('topStockCash').textContent = formatPKR(totalStockCash);
+      document.getElementById('topStockQty').textContent = totalStockQty + ' pcs';
+      document.getElementById('topReceivables').textContent = formatPKR(receivables);
+      document.getElementById('topPayables').textContent = formatPKR(payables);
+
+      // ===== FILTER =====
       if (search) {
-        filtered = filtered.filter(p => 
-          (p.name || '').toLowerCase().includes(search) || 
+        filtered = filtered.filter(p =>
+          (p.name || '').toLowerCase().includes(search) ||
           (p.product_code || '').toLowerCase().includes(search) ||
           (p.category || '').toLowerCase().includes(search)
         );
       }
 
-      if (currentFilter === 'in') filtered = filtered.filter(p => (p.current_stock || 0) > 0);
-      else if (currentFilter === 'out') filtered = filtered.filter(p => (p.current_stock || 0) <= 0);
-      else if (currentFilter === 'low') filtered = filtered.filter(p => (p.current_stock || 0) > 0 && (p.current_stock || 0) <= 5);
+      if (currentFilter === 'in') filtered = filtered.filter(p => calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns).current > 0);
+      else if (currentFilter === 'out') filtered = filtered.filter(p => calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns).current <= 0);
+      else if (currentFilter === 'low') {
+        filtered = filtered.filter(p => {
+          const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+          return live.current > 0 && live.current <= 5;
+        });
+      }
 
-      // Total stats
-      const total = allProducts.length;
-      const inStock = allProducts.filter(p => (p.current_stock || 0) > 0).length;
-      const outStock = allProducts.filter(p => (p.current_stock || 0) <= 0).length;
-      let totalValue = 0;
-      allProducts.forEach(p => { totalValue += (p.current_stock || 0) * (p.cost_price || 0); });
-
-      document.getElementById('totalProducts').textContent = total;
-      document.getElementById('inStock').textContent = inStock;
-      document.getElementById('outStock').textContent = outStock;
-      document.getElementById('totalValue').textContent = formatPKR(totalValue);
       document.getElementById('productCount').textContent = filtered.length;
 
       const container = document.getElementById('storeGrid');
-      
       if (filtered.length === 0) {
         container.innerHTML = '<div class="empty-state"><div class="icon">📦</div><p>No products found</p></div>';
         return;
       }
 
       container.innerHTML = filtered.map(p => {
-        const stock = p.current_stock || 0;
-        const pPurchases = allPurchases.filter(pu => pu.product_id === p.product_code);
-        const pSales = allSales.filter(s => s.product_id === p.product_code);
-        const purchasedQty = pPurchases.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
-        const soldQty = pSales.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
-        const purchaseAmt = pPurchases.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
-        const saleAmt = pSales.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
-        const stockValue = stock * (p.cost_price || 0);
-        
-        const cardClass = stock > 5 ? 'store-card-in' : stock > 0 ? 'store-card-low' : 'store-card-out';
-        
+        const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+        const stats = calculateProductStats(p.product_code, allProducts, allPurchases, allSales, allReturns);
+        const cardClass = live.current > 5 ? 'store-card-in' : live.current > 0 ? 'store-card-low' : 'store-card-out';
+        const stockColor = live.current > 5 ? '#86EFAC' : live.current > 0 ? '#FCD34D' : '#FCA5A5';
         return `
-          <div class="store-card ${cardClass}" onclick='showProductDetail(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+          <div class="store-card ${cardClass}" onclick='showProductDetail(${JSON.stringify(p.product_code).replace(/'/g, "&#39;")})'>
             <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px;">
               <div style="flex: 1; min-width: 200px;">
                 <div style="color: var(--gold-primary); font-weight: 700; font-size: 1.1rem;">${p.name}</div>
                 <div style="color: #93C5FD; font-size: 0.8rem; font-family: var(--font-mono);">${p.product_code}</div>
-                <div style="color: var(--text-muted); font-size: 0.8rem;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • ${formatWeight(p.weight)}</div>
+                <div style="color: var(--text-muted); font-size: 0.8rem;">${(p.category || '').toUpperCase()} ${p.karat ? '• ' + p.karat : ''} • Per pc: ${(Number(p.weight)||0).toFixed(3)}g</div>
               </div>
               <div style="text-align: right;">
-                <div style="color: ${stock > 5 ? '#86EFAC' : stock > 0 ? '#FCD34D' : '#FCA5A5'}; font-weight: 700; font-size: 1.3rem;">${stock}</div>
-                <div style="color: var(--text-muted); font-size: 0.7rem;">In Stock</div>
+                <div style="color: ${stockColor}; font-weight: 700; font-size: 1.3rem;">${live.current} pcs</div>
+                <div style="color: var(--text-muted); font-size: 0.7rem;">Baqi Stock</div>
               </div>
             </div>
-            
             <div class="store-stats">
-              <div class="store-stat"><div class="store-stat-label">Purchased</div><div class="store-stat-value">${purchasedQty}</div></div>
-              <div class="store-stat"><div class="store-stat-label">Sold</div><div class="store-stat-value">${soldQty}</div></div>
-              <div class="store-stat"><div class="store-stat-label">Purchase Amt</div><div class="store-stat-value">${formatPKR(purchaseAmt)}</div></div>
-              <div class="store-stat"><div class="store-stat-label">Sale Amt</div><div class="store-stat-value">${formatPKR(saleAmt)}</div></div>
-              <div class="store-stat"><div class="store-stat-label">Stock Value</div><div class="store-stat-value">${formatPKR(stockValue)}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Total</div><div class="store-stat-value">${live.opening + live.purchased} pcs</div></div>
+              <div class="store-stat"><div class="store-stat-label">Purchased</div><div class="store-stat-value">${live.purchased}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Sold</div><div class="store-stat-value">${live.sold}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Cost/pc</div><div class="store-stat-value">${formatPKR(stats?.costPerPiece || p.cost_price)}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Sale/pc</div><div class="store-stat-value">${formatPKR(stats?.salePerPiece || p.sale_price)}</div></div>
+              <div class="store-stat"><div class="store-stat-label">Net Profit</div><div class="store-stat-value" style="color:${(stats?.netProfit||0) >= 0 ? '#86EFAC' : '#FCA5A5'};">${formatPKR(stats?.netProfit || 0)}</div></div>
             </div>
           </div>
         `;
@@ -184,89 +269,78 @@
       renderStore();
     }
 
-    function showProductDetail(p) {
+    function showProductDetail(productCode) {
+      const p = allProducts.find(x => x.product_code === productCode);
+      if (!p) return;
+      const live = calculateLiveStock(p.product_code, allProducts, allPurchases, allSales, allReturns);
+      const stats = calculateProductStats(p.product_code, allProducts, allPurchases, allSales, allReturns);
       const pPurchases = allPurchases.filter(pu => pu.product_id === p.product_code).sort((a, b) => new Date(b.purchase_date || b.created_at) - new Date(a.purchase_date || a.created_at));
       const pSales = allSales.filter(s => s.product_id === p.product_code).sort((a, b) => new Date(b.sale_date || b.created_at) - new Date(a.sale_date || a.created_at));
-      
-      const purchasedQty = pPurchases.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
-      const soldQty = pSales.reduce((sum, x) => sum + (Number(x.qty) || 0), 0);
-      const purchaseAmt = pPurchases.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
-      const saleAmt = pSales.reduce((sum, x) => sum + (Number(x.total) || 0), 0);
-      const stock = p.current_stock || 0;
+      const pReturns = allReturns.filter(r => r.product_id === p.product_code);
 
       document.getElementById('detailTitle').textContent = p.name;
       document.getElementById('detailContent').innerHTML = `
         <div style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.02)); border: 2px solid var(--gold-primary); border-radius: 14px; padding: 20px; margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; text-align: center;">
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Product ID</div>
-              <div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono);">${p.product_code}</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Purchased</div>
-              <div style="color: #86EFAC; font-weight: 700;">${purchasedQty}</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Sold</div>
-              <div style="color: #FCD34D; font-weight: 700;">${soldQty}</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">In Stock</div>
-              <div style="color: ${stock > 0 ? '#86EFAC' : '#FCA5A5'}; font-weight: 700;">${stock}</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Purchase Amt</div>
-              <div style="color: #FFF8DC; font-weight: 700;">${formatPKR(purchaseAmt)}</div>
-            </div>
-            <div>
-              <div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Sale Amt</div>
-              <div style="color: #FFF8DC; font-weight: 700;">${formatPKR(saleAmt)}</div>
-            </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; text-align: center;">
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Product ID</div><div style="color: #93C5FD; font-weight: 700; font-family: var(--font-mono);">${p.product_code}</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total</div><div style="color: #FFF8DC; font-weight: 700;">${live.opening + live.purchased} pcs</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Purchased</div><div style="color: #86EFAC; font-weight: 700;">${live.purchased}</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Sold</div><div style="color: #FCD34D; font-weight: 700;">${live.sold}</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Returns</div><div style="color: #93C5FD; font-weight: 700;">${live.returned}</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Baqi Stock</div><div style="color: ${live.current > 0 ? '#86EFAC' : '#FCA5A5'}; font-weight: 700; font-size: 1.2rem;">${live.current}</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Per pc Wt</div><div style="color: #FFD700; font-weight: 700;">${live.perPieceWeight.toFixed(3)}g</div></div>
+            <div><div style="color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase;">Total Wt</div><div style="color: #FFD700; font-weight: 700;">${(live.current * live.perPieceWeight).toFixed(3)}g</div></div>
           </div>
         </div>
 
-        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-family: var(--font-heading);">📥 Purchase History (${pPurchases.length})</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          <div style="background: rgba(37,211,102,0.1); border: 2px solid #25D366; border-radius: 12px; padding: 15px; text-align: center;">
+            <div style="color: var(--text-muted); font-size: 0.75rem;">Cost per Piece</div>
+            <div style="color: #25D366; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700;">${formatPKR(stats?.costPerPiece || p.cost_price)}</div>
+          </div>
+          <div style="background: rgba(59,130,246,0.1); border: 2px solid #3B82F6; border-radius: 12px; padding: 15px; text-align: center;">
+            <div style="color: var(--text-muted); font-size: 0.75rem;">Sale per Piece</div>
+            <div style="color: #3B82F6; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700;">${formatPKR(stats?.salePerPiece || p.sale_price)}</div>
+          </div>
+          <div style="background: rgba(255,215,0,0.1); border: 2px solid #FFD700; border-radius: 12px; padding: 15px; text-align: center;">
+            <div style="color: var(--text-muted); font-size: 0.75rem;">Net Profit (sold)</div>
+            <div style="color: ${(stats?.netProfit||0) >= 0 ? '#25D366' : '#DC2626'}; font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700;">${formatPKR(stats?.netProfit || 0)}</div>
+          </div>
+        </div>
+
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px;">📥 Purchase History (${pPurchases.length})</h3>
         <div style="overflow-x: auto; margin-bottom: 20px;">
           <table class="professional-table">
-            <thead><tr><th>Date</th><th>Supplier</th><th>Qty</th><th>Rate/g</th><th style="text-align: right;">Total</th></tr></thead>
+            <thead><tr><th>Date</th><th>Supplier</th><th>Qty</th><th>Rate/g</th><th style="text-align:right;">Total</th></tr></thead>
             <tbody>
-              ${pPurchases.length === 0 ? '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No purchases</td></tr>' : pPurchases.map(pu => `
-                <tr>
-                  <td>${formatDate(pu.purchase_date || pu.created_at)}</td>
-                  <td>${pu.supplier_name || '—'}</td>
-                  <td>${pu.qty || 1}</td>
-                  <td>${formatPKR(pu.rate)}</td>
-                  <td style="text-align: right; font-weight: 700;">${formatPKR(pu.total)}</td>
-                </tr>
+              ${pPurchases.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No purchases</td></tr>' : pPurchases.map(pu => `
+                <tr><td>${formatDate(pu.purchase_date || pu.created_at)}</td><td>${pu.supplier_name || '—'}</td><td>${pu.qty || 1}</td><td>${formatPKR(pu.rate)}</td><td style="text-align:right; font-weight:700;">${formatPKR(pu.total)}</td></tr>
               `).join('')}
             </tbody>
           </table>
         </div>
 
-        <h3 style="color: var(--gold-primary); margin-bottom: 10px; font-family: var(--font-heading);">📤 Sale History (${pSales.length})</h3>
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px;">📤 Sale History (${pSales.length})</h3>
         <div style="overflow-x: auto; margin-bottom: 20px;">
           <table class="professional-table">
-            <thead><tr><th>Date</th><th>Customer</th><th>Qty</th><th>Rate/g</th><th style="text-align: right;">Total</th></tr></thead>
+            <thead><tr><th>Date</th><th>Customer</th><th>Qty</th><th>Rate/g</th><th style="text-align:right;">Total</th></tr></thead>
             <tbody>
-              ${pSales.length === 0 ? '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No sales</td></tr>' : pSales.map(s => `
-                <tr>
-                  <td>${formatDate(s.sale_date || s.created_at)}</td>
-                  <td>${s.customer_name || '—'}</td>
-                  <td>${s.qty || 1}</td>
-                  <td>${formatPKR(s.rate)}</td>
-                  <td style="text-align: right; font-weight: 700;">${formatPKR(s.total)}</td>
-                </tr>
+              ${pSales.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">No sales</td></tr>' : pSales.map(s => `
+                <tr><td>${formatDate(s.sale_date || s.created_at)}</td><td>${s.customer_name || '—'}</td><td>${s.qty || 1}</td><td>${formatPKR(s.rate)}</td><td style="text-align:right; font-weight:700;">${formatPKR(s.total)}</td></tr>
               `).join('')}
             </tbody>
           </table>
         </div>
 
-        <div style="background: rgba(37,211,102,0.1); border: 2px solid #25D366; border-radius: 12px; padding: 15px; text-align: center;">
-          <div style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Net Profit from This Product</div>
-          <div style="color: #25D366; font-family: var(--font-heading); font-size: 1.8rem; font-weight: 700; margin-top: 5px;">${formatPKR(saleAmt - purchaseAmt)}</div>
-        </div>
+        ${pReturns.length > 0 ? `
+        <h3 style="color: var(--gold-primary); margin-bottom: 10px;">🔄 Returns (${pReturns.length})</h3>
+        <div style="overflow-x: auto; margin-bottom: 20px;">
+          <table class="professional-table">
+            <thead><tr><th>Date</th><th>Customer</th><th>Qty</th><th style="text-align:right;">Refund</th></tr></thead>
+            <tbody>${pReturns.map(r => `<tr><td>${formatDate(r.return_date)}</td><td>${r.customer_name || '—'}</td><td>${r.qty || 1}</td><td style="text-align:right;">${formatPKR(r.total)}</td></tr>`).join('')}</tbody>
+          </table>
+        </div>` : ''}
       `;
-      
       document.getElementById('productDetailModal').classList.add('active');
     }
   </script>
