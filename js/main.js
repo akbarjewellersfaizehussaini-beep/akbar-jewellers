@@ -1,8 +1,6 @@
 // ===== AKBAR JEWELLERS – MAIN JS (LIVE RATES VIA CLOUDFLARE WORKER) =====
 
-// ===== CLOUDINARY CONFIG =====
-const CLOUDINARY_CLOUD_NAME = 'olpbssol';
-const CLOUDINARY_UPLOAD_PRESET = 'akbar-jewellers';
+
 
 // ⚠️ APNA CLOUDFLARE WORKER URL YAHAN HAI
 const RATES_PROXY_URL = 'https://akbar-rates-api.akbarjewellersfaizehussaini.workers.dev';
