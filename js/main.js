@@ -1,8 +1,11 @@
-// ===== AKBAR JEWELLERS – MAIN JS =====
+// ===== AKBAR JEWELLERS – MAIN JS (LIVE RATES VIA CLOUDFLARE WORKER) =====
 
 // ===== CLOUDINARY CONFIG =====
 const CLOUDINARY_CLOUD_NAME = 'olpbssol';
 const CLOUDINARY_UPLOAD_PRESET = 'akbar-jewellers';
+
+// ⚠️ APNA CLOUDFLARE WORKER URL YAHAN HAI
+const RATES_PROXY_URL = 'https://akbar-rates-api.akbarjewellersfaizehussaini.workers.dev';
 
 const WEIGHT = {
   tola: 11.664,
@@ -16,7 +19,7 @@ const KARAT_PURITY = {
   '16K': 0.6667, '14K': 0.5833, '12K': 0.5, '10K': 0.4167, '8K': 0.3333
 };
 
-// Default fallback rates (agar DB se na aayein)
+// Default fallback rates (agar API fail ho jaye)
 const LIVE_RATES = {
   usdToPkr: 276.95,
   gold: {
@@ -57,70 +60,52 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
-// ===== FETCH LIVE RATES (Naya structure: gold_rates table) =====
+// ===== FETCH LIVE RATES (CLOUDFLARE WORKER SE) =====
 async function loadLiveRates() {
   try {
-    // Gold rates – latest row
-    const goldRes = await fetch(`${SUPABASE_URL}/rest/v1/gold_rates?select=*&order=rate_date.desc&limit=1`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    const goldRows = await goldRes.json();
-    
-    if (goldRows && goldRows.length > 0) {
-      const g = goldRows[0];
-      if (g.rate_24k) LIVE_RATES.gold['24K'] = parseFloat(g.rate_24k);
-      if (g.rate_22k) LIVE_RATES.gold['22K'] = parseFloat(g.rate_22k);
-      if (g.rate_21k) LIVE_RATES.gold['21K'] = parseFloat(g.rate_21k);
-      if (g.rate_18k) LIVE_RATES.gold['18K'] = parseFloat(g.rate_18k);
-      if (g.rate_pathoor) LIVE_RATES.gold['Pathoor'] = parseFloat(g.rate_pathoor);
-      
-      // Auto-calculate remaining karats from 24K if not provided
-      const base24 = LIVE_RATES.gold['24K'];
-      LIVE_RATES.gold['16K'] = Math.round(base24 * 0.6667);
-      LIVE_RATES.gold['14K'] = Math.round(base24 * 0.5833);
-      LIVE_RATES.gold['12K'] = Math.round(base24 * 0.5);
-      LIVE_RATES.gold['10K'] = Math.round(base24 * 0.4167);
-      LIVE_RATES.gold['8K'] = Math.round(base24 * 0.3333);
-      
+    const res = await fetch(RATES_PROXY_URL);
+    if (!res.ok) throw new Error('Proxy error: ' + res.status);
+    const data = await res.json();
+
+    if (data && data.rate_24k_tola) {
+      const rate24K = parseFloat(data.rate_24k_tola);
+      const ratePathoor = data.rate_pathoor_tola ? parseFloat(data.rate_pathoor_tola) : Math.round(rate24K - 5500);
+
+      LIVE_RATES.gold['24K'] = rate24K;
+      LIVE_RATES.gold['Pathoor'] = ratePathoor;
+
+      // Baaki karats 24K se calculate karein
+      const karats = ['22K', '21K', '18K', '16K', '14K', '12K', '10K', '8K'];
+      karats.forEach(k => {
+        const purity = KARAT_PURITY[k] || 0;
+        LIVE_RATES.gold[k] = Math.round(rate24K * purity);
+      });
+
+      // Top bar update
+      const top24KEl = document.getElementById('top24K');
+      const topPathoorEl = document.getElementById('topPathoor');
+      if (top24KEl) top24KEl.textContent = `Rs ${rate24K.toLocaleString()}`;
+      if (topPathoorEl) topPathoorEl.textContent = `Rs ${ratePathoor.toLocaleString()}`;
+
+      // Per gram calculate
+      Object.keys(LIVE_RATES.gold).forEach(k => {
+        currentRatesPerGram[k] = Math.round(LIVE_RATES.gold[k] / WEIGHT.tola);
+      });
+
       const timeEl = document.getElementById('lastUpdated');
-      if (timeEl && g.created_at) timeEl.textContent = new Date(g.created_at).toLocaleString('en-PK');
+      if (timeEl) timeEl.textContent = new Date().toLocaleString('en-PK');
+      
+      console.log('✅ Live rates loaded from Sarafa.pk via Worker');
     }
+  } catch (error) {
+    console.error('⚠️ Live rate fetch failed, using fallback:', error);
+  }
 
-    // Silver rates – latest row
-    const silverRes = await fetch(`${SUPABASE_URL}/rest/v1/silver_rates?select=*&order=rate_date.desc&limit=1`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-    });
-    const silverRows = await silverRes.json();
-    
-    if (silverRows && silverRows.length > 0) {
-      const s = silverRows[0];
-      if (s.rate_999) {
-        LIVE_RATES.silver.perGram = parseFloat(s.rate_999);
-        LIVE_RATES.silver.per10Gram = Math.round(parseFloat(s.rate_999) * 10);
-        LIVE_RATES.silver.perTola = Math.round(parseFloat(s.rate_999) * WEIGHT.tola);
-      }
-    }
-
-    // Update top bar
-    const rate24K = LIVE_RATES.gold['24K'] || 0;
-    const pathoorRate = LIVE_RATES.gold['Pathoor'] || Math.round(rate24K - 5500);
-    const top24KEl = document.getElementById('top24K');
-    const topPathoorEl = document.getElementById('topPathoor');
-    if (top24KEl) top24KEl.textContent = `Rs ${rate24K.toLocaleString()}`;
-    if (topPathoorEl) topPathoorEl.textContent = `Rs ${pathoorRate.toLocaleString()}`;
-
-    // Calculate per gram
-    Object.keys(LIVE_RATES.gold).forEach(k => {
-      currentRatesPerGram[k] = Math.round(LIVE_RATES.gold[k] / WEIGHT.tola);
-    });
-
-    console.log('✅ Live rates loaded');
-    renderBiscuitUnits();
-    renderGoldRates();
-    renderSilverRates();
-
-    setTimeout(() => { initGoldChart(); initSilverChart(); }, 100);
-  } catch (error) { console.error('⚠️ Rate fetch failed:', error); }
+  // Hamesha render karein (chahe API se aaye ya fallback)
+  renderBiscuitUnits();
+  renderGoldRates();
+  renderSilverRates();
+  setTimeout(() => { initGoldChart(); initSilverChart(); }, 100);
 }
 
 // ===== CAROUSEL =====
@@ -236,7 +221,7 @@ function renderSilverRates() {
   `;
 }
 
-// ===== TAB SWITCHING (FIXED: 'this' pass karein) =====
+// ===== TAB SWITCHING =====
 function switchRateTab(tab, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -263,7 +248,6 @@ function switchRateTab(tab, btn) {
   }
 }
 
-// ===== UPDATE USD / CART =====
 function updateUsdRate() {
   const usdEl = document.getElementById('usdRate');
   if (usdEl) usdEl.textContent = LIVE_RATES.usdToPkr;
@@ -276,13 +260,12 @@ function updateCartCount() {
 }
 
 // =====================================================
-// PRODUCT SYSTEM (Fixed for new products table)
+// PRODUCT SYSTEM
 // =====================================================
 
 let currentProduct = null;
 let cart = JSON.parse(localStorage.getItem('akbar_cart') || '[]');
 
-// Naya products table: images (array), sale_price, weight, karat
 function getProductImage(p) {
   if (p.images && Array.isArray(p.images) && p.images.length > 0) return p.images[0];
   if (p.image_url) return p.image_url;
@@ -336,12 +319,10 @@ function getProductPrices(product) {
   return { originalPrice, discountedPrice, discountPct };
 }
 
-// FEATURED products load karein
 async function loadProducts() {
   const grid = document.getElementById('productsGrid');
   if (!grid) return;
   try {
-    // Sirf featured products (naya column: featured)
     const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&featured=eq.true&is_active=eq.true&order=created_at.desc&limit=12`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
