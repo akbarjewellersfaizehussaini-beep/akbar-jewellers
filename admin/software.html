@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jeweller Software – SHAH REHAN JEWELLERS Admin</title>
+  <title>Jeweller Software – Akbar Jewellers Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
@@ -37,12 +37,12 @@
 <body>
 
   <div class="admin-header">
-    <div class="admin-logo">SHAH REHAN JEWELLERS – Admin</div>
+    <div class="admin-logo">AKBAR JEWELLERS – Admin</div>
     <nav class="admin-nav">
       <a href="dashboard.html">Dashboard</a>
       <a href="products.html">Products</a>
       <a href="orders.html">Orders</a>
-     <a href="vlogs.html" class="mobile-show">Vlogs</a>
+      <a href="vlogs.html" class="mobile-show">Vlogs</a>
       <a href="settings.html">Settings</a>
       <a href="software.html" class="active">Software</a>
       <button class="logout-btn" onclick="logout()">Logout</button>
@@ -105,29 +105,12 @@
   </div>
 
   <script>
-    function checkAuth() {
-      const session = localStorage.getItem('srj_admin_session');
-      if (!session) { window.location.href = 'login.html'; return false; }
-      try {
-        const data = JSON.parse(session);
-        if (Date.now() > data.expires_at) {
-          localStorage.removeItem('srj_admin_session');
-          window.location.href = 'login.html';
-          return false;
-        }
-        return true;
-      } catch {
-        window.location.href = 'login.html';
-        return false;
-      }
-    }
-    
+    // Sirf logout function rakha hai taake logout button kaam kare
     function logout() {
+      localStorage.removeItem('akbar_admin_session');
       localStorage.removeItem('srj_admin_session');
       window.location.href = 'login.html';
     }
-    
-    document.addEventListener('DOMContentLoaded', checkAuth);
   </script>
 
 </body>
