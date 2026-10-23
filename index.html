@@ -37,6 +37,58 @@
     ]
   }
   </script>
+
+  <style>
+    /* 3D Coin Logo Animation */
+    .logo-coin-container {
+      perspective: 1000px;
+      width: 80px;
+      height: 80px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .logo-coin {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: flipCoin 4s infinite linear;
+    }
+    .logo-coin-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #2ecc71, #0f5132);
+      border: 3px solid #FFD700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
+    }
+    .logo-coin-face.back {
+      transform: rotateY(180deg);
+    }
+    .logo-coin-face span {
+      color: #ffffff;
+      font-family: 'Noto Nastaliq Urdu', serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      padding: 5px;
+    }
+    @keyframes flipCoin {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    .hero-logo-coin {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 15px;
+    }
+  </style>
 </head>
 <body>
 
@@ -59,7 +111,13 @@
         </span>
       </div>
       <div style="display: flex; align-items: center; gap: 15px;">
-        <img src="images/logo.png" alt="Akbar Jewellers Logo" class="top-bar-logo rotating-logo" onerror="this.style.display='none'">
+        <!-- 3D Coin Logo in Top Bar -->
+        <div class="logo-coin-container" style="width: 50px; height: 50px;">
+          <div class="logo-coin">
+            <div class="logo-coin-face"><span>فیض<br>حسینی</span></div>
+            <div class="logo-coin-face back"><span>فیض<br>حسینی</span></div>
+          </div>
+        </div>
         <span class="top-bar-contact">📞 0323 4086439</span>
       </div>
     </div>
@@ -69,7 +127,12 @@
   <header class="site-header">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
       <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="images/logo.png" alt="Akbar Jewellers Logo" class="header-logo rotating-logo" onerror="this.style.display='none'">
+        <div class="logo-coin-container" style="width: 60px; height: 60px;">
+          <div class="logo-coin">
+            <div class="logo-coin-face"><span>فیض<br>حسینی</span></div>
+            <div class="logo-coin-face back"><span>فیض<br>حسینی</span></div>
+          </div>
+        </div>
         <h1 class="brand-name">AKBAR JEWELLERS</h1>
       </div>
       <nav class="hidden md:flex gap-8 font-medium">
@@ -96,7 +159,12 @@
     <!-- LEFT: Content (30%) -->
     <div class="hero-content-half">
       <div class="hero-content-inner">
-        <img src="images/logo.png" alt="Akbar Jewellers Logo" class="hero-rotating-logo" onerror="this.style.display='none'">
+        <div class="logo-coin-container hero-logo-coin">
+          <div class="logo-coin">
+            <div class="logo-coin-face"><span>فیض<br>حسینی</span></div>
+            <div class="logo-coin-face back"><span>فیض<br>حسینی</span></div>
+          </div>
+        </div>
         <h1 class="hero-title">AKBAR JEWELLERS</h1>
         <p style="color: #FFD700; font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; font-size: 1.1rem; margin: 10px 0;">فیض حسینی</p>
         <p class="hero-subtitle">Diamond aur Kundan Antique Jewellery ke Expert</p>
@@ -147,6 +215,10 @@
           <img src="images/gold-buiscuit-logo.jpg" alt="Biscuits" class="tab-logo" onerror="this.style.display='none'">
           Biscuits
         </button>
+        <!-- NAYA WATCHES BUTTON -->
+        <a href="https://watch-deals-ruddy.vercel.app/" target="_blank" class="tab-btn" style="background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; font-weight: 700; display: flex; align-items: center; gap: 5px;">
+          ⌚ How Best Watches
+        </a>
         <a href="https://scicalcpro.vercel.app/gold-silver-calculator.html" target="_blank" class="tab-btn calculator-tab">
           <span class="tab-calc-icon">🧮</span>
           Gold & Silver Calculator
@@ -466,9 +538,7 @@
           <p>📞 0323 4086439</p>
           <p>✉️ akbarjewellersfaizehussaini@gmail.com</p>
           
-          <div class="social-icons" id="footerSocialIcons">
-            <!-- JS se populate hoga -->
-          </div>
+          <div class="social-icons" id="footerSocialIcons"></div>
         </div>
         <div>
           <h4>Quick Links</h4>
@@ -540,7 +610,7 @@
   </script>
 
   <script src="js/supabase.js"></script>
-  <!-- ⚠️ MAIN.JS PEHLE LOAD HOGA -->
+  <!-- MAIN.JS PEHLE LOAD HOGA (Isme loadLiveRates aur product functions hain) -->
   <script src="js/main.js"></script>
 
   <!-- BAAD MEIN VLOGS AUR BLOGS LOAD KARNE WALI SCRIPTS -->
