@@ -1,728 +1,1068 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Akbar Jewellers – Diamond, Kundan & Antique Jewellery Expert | Tajbagh Lahore</title>
-  <meta name="description" content="Akbar Jewellers (Faiz e Hussaini) – Best diamond, kundan & antique jewellery shop in New Canal Park, Ali Plaza Tajbagh, Lahore. Live gold rates, bridal sets, custom designs. Call 03234086439.">
-  <meta name="keywords" content="Akbar Jewellers, Faiz e Hussaini, diamond jewellery Lahore, kundan jewellery, antique jewellery, gold shop Tajbagh, bridal sets Lahore">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" type="image/png" href="images/logo.png">
-  <link rel="manifest" href="manifest.json">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+// ===== AKBAR JEWELLERS – MAIN JS (LIVE RATES VIA CLOUDFLARE WORKER) =====
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "JewelryStore",
-    "name": "Akbar Jewellers - Faiz e Hussaini",
-    "url": "https://akbarjewellersfaizehussaini-beep.github.io/akbar-jewellers/",
-    "telephone": "+923234086439",
-    "email": "akbarjewellersfaizehussaini@gmail.com",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "New Canal Park, Ali Plaza Tajbagh",
-      "addressLocality": "Lahore",
-      "addressCountry": "PK"
-    },
-    "priceRange": "$$",
-    "openingHours": "Mo-Sa 11:00-21:00",
-    "sameAs": [
-      "https://www.youtube.com/@AkbarJewellersFaizeHussaini"
-    ]
+
+
+// ⚠️ APNA CLOUDFLARE WORKER URL YAHAN HAI
+const RATES_PROXY_URL = 'https://akbar-rates-api.akbarjewellersfaizehussaini.workers.dev';
+
+const WEIGHT = {
+  tola: 11.664,
+  masha: 0.972,
+  ratti: 0.1215,
+  gram: 1
+};
+
+const KARAT_PURITY = {
+  '24K': 1.0, '22K': 0.9167, '21K': 0.875, '18K': 0.75,
+  '16K': 0.6667, '14K': 0.5833, '12K': 0.5, '10K': 0.4167, '8K': 0.3333
+};
+
+// Default fallback rates (agar API fail ho jaye)
+const LIVE_RATES = {
+  usdToPkr: 276.95,
+  gold: {
+    '24K': 430000, '22K': 394167, '21K': 376250, '18K': 322500,
+    '16K': 286667, '14K': 250833, '12K': 215000, '10K': 179167, '8K': 143333,
+    'Pathoor': 424500
+  },
+  silver: {
+    perGram: 570.10,
+    per10Gram: 5701,
+    perTola: 6651
   }
-  </script>
+};
 
-  <style>
-    /* 3D Coin Logo Animation */
-    .logo-coin-container {
-      perspective: 1000px;
-      width: 80px;
-      height: 80px;
-      display: inline-block;
-      vertical-align: middle;
+let currentRatesPerGram = {};
+let selectedBiscuitPayment = 'easypaisa';
+
+// ===== HELPERS =====
+function getRateForKarat(karat) {
+  if (currentRatesPerGram[karat]) return currentRatesPerGram[karat];
+  const ratePerTola = LIVE_RATES.gold[karat] || 0;
+  return Math.round(ratePerTola / WEIGHT.tola);
+}
+
+function toGrams(value, unit) { return value * WEIGHT[unit]; }
+function formatPKR(amount) { return 'Rs ' + Math.round(amount).toLocaleString('en-PK'); }
+
+// ===== CLOUDINARY UPLOAD =====
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    method: 'POST', body: formData
+  });
+  if (!res.ok) throw new Error('Cloudinary upload failed');
+  const data = await res.json();
+  return data.secure_url;
+}
+
+// ===== FETCH LIVE RATES (CLOUDFLARE WORKER SE) =====
+async function loadLiveRates() {
+  try {
+    const res = await fetch(RATES_PROXY_URL);
+    if (!res.ok) throw new Error('Proxy error: ' + res.status);
+    const data = await res.json();
+
+    if (data && data.rate_24k_tola) {
+      const rate24K = parseFloat(data.rate_24k_tola);
+      const ratePathoor = data.rate_pathoor_tola ? parseFloat(data.rate_pathoor_tola) : Math.round(rate24K - 5500);
+
+      LIVE_RATES.gold['24K'] = rate24K;
+      LIVE_RATES.gold['Pathoor'] = ratePathoor;
+
+      // Baaki karats 24K se calculate karein
+      const karats = ['22K', '21K', '18K', '16K', '14K', '12K', '10K', '8K'];
+      karats.forEach(k => {
+        const purity = KARAT_PURITY[k] || 0;
+        LIVE_RATES.gold[k] = Math.round(rate24K * purity);
+      });
+
+      // Top bar update
+      const top24KEl = document.getElementById('top24K');
+      const topPathoorEl = document.getElementById('topPathoor');
+      if (top24KEl) top24KEl.textContent = `Rs ${rate24K.toLocaleString()}`;
+      if (topPathoorEl) topPathoorEl.textContent = `Rs ${ratePathoor.toLocaleString()}`;
+
+      // Per gram calculate
+      Object.keys(LIVE_RATES.gold).forEach(k => {
+        currentRatesPerGram[k] = Math.round(LIVE_RATES.gold[k] / WEIGHT.tola);
+      });
+
+      const timeEl = document.getElementById('lastUpdated');
+      if (timeEl) timeEl.textContent = new Date().toLocaleString('en-PK');
+      
+      console.log('✅ Live rates loaded from Sarafa.pk via Worker');
     }
-    .logo-coin {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      animation: flipCoin 4s infinite linear;
+  } catch (error) {
+    console.error('⚠️ Live rate fetch failed, using fallback:', error);
+  }
+
+  // Hamesha render karein (chahe API se aaye ya fallback)
+  renderBiscuitUnits();
+  renderGoldRates();
+  renderSilverRates();
+  setTimeout(() => { initGoldChart(); initSilverChart(); }, 100);
+}
+
+// ===== CAROUSEL =====
+let carouselInterval = null;
+let currentSlide = 0;
+let carouselCount = 0;
+
+function startKaratCarousel(total) {
+  carouselCount = total;
+  currentSlide = 0;
+  if (carouselInterval) clearInterval(carouselInterval);
+  carouselInterval = setInterval(() => {
+    currentSlide = (currentSlide + 1) % total;
+    showSlide(currentSlide);
+  }, 3000);
+}
+
+function showSlide(index) {
+  const slides = document.querySelectorAll('.karat-slide');
+  const dots = document.querySelectorAll('.carousel-dots .dot');
+  slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+  dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+  currentSlide = index;
+}
+
+function goToSlide(index) {
+  if (carouselInterval) clearInterval(carouselInterval);
+  showSlide(index);
+  carouselInterval = setInterval(() => {
+    currentSlide = (currentSlide + 1) % carouselCount;
+    showSlide(currentSlide);
+  }, 3000);
+}
+
+// ===== RENDER GOLD RATES =====
+function renderGoldRates() {
+  const container = document.getElementById('goldRatesContainer');
+  if (!container) return;
+
+  const karats = ['24K', '22K', '21K', '18K', '16K', '14K', '12K', '10K', '8K', 'Pathoor'];
+
+  const slides = karats.map((karat, index) => {
+    const pkrPerTola = LIVE_RATES.gold[karat] || 0;
+    const pkrPerGram = currentRatesPerGram[karat] || Math.round(pkrPerTola / WEIGHT.tola);
+    const pkrPerMasha = Math.round(pkrPerTola / 12);
+    const pkrPerRatti = Math.round(pkrPerTola / 96);
+    const isPathoor = karat === 'Pathoor';
+    const logoImg = isPathoor ? 'images/pathoor-logo.jpg' : 'images/gold-logo.jpg';
+
+    return `
+      <div class="karat-slide ${index === 0 ? 'active' : ''} ${isPathoor ? 'pathoor-slide' : ''}">
+        <div class="karat-box">
+          <div class="sparkle sparkle-1"></div>
+          <div class="sparkle sparkle-2"></div>
+          <div class="sparkle sparkle-3"></div>
+          <div class="karat-header">
+            <img src="${logoImg}" alt="${isPathoor ? '24K Pathoor' : 'Gold'}" class="karat-logo" onerror="this.style.display='none'">
+            <span class="karat-title">${isPathoor ? '24K PATHOOR GOLD' : karat + ' GOLD'}</span>
+          </div>
+          <div class="karat-main-rate">
+            <div class="rate-label">Per Tola</div>
+            <div class="rate-tola">Rs ${Math.round(pkrPerTola).toLocaleString()}</div>
+          </div>
+          <div class="karat-details">
+            <div class="detail-item"><div class="detail-label">Per Gram</div><div class="detail-value">Rs ${pkrPerGram.toLocaleString()}</div></div>
+            <div class="detail-item"><div class="detail-label">Per Masha</div><div class="detail-value">Rs ${pkrPerMasha.toLocaleString()}</div></div>
+            <div class="detail-item"><div class="detail-label">Per Ratti</div><div class="detail-value">Rs ${pkrPerRatti}</div></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="karat-carousel">${slides}</div>
+    <div class="carousel-dots" id="carouselDots">
+      ${karats.map((_, i) => `<span class="dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></span>`).join('')}
+    </div>
+  `;
+  startKaratCarousel(karats.length);
+}
+
+// ===== RENDER SILVER RATES =====
+function renderSilverRates() {
+  const container = document.getElementById('silverRatesContainer');
+  if (!container) return;
+  const silver = LIVE_RATES.silver;
+  const usdPerGram = (silver.perGram / LIVE_RATES.usdToPkr).toFixed(2);
+
+  container.innerHTML = `
+    <div class="karat-carousel">
+      <div class="karat-slide active silver-slide">
+        <div class="karat-box silver-box">
+          <div class="sparkle sparkle-1"></div>
+          <div class="sparkle sparkle-2"></div>
+          <div class="sparkle sparkle-3"></div>
+          <div class="karat-header">
+            <img src="images/silver-logo.jpg" alt="Silver" class="karat-logo" onerror="this.style.display='none'">
+            <span class="karat-title">SILVER RATE</span>
+          </div>
+          <div class="karat-main-rate">
+            <div class="rate-label">Per Tola</div>
+            <div class="rate-tola">Rs ${Math.round(silver.perTola).toLocaleString()}</div>
+          </div>
+          <div class="karat-details">
+            <div class="detail-item"><div class="detail-label">Per Gram</div><div class="detail-value">Rs ${silver.perGram.toFixed(2)}</div></div>
+            <div class="detail-item"><div class="detail-label">Per 10 Gram</div><div class="detail-value">Rs ${Math.round(silver.per10Gram).toLocaleString()}</div></div>
+            <div class="detail-item"><div class="detail-label">USD/Gram</div><div class="detail-value">$${usdPerGram}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===== TAB SWITCHING =====
+function switchRateTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  const goldTab = document.getElementById('goldRatesTab');
+  const silverTab = document.getElementById('silverRatesTab');
+  const biscuitsTab = document.getElementById('biscuitsTab');
+
+  if (goldTab) goldTab.classList.add('hidden');
+  if (silverTab) silverTab.classList.add('hidden');
+  if (biscuitsTab) biscuitsTab.classList.add('hidden');
+
+  if (tab === 'gold' && goldTab) {
+    goldTab.classList.remove('hidden');
+    if (carouselInterval) clearInterval(carouselInterval);
+    startKaratCarousel(carouselCount);
+    setTimeout(() => initGoldChart(), 100);
+  } else if (tab === 'silver' && silverTab) {
+    silverTab.classList.remove('hidden');
+    setTimeout(() => initSilverChart(), 100);
+  } else if (tab === 'biscuits' && biscuitsTab) {
+    biscuitsTab.classList.remove('hidden');
+    renderBiscuitUnits();
+  }
+}
+
+function updateUsdRate() {
+  const usdEl = document.getElementById('usdRate');
+  if (usdEl) usdEl.textContent = LIVE_RATES.usdToPkr;
+}
+
+function updateCartCount() {
+  const cartData = JSON.parse(localStorage.getItem('akbar_cart') || '[]');
+  const el = document.getElementById('cartCount');
+  if (el) el.textContent = cartData.length;
+}
+
+// =====================================================
+// PRODUCT SYSTEM
+// =====================================================
+
+let currentProduct = null;
+let cart = JSON.parse(localStorage.getItem('akbar_cart') || '[]');
+
+function getProductImage(p) {
+  if (p.images && Array.isArray(p.images) && p.images.length > 0) return p.images[0];
+  if (p.image_url) return p.image_url;
+  return 'images/placeholder.svg';
+}
+
+function getProductPrice(p) {
+  return p.sale_price || p.price || 0;
+}
+
+function calculateGoldSilverPrice(product) {
+  const isSilver = product.category === 'silver';
+  const weight = product.weight || 0;
+  if (!weight) return getProductPrice(product);
+
+  const ratePerGram = isSilver ? (LIVE_RATES.silver.perGram || 570.10) : getRateForKarat(product.karat || '24K');
+  const metalValue = ratePerGram * weight;
+  const making = metalValue * 0.15;
+  const polish = metalValue * 0.10;
+  const subtotal = metalValue + making + polish;
+  const gst = subtotal * 0.03;
+  return Math.round(subtotal + gst);
+}
+
+function getProductPrices(product) {
+  const isGold = product.category === 'gold';
+  const isSilver = product.category === 'silver';
+  let originalPrice, discountedPrice, discountPct;
+
+  if (isGold || isSilver) {
+    const calculated = calculateGoldSilverPrice(product);
+    const mrp = getProductPrice(product);
+    if (product.discount_percent && product.discount_percent > 0) {
+      originalPrice = mrp || calculated;
+      discountPct = product.discount_percent;
+      discountedPrice = Math.round(originalPrice * (1 - discountPct/100));
+    } else if (mrp > 0 && calculated > 0 && mrp !== calculated) {
+      if (mrp > calculated) { originalPrice = mrp; discountedPrice = calculated; }
+      else { originalPrice = calculated; discountedPrice = mrp; }
+      discountPct = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+    } else {
+      originalPrice = calculated || mrp;
+      discountedPrice = originalPrice;
+      discountPct = 0;
     }
-    .logo-coin-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #2ecc71, #0f5132);
-      border: 3px solid #FFD700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 20px rgba(46, 204, 113, 0.6);
-    }
-    .logo-coin-face.back {
-      transform: rotateY(180deg);
-    }
-    .logo-coin-face span {
-      color: #ffffff;
-      font-family: 'Noto Nastaliq Urdu', serif;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-align: center;
-      line-height: 1.2;
-      padding: 5px;
-    }
-    @keyframes flipCoin {
-      0% { transform: rotateY(0deg); }
-      100% { transform: rotateY(360deg); }
-    }
-    .hero-logo-coin {
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 15px;
-    }
-  </style>
-</head>
-<body>
+  } else {
+    originalPrice = getProductPrice(product);
+    discountPct = product.discount_percent || 5;
+    discountedPrice = Math.round(originalPrice * (1 - discountPct/100));
+  }
+  return { originalPrice, discountedPrice, discountPct };
+}
 
-   <!-- ===================== TOP BAR ===================== -->
-  <div class="top-bar">
-    <div class="container mx-auto px-4 flex justify-between items-center text-sm">
-      <div class="top-bar-rates" id="topBarRates">
-        <span class="rate-item">
-          <img src="images/gold-logo.jpg" alt="Gold" class="rate-icon-img" onerror="this.style.display='none'">
-          <span class="rate-label">24K Gold</span>
-          <span class="rate-value" id="top24K">Loading...</span>
-          <span class="rate-unit">/tola</span>
-        </span>
-        <span class="divider">|</span>
-        <span class="rate-item pathoor-item">
-          <img src="images/pathoor-logo.jpg" alt="Pathoor" class="rate-icon-img" onerror="this.style.display='none'">
-          <span class="rate-label">24K Pathoor</span>
-          <span class="rate-value" id="topPathoor">Loading...</span>
-          <span class="rate-unit">/tola</span>
-        </span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <!-- 3D Coin Logo in Top Bar -->
-        <div class="logo-coin-container" style="width: 50px; height: 50px;">
-          <div class="logo-coin">
-            <div class="logo-coin-face"><span>فیض<br>حسینی</span></div>
-            <div class="logo-coin-face back"><span>فیض<br>حسینی</span></div>
-          </div>
-        </div>
-        <span class="top-bar-contact">📞 0323 4086439</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div class="logo-coin-container" style="width: 60px; height: 60px;">
-          <div class="logo-coin">
-            <div class="logo-coin-face"><span>فیض<br>حسینی</span></div>
-            <div class="logo-coin-face back"><span>فیض<br>حسینی</span></div>
-          </div>
-        </div>
-        <h1 class="brand-name">AKBAR JEWELLERS</h1>
-      </div>
-      <nav class="hidden md:flex gap-8 font-medium">
-        <a href="index.html" class="nav-link active">Home</a>
-        <a href="collections.html" class="nav-link">Collections</a>
-        <a href="vlogs.html" class="nav-link">Vlogs</a>
-        <a href="blog.html" class="nav-link">Blog</a>
-        <a href="about.html" class="nav-link">About</a>
-        <a href="contact.html" class="nav-link">Contact</a>
-      </nav>
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <a href="cart.html" style="position: relative; color: #FFD700; font-size: 1.5rem; text-decoration: none;">
-          🛒
-          <span id="cartCount" style="position: absolute; top: -8px; right: -10px; background: #DC2626; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50px; font-weight: 700;">0</span>
-        </a>
-        <a href="https://wa.me/923234086439" class="whatsapp-btn">WhatsApp</a>
-      </div>
-    </div>
-  </header>
-
-  <!-- ===================== HERO SECTION ===================== -->
-  <section class="hero-split">
-    
-    <!-- LEFT: Content (30%) -->
-    <div class="hero-content-half">
-      <div class="hero-content-inner">
-        <div class="logo-coin-container hero-logo-coin">
-          <div class="logo-coin">
-            <div class="logo-coin-face"><span>فیض<br>حسینی</span></div>
-            <div class="logo-coin-face back"><span>فیض<br>حسینی</span></div>
-          </div>
-        </div>
-        <h1 class="hero-title">AKBAR JEWELLERS</h1>
-        <p style="color: #FFD700; font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; font-size: 1.1rem; margin: 10px 0;">فیض حسینی</p>
-        <p class="hero-subtitle">Diamond aur Kundan Antique Jewellery ke Expert</p>
-        <div class="hero-buttons">
-          <a href="collections.html" class="btn-gold">Shop Now</a>
-          <a href="https://wa.me/923234086439" class="btn-outline">WhatsApp Us</a>
-        </div>
-      </div>
-    </div>
-    
-    <!-- RIGHT: Video (70%) -->
-    <a href="collections.html" class="hero-video-half">
-      <video 
-        id="heroVideo"
-        autoplay 
-        muted 
-        loop 
-        playsinline 
-        webkit-playsinline
-        preload="auto"
-        disablepictureinpicture
-        controlslist="nodownload"
-        class="hero-video-element">
-        <source src="videos/akbar-jewellers-model.mp4" type="video/mp4">
-      </video>
-      <div class="video-overlay"></div>
-      <div class="watermark">AKBAR JEWELLERS</div>
-    </a>
-    
-  </section>
-
-  <!-- ===================== LIVE RATES ===================== -->
-  <section class="rates-section">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">Live Gold & Silver Rates</h2>
-      <p class="section-subtitle-urdu" dir="rtl">آج کا سونے اور چاندی کا ریٹ</p>
-      
-      <div class="rate-tabs">
-        <!-- YAHAN CHANGE KYA HAI: Gold ke button se gold.html khulega -->
-        <button class="tab-btn active" onclick="window.location.href='gold.html'">
-          <img src="images/gold-logo.jpg" alt="Gold" class="tab-logo" onerror="this.style.display='none'">
-          Gold
-        </button>
-        <!-- YAHAN CHANGE KYA HAI: Silver ke button se silver.html khulega -->
-        <button class="tab-btn" onclick="window.location.href='silver.html'">
-          <img src="images/silver-logo.jpg" alt="Silver" class="tab-logo" onerror="this.style.display='none'">
-          Silver
-        </button>
-        <button class="tab-btn" onclick="switchRateTab('biscuits', this)">
-          <img src="images/gold-buiscuit-logo.jpg" alt="Biscuits" class="tab-logo" onerror="this.style.display='none'">
-          Biscuits
-        </button>
-        <a href="https://watch-deals-ruddy.vercel.app/" target="_blank" class="tab-btn" style="background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; font-weight: 700; display: flex; align-items: center; gap: 5px;">
-          ⌚ How Best Watches
-        </a>
-        <a href="https://scicalcpro.vercel.app/gold-silver-calculator.html" target="_blank" class="tab-btn calculator-tab">
-          <span class="tab-calc-icon">🧮</span>
-          Gold & Silver Calculator
-        </a>
-      </div>
-
-      <!-- GOLD TAB -->
-      <div id="goldRatesTab" class="rates-content">
-        <div class="rates-with-graph">
-          <div class="rates-carousel-side">
-            <div id="goldRatesContainer" class="rates-grid"></div>
-          </div>
-          <div class="rates-graph-side">
-            <div class="graph-header">
-              <h3 class="graph-title">📈 Gold Rate Chart</h3>
-              <p class="graph-subtitle">Last 30 Days Trend (Lahore)</p>
-            </div>
-            <div class="graph-wrapper">
-              <canvas id="goldRateChart"></canvas>
-            </div>
-            <div class="graph-stats">
-              <div class="stat-item">
-                <span class="stat-label">Today Close</span>
-                <span class="stat-value" id="graphToday">—</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Today High</span>
-                <span class="stat-value" id="todayHigh">—</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Today Low</span>
-                <span class="stat-value" id="todayLow">—</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">Change</span>
-                <span class="stat-value" id="graphChange">—</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">30D High</span>
-                <span class="stat-value" id="graphHigh">—</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-label">30D Low</span>
-                <span class="stat-value" id="graphLow">—</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SILVER TAB (YE HIDDEN RAHEGA KYUNKI BUTTON SE PAGE CHANGE HO RAHA HAI) -->
-      <div id="silverRatesTab" class="rates-content hidden">
-        <div class="rates-with-graph">
-          <div class="rates-carousel-side">
-            <div id="silverRatesContainer" class="rates-grid-silver"></div>
-          </div>
-          <div class="rates-graph-side">
-            <div class="graph-header">
-              <h3 class="graph-title">📈 Silver Rate Chart</h3>
-              <p class="graph-subtitle">Last 30 Days Trend (Lahore)</p>
-            </div>
-            <div class="graph-wrapper">
-              <canvas id="silverRateChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- BISCUITS TAB -->
-      <div id="biscuitsTab" class="rates-content hidden">
-        <div class="biscuits-grid">
-          <div class="biscuit-card">
-            <div class="biscuit-logo-wrap">
-              <img src="images/gold-buiscuit-logo.jpg" alt="Gold Biscuit" onerror="this.src='images/placeholder.svg'">
-            </div>
-            <h3>Gold Biscuit</h3>
-            <p class="biscuit-subtitle">24K Pure Gold • Live Rate</p>
-            <div class="biscuit-units" id="goldBiscuitUnits">
-              <div class="loading-units">Loading rates...</div>
-            </div>
-          </div>
-
-          <div class="biscuit-card pathoor-biscuit-card">
-            <div class="biscuit-logo-wrap pathoor-logo-wrap">
-              <img src="images/pathoor-logo.jpg" alt="Pathoor Gold" onerror="this.src='images/placeholder.svg'">
-            </div>
-            <h3>24K Pathoor Gold</h3>
-            <p class="biscuit-subtitle">Local Market Rate • Live</p>
-            <div class="biscuit-units" id="pathoorBiscuitUnits">
-              <div class="loading-units">Loading rates...</div>
-            </div>
-          </div>
-
-          <div class="biscuit-card silver-biscuit-card">
-            <div class="biscuit-logo-wrap silver-logo-wrap">
-              <img src="images/silver-1.jpg" alt="Silver Biscuit" onerror="this.src='images/placeholder.svg'">
-            </div>
-            <h3>Silver Biscuit</h3>
-            <p class="biscuit-subtitle">999 Pure Silver • Live Rate</p>
-            <div class="biscuit-units" id="silverBiscuitUnits">
-              <div class="loading-units">Loading rates...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="usd-rate">
-        <span>💵 1 USD = <strong id="usdRate">276.95</strong> PKR</span>
-        <span class="last-updated">Last Updated: <span id="lastUpdated">Loading...</span></span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== CATEGORIES ===================== -->
-  <section class="categories-section">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">Our Collections</h2>
-      
-      <div class="categories-grid">
-        <a href="gold.html" class="category-card">
-          <div class="category-logo-img">
-            <img src="images/gold-logo.jpg" alt="Gold Jewellery" onerror="this.src='images/placeholder.svg'">
-          </div>
-          <div class="category-name">Gold Jewellery</div>
-        </a>
-
-        <a href="silver.html" class="category-card">
-          <div class="category-logo-img">
-            <img src="images/silver-logo.jpg" alt="Silver Jewellery" onerror="this.src='images/placeholder.svg'">
-          </div>
-          <div class="category-name">Silver Jewellery</div>
-        </a>
-
-        <a href="diamond.html" class="category-card">
-          <div class="category-logo-img">
-            <img src="images/diamond-logo.jpg" alt="Diamond" onerror="this.src='images/placeholder.svg'">
-          </div>
-          <div class="category-name">Diamond & Kundan</div>
-        </a>
-
-        <a href="artificial.html" class="category-card">
-          <div class="category-logo-img">
-            <img src="images/artificial-logo.jpg" alt="Artificial" onerror="this.src='images/placeholder.svg'">
-          </div>
-          <div class="category-name">Artificial</div>
-        </a>
-
-        <a href="javascript:void(0)" onclick="scrollToRatesAndTab('biscuits')" class="category-card">
-          <div class="category-logo-img">
-            <img src="images/gold-buiscuit-logo.jpg" alt="Gold & Silver Biscuits" onerror="this.src='images/placeholder.svg'">
-          </div>
-          <div class="category-name">Gold & Silver Biscuits</div>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== FEATURED PRODUCTS ===================== -->
-  <section class="products-section">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">Featured Products</h2>
-      <p class="section-subtitle-urdu" dir="rtl">ہماری منتخب مصنوعات</p>
-      
-      <div id="productsGrid" class="products-grid">
-        <div class="loading-spinner">Loading products...</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== VLOGS ===================== -->
-  <section class="vlogs-home-section">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">Watch Our Vlogs</h2>
-      <p class="section-subtitle-urdu" dir="rtl">ہماری ویڈیوز دیکھیں</p>
-      
-      <div id="homeVlogsGrid" class="vlogs-home-grid">
-        <div class="loading-vlogs">Loading vlogs...</div>
-      </div>
-      
-      <div style="text-align: center; margin-top: 30px;">
-        <a href="vlogs.html" class="btn-gold">🎬 View All Vlogs</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== BLOG ===================== -->
-  <section class="blog-section">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">Latest from Our Blog</h2>
-      <p class="section-subtitle-urdu" dir="rtl">ہمارے بلاگ سے تازہ ترین</p>
-      
-      <div id="homeBlogGrid" class="blog-grid">
-        <div class="loading-blogs">Loading blogs...</div>
-      </div>
-      
-      <div style="text-align: center; margin-top: 30px;">
-        <a href="blog.html" class="btn-gold">📚 View All Blog Posts</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===================== PRODUCT MODAL ===================== -->
-  <div id="productModal" class="modal-overlay">
-    <div class="modal-content product-modal">
-      <button class="modal-close" onclick="closeProductModal()">×</button>
-      
-      <div class="modal-grid">
-        <div class="modal-left">
-          <img id="modalImage" src="" alt="Product" class="modal-image">
-        </div>
-        
-        <div class="modal-right">
-          <h2 class="modal-title">AKBAR JEWELLERS</h2>
-          <h3 id="modalProductName" class="product-name"></h3>
-          <p id="modalProductCode" class="product-code"></p>
-          <p id="modalDescription" class="product-description"></p>
-          
-          <div id="productDetailsBox" class="product-details-box"></div>
-          <div id="autoPriceDisplay"></div>
-          
-          <button id="customWeightBtn" class="btn-custom-weight" onclick="toggleCustomWeight()" style="display:none;">
-            ⚖️ Apni Marzi ka Wazan Banwain
-          </button>
-          
-          <div id="customWeightBox" style="display: none;">
-            <div class="custom-weight-notice">
-              <div class="notice-icon">⚖️</div>
-              <div>
-                <strong>Custom Weight Order</strong>
-                <p>Apni pasand ka weight daalein. Custom jewellery banwaen.</p>
-              </div>
-            </div>
-            
-            <div id="karatSection" class="form-group">
-              <label class="form-label urdu" dir="rtl">آپ کس کیرٹ میں بنوانا چاہتے ہیں؟</label>
-              <div class="karat-options">
-                <label class="karat-option"><input type="radio" name="karat" value="24K" checked> 24K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="22K"> 22K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="21K"> 21K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="18K"> 18K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="16K"> 16K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="14K"> 14K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="12K"> 12K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="10K"> 10K</label>
-                <label class="karat-option"><input type="radio" name="karat" value="8K"> 8K</label>
-              </div>
-            </div>
-            
-            <div id="colorSection" class="form-group" style="display: none;">
-              <label class="form-label urdu" dir="rtl">رنگ منتخب کریں</label>
-              <select id="modalColor" class="form-input">
-                <option value="Golden">Golden</option>
-                <option value="Silver">Silver</option>
-                <option value="Rose Gold">Rose Gold</option>
-                <option value="Multi">Multi</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label urdu" dir="rtl">آپ کا سائز</label>
-              <select id="modalSize" class="form-input">
-                <option value="">Select Size</option>
-              </select>
-            </div>
-            
-            <div id="weightSection" class="form-group">
-              <label class="form-label urdu" dir="rtl">آپ کا مطلوبہ وزن</label>
-              <div class="weight-input-group">
-                <input type="number" id="modalWeight" class="form-input" placeholder="Enter weight" step="0.1" min="0.1">
-                <select id="modalUnit" class="form-input unit-select">
-                  <option value="gram">Gram</option>
-                  <option value="tola">Tola</option>
-                  <option value="masha">Masha</option>
-                  <option value="ratti">Ratti</option>
-                </select>
-              </div>
-            </div>
-            
-            <button onclick="calculatePrice()" class="btn-calculate" id="calculateBtn">Calculate Price</button>
-            
-            <div id="priceBreakdown" class="price-breakdown hidden">
-              <div class="price-row"><span>Rate/gram</span><span id="pRate">Rs 0</span></div>
-              <div class="price-row"><span>Weight</span><span id="pWeight">0 g</span></div>
-              <div class="price-row"><span>Metal Value</span><span id="pGold">Rs 0</span></div>
-              <div class="price-row" id="pMakingRow"><span>Making (15%)</span><span id="pMaking">Rs 0</span></div>
-              <div class="price-row" id="pPolishRow"><span>Polish (10%)</span><span id="pPolish">Rs 0</span></div>
-              <div class="price-row" id="pGSTRow"><span>GST (3%)</span><span id="pGST">Rs 0</span></div>
-              <div class="price-row total-row"><span>TOTAL</span><span id="pTotal">Rs 0</span></div>
-            </div>
-            
-            <div class="modal-buttons" id="modalButtons" style="display:none;">
-              <button onclick="addToCart()" class="btn-gold">Add to Cart</button>
-              <button onclick="whatsappOrder()" class="btn-whatsapp">WhatsApp Order</button>
-            </div>
-          </div>
-          
-          <div id="readymadeButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-            <button onclick="buyReadymade()" class="btn-gold">🛒 Add to Cart</button>
-            <button onclick="whatsappReadymade()" class="btn-whatsapp">📱 WhatsApp</button>
-          </div>
-          
-          <p class="urdu-tagline urdu" dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================== FOOTER ===================== -->
-  <footer class="site-footer footer-premium">
-    <div class="container mx-auto px-4 py-12">
-      <div class="footer-grid">
-        <div>
-          <h3 class="footer-brand">AKBAR JEWELLERS</h3>
-          <p style="font-family: 'Noto Nastaliq Urdu', serif; direction: rtl; color: #FFD700; margin: 5px 0;">فیض حسینی</p>
-          <p style="font-style: italic; color: #FFD700; font-size: 0.85rem; margin-bottom: 10px;">Diamond aur Kundan Antique Jewellery ke Expert</p>
-          <p>New Canal Park, Ali Plaza Tajbagh, Lahore</p>
-          <p>📞 0323 4086439</p>
-          <p>✉️ akbarjewellersfaizehussaini@gmail.com</p>
-          
-          <div class="social-icons" id="footerSocialIcons"></div>
-        </div>
-        <div>
-          <h4>Quick Links</h4>
-          <a href="about.html">About Us</a>
-          <a href="contact.html">Contact</a>
-          <a href="vlogs.html">Vlogs</a>
-          <a href="blog.html">Blog</a>
-          <a href="disclaimer.html">Disclaimer</a>
-        </div>
-        <div>
-          <h4>Follow Us</h4>
-          <a href="https://www.youtube.com/@AkbarJewellersFaizeHussaini" target="_blank">YouTube</a>
-          <a href="https://wa.me/923234086439">WhatsApp</a>
-        </div>
-      </div>
-      
-      <div class="footer-taglines-premium">
-        <p class="footer-tagline-item urdu" dir="rtl">آپ کا آرڈر مکمل رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
-        <p class="footer-tagline-item urdu" dir="rtl">ڈائمنڈ اور کندن انٹیک جیولری کے ماہر</p>
-        <p class="footer-tagline-item urdu" dir="rtl">ہر قدم مکمل شفافیت اور دیانت داری کے ساتھ</p>
-      </div>
-      
-      <div class="footer-bottom">
-        <p>© 2026 AKBAR JEWELLERS. All Rights Reserved.</p>
-        <div class="creator-credit" style="text-align: center; font-size: 0.75rem; color: #B8B8B8; letter-spacing: 0.5px; margin-top: 10px;">
-          Designed by <span style="color: #FFD700; font-weight: 600;">Bilal Marghoob Creations</span> 
-          <span style="color: #666;">|</span> 
-          <a href="tel:00923266501314" style="color: #FFD700; text-decoration: none;">0092 326 6501314</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- FLOATING WHATSAPP -->
-  <a href="https://wa.me/923234086439" class="floating-whatsapp">
-    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-  </a>
-
-  <!-- ===================== SCRIPTS ===================== -->
-  <script>
-    function scrollToRatesAndTab(tab) {
-      document.querySelector('.rates-section').scrollIntoView({ behavior: 'smooth' });
-      setTimeout(() => {
-        const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => 
-          b.getAttribute('onclick') && b.getAttribute('onclick').includes(`'${tab}'`)
-        );
-        switchRateTab(tab, btn);
-      }, 500);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      const video = document.getElementById('heroVideo');
-      if (video) {
-        video.muted = true;
-        video.play().catch(function(err) {
-          console.log('Autoplay attempt failed:', err);
-          const playVideo = () => {
-            video.play().then(() => {
-              document.removeEventListener('click', playVideo);
-              document.removeEventListener('touchstart', playVideo);
-            });
-          };
-          document.addEventListener('click', playVideo);
-          document.addEventListener('touchstart', playVideo);
-          setTimeout(() => video.play().catch(e => console.log('Retry failed:', e)), 1000);
-        });
-      }
+async function loadProducts() {
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&featured=eq.true&is_active=eq.true&order=created_at.desc&limit=12`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
     });
-  </script>
+    const products = await res.json();
+    
+    if (!products || products.length === 0) {
+      grid.innerHTML = '<div class="loading-spinner">No featured products yet</div>';
+      return;
+    }
 
-  <script src="js/supabase.js"></script>
-  <!-- MAIN.JS PEHLE LOAD HOGA -->
-  <script src="js/main.js"></script>
-
-  <!-- BAAD MEIN VLOGS AUR BLOGS LOAD KARNE WALI SCRIPTS -->
-  <script>
-    async function loadHomeVlogs() {
-      const grid = document.getElementById('homeVlogsGrid');
-      if (!grid) return;
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/vlogs?select=*&is_active=eq.true&order=display_order.asc,created_at.desc&limit=3`,
-          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-        );
-        const vlogs = await res.json();
-        if (!vlogs || vlogs.length === 0) {
-          grid.innerHTML = `<div class="empty-vlogs-home" style="grid-column:1/-1;"><div style="font-size:3rem;margin-bottom:12px;">📹</div><p style="color:#B8B8B8;">No vlogs yet. Check back soon!</p></div>`;
-          return;
-        }
-        grid.innerHTML = vlogs.map(v => {
-          const date = new Date(v.created_at);
-          const formattedDate = date.toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
-          const categoryMap = { 'showcase': 'Showcase', 'bridal': 'Bridal', 'diamond': 'Diamond', 'kundan': 'Kundan', 'antique': 'Antique', 'gold': 'Gold', 'silver': 'Silver', 'artificial': 'Artificial', 'shop-tour': 'Shop Tour', 'behind-scenes': 'Behind Scenes', 'other': 'Video' };
-          const categoryLabel = categoryMap[v.category] || 'Video';
-          return `
-            <div class="vlog-home-card">
-              <div class="vlog-home-video-wrapper">
-                <iframe src="https://www.youtube.com/embed/${v.youtube_id}?rel=0&modestbranding=1" title="${v.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-              </div>
-              <div class="vlog-home-info">
-                <span class="vlog-home-category">${categoryLabel}</span>
-                <h3>${v.title}</h3>
-                <p>${v.description || ''}</p>
-                <div class="vlog-home-date"><span>📅</span><span>${formattedDate}</span></div>
+    grid.innerHTML = products.map(p => {
+      const { originalPrice, discountedPrice, discountPct } = getProductPrices(p);
+      const imgUrl = getProductImage(p);
+      return `
+        <div class="product-card" onclick='openProductModal(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+          <div class="product-image-wrapper">
+            <img src="${imgUrl}" alt="${p.name}" loading="lazy" onerror="this.src='images/placeholder.svg'">
+            ${discountPct > 0 ? `<div class="discount-ball"><span class="discount-percent">${discountPct}%</span><span class="discount-text">OFF</span></div>` : ''}
+          </div>
+          <div class="product-info">
+            <span class="category-tag">${p.category}</span>
+            <h3>${p.name}</h3>
+            <div class="price-display-block">
+              ${discountPct > 0 ? `<div class="original-price-line"><span class="original-price-text">Rs ${originalPrice.toLocaleString()}</span><span class="cut-line"></span></div>` : ''}
+              <div class="final-price-highlight">
+                <span class="final-price-value">Rs ${discountedPrice.toLocaleString()}</span>
+                ${discountPct > 0 ? `<span class="inline-discount-tag">${discountPct}% OFF</span>` : ''}
               </div>
             </div>
-          `;
-        }).join('');
-      } catch (error) {
-        console.error('Error loading vlogs:', error);
-        grid.innerHTML = '<div class="loading-vlogs">Error loading vlogs</div>';
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (error) {
+    console.error('Product load error:', error);
+    grid.innerHTML = '<div class="loading-spinner">Error loading products</div>';
+  }
+}
+
+function openProductModal(product) {
+  currentProduct = product;
+  document.getElementById('modalImage').src = getProductImage(product);
+  document.getElementById('modalProductName').textContent = product.name;
+  document.getElementById('modalProductCode').textContent = `Code: AKBAR-${(product.id || '').slice(0, 6).toUpperCase()}`;
+  document.getElementById('modalDescription').textContent = product.description || '';
+
+  const isArtificial = product.category === 'artificial';
+  const isDiamond = product.category === 'diamond';
+  const isGold = product.category === 'gold';
+  const isSilver = product.category === 'silver';
+  const { originalPrice, discountedPrice, discountPct } = getProductPrices(product);
+  const detailsBox = document.getElementById('productDetailsBox');
+  const soldQty = product.sold_qty || Math.floor(Math.random() * 50) + 10;
+
+  if (detailsBox) {
+    detailsBox.innerHTML = `
+      <div class="product-details-grid">
+        ${product.weight ? `<div class="detail-box"><div class="detail-box-label">Weight</div><div class="detail-box-value">${product.weight}g</div></div>` : ''}
+        ${product.karat ? `<div class="detail-box"><div class="detail-box-label">Quality</div><div class="detail-box-value">${product.karat}</div></div>` : ''}
+        ${product.color ? `<div class="detail-box"><div class="detail-box-label">Color</div><div class="detail-box-value">${product.color}</div></div>` : ''}
+        ${product.size ? `<div class="detail-box"><div class="detail-box-label">Size</div><div class="detail-box-value">${product.size}</div></div>` : ''}
+        <div class="detail-box"><div class="detail-box-label">Sold</div><div class="detail-box-value">${soldQty}</div></div>
+      </div>
+      <div class="popup-price-display">
+        ${discountPct > 0 ? `<div class="popup-original-price"><span class="popup-original-text">Rs ${originalPrice.toLocaleString()}</span><span class="popup-cut-line"></span></div>` : ''}
+        <div class="popup-final-price">
+          <span class="popup-price-label">${discountPct > 0 ? '🎉 Discounted Price' : '💰 Price'}</span>
+          <span class="popup-final-value">Rs ${discountedPrice.toLocaleString()}</span>
+          ${discountPct > 0 ? `<span class="popup-discount-tag">Save ${discountPct}%</span>` : ''}
+        </div>
+      </div>
+    `;
+    detailsBox.style.display = 'block';
+  }
+
+  const autoPrice = document.getElementById('autoPriceDisplay');
+  if (autoPrice) { autoPrice.innerHTML = ''; autoPrice.style.display = 'none'; }
+
+  const sizeSelect = document.getElementById('modalSize');
+  if (sizeSelect) {
+    const options = getSizeOptions(product.category, product.subcategory);
+    sizeSelect.innerHTML = '<option value="">Select Size</option>' + options;
+    if (product.size) {
+      const option = Array.from(sizeSelect.options).find(o => o.value === product.size);
+      if (option) sizeSelect.value = product.size;
+    }
+  }
+
+  const karatSection = document.getElementById('karatSection');
+  if (karatSection) {
+    if (isArtificial || isDiamond) karatSection.style.display = 'none';
+    else {
+      karatSection.style.display = 'block';
+      if (product.karat) {
+        const radio = document.querySelector(`input[name="karat"][value="${product.karat}"]`);
+        if (radio) radio.checked = true;
       }
     }
-    document.addEventListener('DOMContentLoaded', loadHomeVlogs);
-  </script>
+  }
 
-  <script>
-    async function loadHomeBlogs() {
-      const grid = document.getElementById('homeBlogGrid');
-      if (!grid) return;
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/blogs?select=*&is_published=eq.true&order=created_at.desc&limit=3`,
-          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-        );
-        const blogs = await res.json();
-        if (!blogs || blogs.length === 0) {
-          grid.innerHTML = '<div class="loading-blogs">No blogs yet</div>';
-          return;
+  const colorSection = document.getElementById('colorSection');
+  if (colorSection) {
+    colorSection.style.display = isArtificial ? 'block' : 'none';
+    if (product.color && isArtificial && document.getElementById('modalColor')) {
+      document.getElementById('modalColor').value = product.color;
+    }
+  }
+
+  const customWeightBtn = document.getElementById('customWeightBtn');
+  const customWeightBox = document.getElementById('customWeightBox');
+  const priceBreakdown = document.getElementById('priceBreakdown');
+
+  if (customWeightBtn) {
+    if (isGold || isSilver) {
+      customWeightBtn.style.display = 'block';
+      if (customWeightBox) customWeightBox.style.display = 'none';
+      customWeightBtn.innerHTML = '⚖️ Apni Marzi ka Wazan Banwain';
+    } else {
+      customWeightBtn.style.display = 'none';
+    }
+  }
+
+  const weightSection = document.getElementById('weightSection');
+  if (weightSection) weightSection.style.display = 'none';
+  if (priceBreakdown) priceBreakdown.classList.add('hidden');
+
+  const readymadeButtons = document.getElementById('readymadeButtons');
+  if (readymadeButtons) readymadeButtons.style.display = 'grid';
+
+  document.getElementById('productModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProductModal() {
+  document.getElementById('productModal').classList.remove('active');
+  document.body.style.overflow = '';
+  currentProduct = null;
+}
+
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('productModal');
+  if (e.target === modal) closeProductModal();
+});
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeProductModal(); });
+
+function getSizeOptions(category, subcategory) {
+  const sub = (subcategory || '').toLowerCase();
+  if (sub.includes('ring') || sub.includes('baby ring')) {
+    if (sub.includes('baby')) return ['1','2','3','4','5','6','7','8','9'].map(s => `<option value="${s}">${s}</option>`).join('');
+    return ['10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25'].map(s => `<option value="${s}">${s}</option>`).join('');
+  }
+  if (sub.includes('bangle') || sub.includes('kara') || sub.includes('choori')) return ['2.2','2.4','2.6','2.8','2.10','2.12'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('bracelet')) return ['6"','6.5"','7"','7.5"','8"','8.5"'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('chain')) return ['14"','16"','18"','20"','22"','24"','26"','30"'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('anklet') || sub.includes('payal')) return ['9"','10"','11"','12"'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('necklace') || sub.includes('haar') || sub.includes('choker')) return ['14"','16"','18"','20"','22"','24"'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('earring') || sub.includes('jhumka')) return `<option value="Stud">Stud</option><option value="Drop">Drop</option><option value="Jhumka">Jhumka</option><option value="Chandbali">Chandbali</option><option value="Hoop">Hoop</option>`;
+  if (sub.includes('pendant')) return ['16"','18"','20"','22"'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('coin')) return ['1g','2g','2.5g','5g','10g','20g','50g','100g'].map(s => `<option value="${s}">${s}</option>`).join('');
+  if (sub.includes('bridal')) return `<option value="Standard">Standard</option>`;
+  return ['Small','Medium','Large','Standard'].map(s => `<option value="${s}">${s}</option>`).join('');
+}
+
+function toggleCustomWeight() {
+  const customWeightBox = document.getElementById('customWeightBox');
+  const customWeightBtn = document.getElementById('customWeightBtn');
+  const weightSection = document.getElementById('weightSection');
+  const calculateBtn = document.getElementById('calculateBtn');
+  const modalButtons = document.getElementById('modalButtons');
+  const priceBreakdown = document.getElementById('priceBreakdown');
+  const readymadeButtons = document.getElementById('readymadeButtons');
+
+  if (customWeightBox.style.display === 'none' || !customWeightBox.style.display) {
+    customWeightBox.style.display = 'block';
+    weightSection.style.display = 'block';
+    if (calculateBtn) calculateBtn.style.display = 'block';
+    if (modalButtons) modalButtons.style.display = 'grid';
+    if (readymadeButtons) readymadeButtons.style.display = 'none';
+    customWeightBtn.innerHTML = '❌ Close Custom Weight';
+    if (priceBreakdown) priceBreakdown.classList.add('hidden');
+  } else {
+    customWeightBox.style.display = 'none';
+    weightSection.style.display = 'none';
+    if (calculateBtn) calculateBtn.style.display = 'none';
+    if (modalButtons) modalButtons.style.display = 'none';
+    if (readymadeButtons) readymadeButtons.style.display = 'grid';
+    customWeightBtn.innerHTML = '⚖️ Apni Marzi ka Wazan Banwain';
+    if (priceBreakdown) priceBreakdown.classList.add('hidden');
+  }
+}
+
+function calculatePrice() {
+  if (!currentProduct) return;
+  const weight = parseFloat(document.getElementById('modalWeight').value);
+  const unit = document.getElementById('modalUnit').value;
+  if (!weight || weight <= 0) { alert('Please enter a valid weight'); return; }
+  const weightInGrams = toGrams(weight, unit);
+
+  let karat = '24K';
+  const karatInput = document.querySelector('input[name="karat"]:checked');
+  if (karatInput) karat = karatInput.value;
+
+  let ratePerGram;
+  if (currentProduct.category === 'silver') ratePerGram = (LIVE_RATES.silver.perGram || 570.10);
+  else ratePerGram = getRateForKarat(karat);
+
+  const metalValue = ratePerGram * weightInGrams;
+  const making = metalValue * 0.15;
+  const polish = metalValue * 0.10;
+  const subtotal = metalValue + making + polish;
+  const gst = subtotal * 0.03;
+  const total = subtotal + gst;
+
+  document.getElementById('pRate').textContent = formatPKR(ratePerGram) + '/g';
+  document.getElementById('pWeight').textContent = weightInGrams.toFixed(3) + ' g';
+  document.getElementById('pGold').textContent = formatPKR(metalValue);
+  document.getElementById('pMaking').textContent = formatPKR(making);
+  document.getElementById('pPolish').textContent = formatPKR(polish);
+  document.getElementById('pGST').textContent = formatPKR(gst);
+  document.getElementById('pTotal').textContent = formatPKR(total);
+  document.getElementById('priceBreakdown').classList.remove('hidden');
+}
+
+function addToCart() {
+  if (!currentProduct) return;
+  if (document.getElementById('priceBreakdown').classList.contains('hidden')) {
+    alert('Please calculate price first'); return;
+  }
+  const cartItem = {
+    id: currentProduct.id,
+    name: currentProduct.name,
+    karat: document.querySelector('input[name="karat"]:checked')?.value || currentProduct.karat || 'N/A',
+    weight: parseFloat(document.getElementById('modalWeight').value),
+    unit: document.getElementById('modalUnit').value,
+    size: document.getElementById('modalSize')?.value || 'Standard',
+    color: '',
+    total: document.getElementById('pTotal').textContent,
+    image: getProductImage(currentProduct),
+    category: currentProduct.category
+  };
+  cart.push(cartItem);
+  localStorage.setItem('akbar_cart', JSON.stringify(cart));
+  updateCartCount();
+  alert('✅ Added to cart!\n\nItems in cart: ' + cart.length);
+  closeProductModal();
+}
+
+function whatsappOrder() {
+  if (!currentProduct) return;
+  const isCustomWeight = document.getElementById('customWeightBox')?.style.display === 'block';
+  let total, weight;
+  if (isCustomWeight) {
+    total = document.getElementById('pTotal').textContent;
+    weight = document.getElementById('modalWeight').value + ' ' + document.getElementById('modalUnit').value;
+  } else {
+    const { discountedPrice } = getProductPrices(currentProduct);
+    total = 'Rs ' + discountedPrice.toLocaleString();
+    weight = currentProduct.weight + ' grams';
+  }
+  const size = document.getElementById('modalSize')?.value || 'Standard';
+  const karat = document.querySelector('input[name="karat"]:checked')?.value || currentProduct.karat || 'N/A';
+  let message = `Assalam o Alaikum,%0A%0AMujhe yeh product order karni hai:%0A%0A`;
+  message += `📿 Product: ${currentProduct.name}%0A`;
+  message += `🔸 Karat: ${karat}%0A`;
+  message += `⚖️ Weight: ${weight}%0A`;
+  if (size) message += `📏 Size: ${size}%0A`;
+  message += `💰 Total: ${total}%0A%0APlease confirm karein.%0A%0AAKBAR JEWELLERS`;
+  window.open(`https://wa.me/923234086439?text=${message}`, '_blank');
+}
+
+function buyReadymade() {
+  if (!currentProduct) return;
+  const { discountedPrice } = getProductPrices(currentProduct);
+  const cartItem = {
+    id: currentProduct.id,
+    name: currentProduct.name,
+    karat: currentProduct.karat || 'N/A',
+    weight: currentProduct.weight || 0,
+    unit: 'gram',
+    size: currentProduct.size || 'Standard',
+    color: currentProduct.color || '',
+    total: 'Rs ' + discountedPrice.toLocaleString(),
+    image: getProductImage(currentProduct),
+    category: currentProduct.category
+  };
+  cart.push(cartItem);
+  localStorage.setItem('akbar_cart', JSON.stringify(cart));
+  updateCartCount();
+  alert('✅ Added to cart!\n\n' + currentProduct.name + '\nPrice: Rs ' + discountedPrice.toLocaleString());
+  closeProductModal();
+}
+
+function whatsappReadymade() {
+  if (!currentProduct) return;
+  const { discountedPrice } = getProductPrices(currentProduct);
+  let message = `Assalam o Alaikum,%0A%0AMujhe yeh product order karni hai:%0A%0A`;
+  message += `📿 Product: ${currentProduct.name}%0A`;
+  if (currentProduct.karat) message += `🔸 Karat: ${currentProduct.karat}%0A`;
+  if (currentProduct.weight) message += `⚖️ Weight: ${currentProduct.weight}g%0A`;
+  if (currentProduct.size) message += `📏 Size: ${currentProduct.size}%0A`;
+  message += `💰 Price: Rs ${discountedPrice.toLocaleString()}%0A%0APlease confirm karein.%0A%0AAKBAR JEWELLERS`;
+  window.open(`https://wa.me/923234086439?text=${message}`, '_blank');
+}
+
+// =====================================================
+// BISCUITS SYSTEM
+// =====================================================
+
+const BISCUIT_UNITS = {
+  gold: [
+    { label: '1 Gram', grams: 1 }, { label: '5 Gram', grams: 5 }, { label: '10 Gram', grams: 10 },
+    { label: '1 Tola', grams: 11.664 }, { label: '5 Tola', grams: 58.32 }, { label: '10 Tola', grams: 116.64 }
+  ],
+  pathoor: [
+    { label: '1 Gram', grams: 1 }, { label: '5 Gram', grams: 5 }, { label: '10 Gram', grams: 10 },
+    { label: '1 Tola', grams: 11.664 }, { label: '5 Tola', grams: 58.32 }, { label: '10 Tola', grams: 116.64 }
+  ],
+  silver: [
+    { label: '1 Tola', grams: 11.664 }, { label: '5 Tola', grams: 58.32 }, { label: '10 Tola', grams: 116.64 },
+    { label: '50 Tola', grams: 583.20 }, { label: '100 Tola', grams: 1166.40 }
+  ]
+};
+
+function renderBiscuitUnits() {
+  const goldContainer = document.getElementById('goldBiscuitUnits');
+  if (goldContainer) {
+    const goldRatePerGram = (LIVE_RATES.gold['24K'] || 0) / WEIGHT.tola;
+    goldContainer.innerHTML = BISCUIT_UNITS.gold.map(unit => {
+      const metalValue = Math.round(goldRatePerGram * unit.grams);
+      return `<button class="unit-btn gold-unit" onclick="openBiscuitPopup('gold', '${unit.label}', ${unit.grams}, ${metalValue}, '24K Gold')"><span class="unit-label">${unit.label}</span><span class="unit-price">Rs ${metalValue.toLocaleString()}</span></button>`;
+    }).join('');
+  }
+  const pathoorContainer = document.getElementById('pathoorBiscuitUnits');
+  if (pathoorContainer) {
+    const pathoorRate = LIVE_RATES.gold['Pathoor'] || (LIVE_RATES.gold['24K'] - 5500);
+    const pathoorRatePerGram = pathoorRate / WEIGHT.tola;
+    pathoorContainer.innerHTML = BISCUIT_UNITS.pathoor.map(unit => {
+      const metalValue = Math.round(pathoorRatePerGram * unit.grams);
+      return `<button class="unit-btn pathoor-unit" onclick="openBiscuitPopup('pathoor', '${unit.label}', ${unit.grams}, ${metalValue}, '24K Pathoor Gold')"><span class="unit-label">${unit.label}</span><span class="unit-price">Rs ${metalValue.toLocaleString()}</span></button>`;
+    }).join('');
+  }
+  const silverContainer = document.getElementById('silverBiscuitUnits');
+  if (silverContainer) {
+    const silverPerGram = LIVE_RATES.silver.perGram || 570.10;
+    silverContainer.innerHTML = BISCUIT_UNITS.silver.map(unit => {
+      const metalValue = Math.round(silverPerGram * unit.grams);
+      return `<button class="unit-btn silver-unit" onclick="openBiscuitPopup('silver', '${unit.label}', ${unit.grams}, ${metalValue}, 'Silver')"><span class="unit-label">${unit.label}</span><span class="unit-price">Rs ${metalValue.toLocaleString()}</span></button>`;
+    }).join('');
+  }
+}
+
+function openBiscuitPopup(metalType, unitLabel, grams, metalValue, metalName) {
+  const serviceCharges = Math.round(metalValue * 0.01);
+  const subtotal = metalValue + serviceCharges;
+  const gst = Math.round(subtotal * 0.03);
+  const total = subtotal + gst;
+
+  let popup = document.getElementById('biscuitPopup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'biscuitPopup';
+    popup.className = 'modal-overlay';
+    document.body.appendChild(popup);
+  }
+
+  popup.innerHTML = `
+    <div class="modal-content biscuit-modal">
+      <button class="modal-close" onclick="closeBiscuitPopup()">×</button>
+      <h2 class="modal-title">🪙 Purchase Biscuit</h2>
+      <div class="biscuit-popup-body">
+        <div class="biscuit-popup-header">
+          <div class="biscuit-metal-name">${metalName}</div>
+          <div class="biscuit-unit-info">${unitLabel} • ${grams.toFixed(3)} grams</div>
+        </div>
+        <div class="biscuit-breakdown">
+          <div class="breakdown-row"><span>Metal Value</span><span>Rs ${metalValue.toLocaleString()}</span></div>
+          <div class="breakdown-row"><span>Service Charges (1%)</span><span>Rs ${serviceCharges.toLocaleString()}</span></div>
+          <div class="breakdown-row subtotal-row"><span>Subtotal</span><span>Rs ${subtotal.toLocaleString()}</span></div>
+          <div class="breakdown-row"><span>GST (3%)</span><span>Rs ${gst.toLocaleString()}</span></div>
+          <div class="breakdown-row total-row"><span>TOTAL</span><span>Rs ${total.toLocaleString()}</span></div>
+        </div>
+
+        <div class="payment-notice">
+          <div class="notice-icon">💯</div>
+          <div class="notice-text">
+            <strong>100% Advance Payment</strong>
+            <p>Choose your payment method below</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+          <div id="payCard-easypaisa" style="cursor: pointer; text-align: center; padding: 15px 10px; background: rgba(255,215,0,0.1); border: 2px solid #FFD700; border-radius: 12px;" onclick="selectBiscuitPayment('easypaisa')">
+            <img src="images/easypaisa.jpg" alt="Easypaisa" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #25D366;" onerror="this.src='images/placeholder.svg'">
+            <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">Easypaisa</div>
+          </div>
+          <div id="payCard-jazzcash" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px;" onclick="selectBiscuitPayment('jazzcash')">
+            <img src="images/jazzcash.jpg" alt="JazzCash" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #DC2626;" onerror="this.src='images/placeholder.svg'">
+            <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">JazzCash</div>
+          </div>
+          <div id="payCard-bank" style="cursor: pointer; text-align: center; padding: 15px 10px; background: #0A0A0A; border: 2px solid rgba(255,215,0,0.3); border-radius: 12px;" onclick="selectBiscuitPayment('bank')">
+            <img src="images/bank.jpg" alt="Bank Transfer" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin: 0 auto 8px; display: block; border: 2px solid #3B82F6;" onerror="this.src='images/placeholder.svg'">
+            <div style="color: #FFD700; font-weight: 700; font-size: 0.8rem;">Bank Transfer</div>
+          </div>
+        </div>
+
+        <div id="biscuitPaymentDetails" style="background: linear-gradient(135deg, #0F5132, #128C7E); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+          <h4 style="color: #FFF8DC; margin-bottom: 10px; font-size: 1rem;">💚 Pay via Easypaisa</h4>
+          <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 0.75rem; color: #B8B8B8;">Account Number</div>
+              <strong style="color: #FFD700; font-size: 1.1rem;">03234086439</strong>
+            </div>
+            <button type="button" onclick="copyBiscuitNumber()" style="background: #FFD700; color: #0A0A0A; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">📋 Copy</button>
+          </div>
+          <div style="font-size: 0.85rem; color: #FFF8DC;">Account Title: <strong>AKBAR JEWELLERS</strong></div>
+          <div style="font-size: 0.85rem; color: #FFF8DC; margin-top: 4px;">Amount: <strong>Rs ${total.toLocaleString()}</strong></div>
+        </div>
+
+        <div class="customer-form">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="biscuitName" class="form-input" placeholder="Your name"></div>
+            <div class="form-group"><label class="form-label">WhatsApp *</label><input type="tel" id="biscuitPhone" class="form-input" placeholder="03XXXXXXXXX"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Email (Optional)</label><input type="email" id="biscuitEmail" class="form-input" placeholder="your@email.com"></div>
+          <div class="form-group"><label class="form-label">Address *</label><input type="text" id="biscuitAddress" class="form-input" placeholder="Full address"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Transaction ID (TID) *</label>
+          <input type="text" id="biscuitTID" class="form-input" placeholder="Enter transaction ID">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Upload Payment Screenshot *</label>
+          <input type="file" id="biscuitScreenshot" class="form-input" accept="image/*" style="padding: 10px;">
+        </div>
+
+        <button onclick="confirmBiscuitOrder('${metalType}', '${metalName}', '${unitLabel}', ${grams}, ${metalValue}, ${serviceCharges}, ${gst}, ${total})" class="btn-gold" style="width: 100%; padding: 15px; font-size: 1.1rem;">
+          ✅ Confirm Purchase
+        </button>
+        <p class="urdu-tagline urdu" dir="rtl">آپ کا آرڈر رازداری کے ساتھ آپ تک پہنچایا جائے گا</p>
+      </div>
+    </div>
+  `;
+
+  selectedBiscuitPayment = 'easypaisa';
+  selectBiscuitPayment('easypaisa');
+
+  popup.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function selectBiscuitPayment(method) {
+  selectedBiscuitPayment = method;
+
+  const cards = {
+    easypaisa: document.getElementById('payCard-easypaisa'),
+    jazzcash: document.getElementById('payCard-jazzcash'),
+    bank: document.getElementById('payCard-bank')
+  };
+
+  Object.keys(cards).forEach(k => {
+    if (cards[k]) {
+      const isActive = (k === method);
+      cards[k].style.borderColor = isActive ? '#FFD700' : 'rgba(255,215,0,0.3)';
+      cards[k].style.background = isActive ? 'rgba(255,215,0,0.1)' : '#0A0A0A';
+    }
+  });
+
+  const details = document.getElementById('biscuitPaymentDetails');
+  if (!details) return;
+
+  const methods = {
+    easypaisa: { title: '💚 Pay via Easypaisa', bg: 'linear-gradient(135deg, #0F5132, #128C7E)', number: '03234086439', label: 'Account Number' },
+    jazzcash: { title: '🔴 Pay via JazzCash', bg: 'linear-gradient(135deg, #7F1D1D, #DC2626)', number: '03234086439', label: 'Account Number' },
+    bank: { title: '🏦 Bank Transfer', bg: 'linear-gradient(135deg, #1E3A8A, #3B82F6)', number: 'PK00XXXX0000000000000000', label: 'IBAN' }
+  };
+  const m = methods[method];
+  if (!m) return;
+
+  details.style.background = m.bg;
+  details.innerHTML = `
+    <h4 style="color: #FFF8DC; margin-bottom: 10px; font-size: 1rem;">${m.title}</h4>
+    <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 0.75rem; color: #B8B8B8;">${m.label}</div>
+        <strong style="color: #FFD700; font-size: 1.1rem;">${m.number}</strong>
+      </div>
+      <button type="button" onclick="copyBiscuitNumber()" style="background: #FFD700; color: #0A0A0A; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">📋 Copy</button>
+    </div>
+    <div style="font-size: 0.85rem; color: #FFF8DC;">Account Title: <strong>AKBAR JEWELLERS</strong></div>
+  `;
+}
+
+function closeBiscuitPopup() {
+  const popup = document.getElementById('biscuitPopup');
+  if (popup) popup.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function copyBiscuitNumber() {
+  const details = document.getElementById('biscuitPaymentDetails');
+  const numberMatch = details?.innerHTML.match(/<strong[^>]*>([^<]+)<\/strong>/);
+  const number = numberMatch ? numberMatch[1] : '03234086439';
+  navigator.clipboard.writeText(number);
+  alert('✅ Number copied: ' + number);
+}
+
+async function confirmBiscuitOrder(metalType, metalName, unitLabel, grams, metalValue, serviceCharges, gst, total) {
+  const name = document.getElementById('biscuitName').value.trim();
+  const phone = document.getElementById('biscuitPhone').value.trim();
+  const email = document.getElementById('biscuitEmail').value.trim();
+  const address = document.getElementById('biscuitAddress').value.trim();
+  const tid = document.getElementById('biscuitTID').value.trim();
+  const screenshot = document.getElementById('biscuitScreenshot').files[0];
+  const paymentMethod = selectedBiscuitPayment;
+
+  if (!name || !phone || !address || !tid || !screenshot) {
+    alert('❌ Please fill all required fields');
+    return;
+  }
+
+  let screenshotUrl = '';
+  try {
+    screenshotUrl = await uploadToCloudinary(screenshot);
+    console.log('✅ Screenshot uploaded:', screenshotUrl);
+  } catch (err) {
+    alert('❌ Screenshot upload failed: ' + err.message);
+    return;
+  }
+
+  const now = new Date();
+  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const orderNumber = `AKBAR-BIS-${dateStr}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+
+  const orderData = {
+    order_number: orderNumber,
+    customer_name: name,
+    customer_whatsapp: phone,
+    customer_email: email || null,
+    customer_address: address,
+    items: [{
+      name: `${metalName} Biscuit - ${unitLabel}`,
+      weight: grams,
+      unit: 'gram',
+      karat: metalType === 'silver' ? null : '24K',
+      total: `Rs ${total.toLocaleString()}`
+    }],
+    subtotal: metalValue + serviceCharges,
+    gst_amount: gst,
+    total_amount: total,
+    advance_type: 'full',
+    advance_amount: total,
+    remaining_amount: 0,
+    payment_method: paymentMethod,
+    transaction_id: tid,
+    payment_screenshot_url: screenshotUrl,
+    order_status: 'pending',
+    notes: `Biscuit Order - ${metalName} (${unitLabel})`,
+    expected_delivery: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  };
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!res.ok) { const err = await res.text(); throw new Error(err); }
+
+    localStorage.setItem('akbar_last_biscuit_order', JSON.stringify(orderData));
+
+    const ownerMsg = `🔔 *NEW BISCUIT ORDER*%0A%0AOrder #: ${orderNumber}%0ACustomer: ${name}%0AWhatsApp: ${phone}%0AEmail: ${email || 'N/A'}%0A%0A🪙 Item: ${metalName} - ${unitLabel}%0A⚖️ Weight: ${grams.toFixed(3)} grams%0A💰 Total: Rs ${total.toLocaleString()}%0A💳 Payment: ${paymentMethod}%0A📝 TID: ${tid}%0A🖼️ Screenshot: ${screenshotUrl}%0A%0AFull payment received. Please verify and confirm.`;
+    window.open(`https://wa.me/923234086439?text=${ownerMsg}`, '_blank');
+
+    const customerMsg = `Assalam o Alaikum ${name},%0A%0AAap ka biscuit order receive ho gaya!%0A%0A📋 Order #: ${orderNumber}%0A🪙 Item: ${metalName} - ${unitLabel}%0A⚖️ Weight: ${grams.toFixed(3)} grams%0A💰 Total: Rs ${total.toLocaleString()}%0A%0AAap ki payment verify hone ke baad order confirm ho jayega.%0A%0AShukriya!%0AAKBAR JEWELLERS`;
+    setTimeout(() => { window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${customerMsg}`, '_blank'); }, 1000);
+
+    alert(`✅ Order Confirmed!\n\nOrder #: ${orderNumber}\nTotal: Rs ${total.toLocaleString()}\n\nWhatsApp confirmation sent.`);
+    closeBiscuitPopup();
+    window.location.href = 'order-success.html';
+
+  } catch (error) {
+    console.error('Order error:', error);
+    alert('❌ Error: ' + error.message);
+  }
+}
+
+// =====================================================
+// GOLD/SILVER RATE GRAPH
+// =====================================================
+
+let goldChart = null;
+let silverChart = null;
+
+function generateHistoricalData(currentRate, days = 30) {
+  const data = [], highData = [], lowData = [], labels = [];
+  const today = new Date();
+  let rate = currentRate * 0.96;
+  for (let i = days; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const change = (Math.random() - 0.48) * 0.025;
+    rate = rate * (1 + change);
+    if (i < 5) rate = rate + (currentRate - rate) * 0.5;
+    const dayHigh = Math.round(rate * (1 + Math.random() * 0.008));
+    const dayLow = Math.round(rate * (1 - Math.random() * 0.008));
+    const dayClose = Math.round(rate);
+    data.push(dayClose);
+    highData.push(dayHigh);
+    lowData.push(dayLow);
+    labels.push(date.toLocaleDateString('en-PK', { day: '2-digit', month: 'short' }));
+  }
+  data[data.length - 1] = currentRate;
+  highData[highData.length - 1] = currentRate;
+  lowData[lowData.length - 1] = currentRate;
+  return { data, highData, lowData, labels };
+}
+
+function initGoldChart() {
+  const canvas = document.getElementById('goldRateChart');
+  if (!canvas) return;
+  const currentRate = LIVE_RATES.gold['24K'] || 430000;
+  const { data, highData, lowData, labels } = generateHistoricalData(currentRate);
+  const todayClose = data[data.length - 1];
+  const todayHigh = highData[highData.length - 1];
+  const todayLow = lowData[lowData.length - 1];
+  const yesterdayClose = data[data.length - 2];
+  const change = todayClose - yesterdayClose;
+  const changePct = ((change / yesterdayClose) * 100).toFixed(2);
+  const overallHigh = Math.max(...highData);
+  const overallLow = Math.min(...lowData);
+  const setEl = (id, val, color) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = val; if (color) el.style.color = color; }
+  };
+  setEl('graphToday', `Rs ${todayClose.toLocaleString()}`);
+  setEl('graphChange', `${change >= 0 ? '+' : ''}${change.toLocaleString()} (${changePct}%)`, change >= 0 ? '#25D366' : '#DC2626');
+  setEl('graphHigh', `Rs ${overallHigh.toLocaleString()}`);
+  setEl('graphLow', `Rs ${overallLow.toLocaleString()}`);
+  setEl('todayHigh', `Rs ${todayHigh.toLocaleString()}`);
+  setEl('todayLow', `Rs ${todayLow.toLocaleString()}`);
+  if (goldChart) goldChart.destroy();
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+  gradient.addColorStop(0, 'rgba(255, 215, 0, 0.35)');
+  gradient.addColorStop(1, 'rgba(255, 215, 0, 0.0)');
+  goldChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: '24K Gold (Rs/Tola)', data: data, borderColor: '#FFD700', backgroundColor: gradient, borderWidth: 2.5, fill: true, tension: 0.3, pointBackgroundColor: '#FFD700', pointBorderColor: '#0A0A0A', pointBorderWidth: 1.5, pointRadius: 2, pointHoverRadius: 6 },
+        { label: 'Daily High', data: highData, borderColor: 'rgba(37, 211, 102, 0.6)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.3, pointRadius: 0, pointHoverRadius: 4 },
+        { label: 'Daily Low', data: lowData, borderColor: 'rgba(220, 38, 38, 0.6)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.3, pointRadius: 0, pointHoverRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300, easing: 'easeOutQuart' },
+      animations: { x: { duration: 250 }, y: { duration: 250 } },
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: '#FFF8DC', font: { family: 'Poppins', size: 11, weight: '500' }, padding: 12, usePointStyle: true, pointStyle: 'line' } },
+        tooltip: {
+          backgroundColor: 'rgba(10, 10, 10, 0.96)', titleColor: '#FFD700', bodyColor: '#FFF8DC', borderColor: '#FFD700', borderWidth: 1, padding: 12, cornerRadius: 8,
+          titleFont: { family: 'Poppins', size: 12, weight: '600' }, bodyFont: { family: 'Poppins', size: 12 }, displayColors: true,
+          callbacks: { title: function(items) { return '📅 ' + items[0].label; }, label: function(context) { return context.dataset.label + ': Rs ' + context.parsed.y.toLocaleString(); } }
         }
-        grid.innerHTML = blogs.map(b => `
-          <a href="blog-post.html?slug=${b.slug}" class="blog-card-with-image">
-            <div class="blog-card-image-wrapper">
-              <img src="${b.featured_image || 'images/placeholder.svg'}" alt="${b.title}" onerror="this.src='images/placeholder.svg'">
-              <span class="blog-card-category">${b.category || 'Blog'}</span>
-            </div>
-            <div class="blog-card-content">
-              <h3>${b.title}</h3>
-              <p>${b.excerpt || ''}</p>
-              <span class="blog-read-more">Read More →</span>
-            </div>
-          </a>
-        `).join('');
-      } catch (error) {
-        console.error('Error loading blogs:', error);
-        grid.innerHTML = '<div class="loading-blogs">Error loading blogs</div>';
+      },
+      scales: {
+        x: { grid: { color: 'rgba(255,215,0,0.06)' }, ticks: { color: '#B8B8B8', font: { family: 'Poppins', size: 10 }, maxTicksLimit: 8, maxRotation: 0 } },
+        y: { grid: { color: 'rgba(255,215,0,0.06)' }, ticks: { color: '#FFD700', font: { family: 'Poppins', size: 11, weight: '600' }, callback: function(value) { if (value >= 100000) return 'Rs ' + (value/100000).toFixed(2) + 'L'; if (value >= 1000) return 'Rs ' + (value/1000).toFixed(0) + 'k'; return 'Rs ' + value; } } }
       }
     }
-    document.addEventListener('DOMContentLoaded', loadHomeBlogs);
-  </script>
+  });
+}
 
-  <script>
-    async function loadSocialIcons() {
-      const container = document.getElementById('footerSocialIcons');
-      if (!container) return;
-      try {
-        const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/settings?select=*&setting_key=like.social_*`,
-          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-        );
-        const settings = await res.json();
-        const social = {};
-        (settings || []).forEach(s => { social[s.setting_key] = s.setting_value; });
-        const icons = {
-          instagram: '<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>',
-          facebook: '<svg viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>',
-          twitter: '<svg viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>',
-          youtube: '<svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>',
-          tiktok: '<svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>'
-        };
-        let html = '';
-        Object.keys(icons).forEach(platform => {
-          if (social['social_' + platform]) {
-            html += `<a href="${social['social_' + platform]}" target="_blank" rel="noopener" title="${platform}">${icons[platform]}</a>`;
-          }
-        });
-        container.innerHTML = html;
-      } catch (error) {
-        console.error('Social icons load error:', error);
+function initSilverChart() {
+  const canvas = document.getElementById('silverRateChart');
+  if (!canvas) return;
+  const currentRate = LIVE_RATES.silver.perTola || 6651;
+  const { data, highData, lowData, labels } = generateHistoricalData(currentRate);
+  if (silverChart) silverChart.destroy();
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 0, 350);
+  gradient.addColorStop(0, 'rgba(192, 192, 192, 0.4)');
+  gradient.addColorStop(1, 'rgba(192, 192, 192, 0.0)');
+  silverChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label: 'Silver (Rs/Tola)', data: data, borderColor: '#C0C0C0', backgroundColor: gradient, borderWidth: 2.5, fill: true, tension: 0.3, pointBackgroundColor: '#C0C0C0', pointBorderColor: '#0A0A0A', pointBorderWidth: 1.5, pointRadius: 2, pointHoverRadius: 6 },
+        { label: 'Daily High', data: highData, borderColor: 'rgba(37, 211, 102, 0.6)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.3, pointRadius: 0 },
+        { label: 'Daily Low', data: lowData, borderColor: 'rgba(220, 38, 38, 0.6)', borderWidth: 1.5, borderDash: [5, 5], fill: false, tension: 0.3, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 300, easing: 'easeOutQuart' },
+      animations: { x: { duration: 250 }, y: { duration: 250 } },
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: '#FFF8DC', font: { family: 'Poppins', size: 11, weight: '500' }, padding: 12, usePointStyle: true, pointStyle: 'line' } },
+        tooltip: {
+          backgroundColor: 'rgba(10, 10, 10, 0.96)', titleColor: '#C0C0C0', bodyColor: '#FFF8DC', borderColor: '#C0C0C0', borderWidth: 1, padding: 12,
+          callbacks: { title: function(items) { return '📅 ' + items[0].label; }, label: function(context) { return context.dataset.label + ': Rs ' + context.parsed.y.toLocaleString(); } }
+        }
+      },
+      scales: {
+        x: { grid: { color: 'rgba(192,192,192,0.06)' }, ticks: { color: '#B8B8B8', font: { family: 'Poppins', size: 10 }, maxTicksLimit: 8 } },
+        y: { grid: { color: 'rgba(192,192,192,0.06)' }, ticks: { color: '#C0C0C0', font: { family: 'Poppins', size: 11, weight: '600' }, callback: function(value) { return 'Rs ' + value.toLocaleString(); } } }
       }
     }
-    document.addEventListener('DOMContentLoaded', loadSocialIcons);
-  </script>
+  });
+}
 
-</body>
-</html>
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('🚀 Loading AKBAR JEWELLERS...');
+  await loadLiveRates();
+  renderGoldRates();
+  renderSilverRates();
+  updateUsdRate();
+  loadProducts();
+  updateCartCount();
+  renderBiscuitUnits();
+  console.log('✅ AKBAR JEWELLERS Loaded');
+});
+
+setInterval(async () => {
+  console.log('🔄 Auto-refreshing rates...');
+  await loadLiveRates();
+  renderGoldRates();
+  renderSilverRates();
+  initGoldChart();
+  initSilverChart();
+}, 15 * 60 * 1000);
