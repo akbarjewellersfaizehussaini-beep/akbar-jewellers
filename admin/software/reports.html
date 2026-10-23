@@ -8,35 +8,24 @@
   <link rel="stylesheet" href="style-software.css">
   <style>
     .report-btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .report-btn { background: linear-gradient(135deg, var(--black-soft), #252525); border: 2px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 25px 20px; text-align: center; cursor: pointer; transition: all 0.4s; font-family: var(--font-body); }
+    .report-btn { background: linear-gradient(135deg, var(--black-soft), #252525); border: 2px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 25px 20px; text-align: center; cursor: pointer; transition: all 0.4s; }
     .report-btn:hover { border-color: var(--gold-primary); transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255,215,0,0.2); }
     .report-btn .icon { font-size: 2.5rem; margin-bottom: 10px; }
-    .report-btn .label { color: var(--gold-primary); font-weight: 700; font-size: 1rem; letter-spacing: 0.5px; }
-    .report-btn .desc { color: var(--text-muted); font-size: 0.75rem; margin-top: 5px; }
-    
+    .report-btn .label { color: var(--gold-primary); font-weight: 700; font-size: 1rem; }
     .report-view { display: none; }
     .report-view.active { display: block; }
-    
     .report-table { width: 100%; border-collapse: collapse; background: var(--black-soft); border-radius: 12px; overflow: hidden; }
     .report-table th { background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); color: var(--gold-primary); padding: 12px; text-align: left; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
     .report-table td { padding: 12px; border-bottom: 1px solid rgba(255,215,0,0.08); font-size: 0.88rem; }
     .report-table tr { cursor: pointer; }
     .report-table tr:hover { background: rgba(255,215,0,0.05); }
-    
     .drill-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
     .drill-title { font-family: var(--font-heading); font-size: 1.5rem; color: var(--gold-primary); }
-    
-    .search-bar { width: 100%; padding: 12px 16px; background: var(--black-royal); border: 1px solid rgba(255,215,0,0.3); border-radius: 50px; color: var(--text-light); font-family: var(--font-body); margin-bottom: 20px; }
-    .search-bar:focus { outline: none; border-color: var(--gold-primary); }
-    
     .split-view { display: grid; grid-template-columns: 40% 60%; gap: 20px; }
     .split-left { background: var(--black-soft); border-radius: 12px; padding: 15px; max-height: 60vh; overflow-y: auto; }
     .split-right { background: #fff; color: #1A1A1A; border-radius: 12px; padding: 25px; max-height: 60vh; overflow-y: auto; }
-    
-    .invoice-list-item { padding: 10px; background: var(--black-royal); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: all 0.3s; }
-    .invoice-list-item:hover { border-color: var(--gold-primary); background: rgba(255,215,0,0.05); }
-    .invoice-list-item.active { border-color: var(--gold-primary); background: rgba(255,215,0,0.1); }
-    
+    .invoice-list-item { padding: 10px; background: var(--black-royal); border: 1px solid rgba(255,215,0,0.2); border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+    .invoice-list-item:hover, .invoice-list-item.active { border-color: var(--gold-primary); background: rgba(255,215,0,0.1); }
     @media (max-width: 768px) { .split-view { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -47,81 +36,42 @@
       <img src="../../images/logo.png" alt="Logo" onerror="this.style.display='none'">
       Reports
     </div>
-    <button onclick="navigateFresh('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
+    <button onclick="goBack('index.html')" style="background: transparent; color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 6px 15px; border-radius: 50px; cursor: pointer;">← Back</button>
   </div>
 
   <div class="sw-content">
     <h1 class="page-title">Business Reports</h1>
-    <p class="page-subtitle">Har report — Print + WhatsApp + Email</p>
+    <p class="page-subtitle">Har report — Print + WhatsApp</p>
 
-    <!-- REPORT BUTTONS -->
     <div class="report-btn-grid" id="reportButtons">
-      <div class="report-btn" onclick="openReport('daily-sales')">
-        <div class="icon">📊</div>
-        <div class="label">Daily Sales Report</div>
-        <div class="desc">Date-wise invoice list</div>
-      </div>
-      <div class="report-btn" onclick="openReport('weekly-sales')">
-        <div class="icon">📅</div>
-        <div class="label">Weekly Sales Report</div>
-        <div class="desc">Week-wise breakdown</div>
-      </div>
-      <div class="report-btn" onclick="openReport('monthly-sales')">
-        <div class="icon">📆</div>
-        <div class="label">Monthly Sales Report</div>
-        <div class="desc">Month-wise breakdown</div>
-      </div>
-      <div class="report-btn" onclick="openReport('yearly-sales')">
-        <div class="icon">📈</div>
-        <div class="label">Yearly Sales Report</div>
-        <div class="desc">Year-wise breakdown</div>
-      </div>
-      <div class="report-btn" onclick="openReport('expenses')">
-        <div class="icon">💸</div>
-        <div class="label">Expense Report</div>
-        <div class="desc">Daily/Weekly/Monthly/Yearly</div>
-      </div>
-      <div class="report-btn" onclick="openReport('payments')">
-        <div class="icon">💳</div>
-        <div class="label">Payments Report</div>
-        <div class="desc">Daily/Weekly/Monthly/Yearly</div>
-      </div>
-      <div class="report-btn" onclick="openReport('stock')">
-        <div class="icon">📦</div>
-        <div class="label">Available Stock</div>
-        <div class="desc">Current inventory value</div>
-      </div>
+      <div class="report-btn" onclick="openReport('daily-sales')"><div class="icon">📊</div><div class="label">Daily Sales</div></div>
+      <div class="report-btn" onclick="openReport('weekly-sales')"><div class="icon">📅</div><div class="label">Weekly Sales</div></div>
+      <div class="report-btn" onclick="openReport('monthly-sales')"><div class="icon">📆</div><div class="label">Monthly Sales</div></div>
+      <div class="report-btn" onclick="openReport('yearly-sales')"><div class="icon">📈</div><div class="label">Yearly Sales</div></div>
+      <div class="report-btn" onclick="openReport('expenses')"><div class="icon">💸</div><div class="label">Expenses</div></div>
+      <div class="report-btn" onclick="openReport('payments')"><div class="icon">💳</div><div class="label">Payments</div></div>
+      <div class="report-btn" onclick="openReport('stock')"><div class="icon">📦</div><div class="label">Available Stock</div></div>
     </div>
 
-    <!-- REPORT VIEW -->
     <div id="reportView" class="report-view">
       <div class="drill-header">
-        <button class="btn-secondary" onclick="closeReport()" style="padding:8px 16px; font-size:0.85rem;">← Back to Reports</button>
+        <button class="btn-secondary" onclick="closeReport()" style="padding:8px 16px;">← Back</button>
         <h2 class="drill-title" id="reportTitle">Report</h2>
-        <div style="display:flex; gap:8px;">
-          <button class="btn-primary" onclick="printElement('reportContent')" style="padding:8px 16px; font-size:0.85rem;">🖨 Print</button>
-          <button class="btn-success" onclick="whatsappReport()" style="padding:8px 16px; font-size:0.85rem;">📱 WhatsApp</button>
-        </div>
+        <button class="btn-primary" onclick="printElement('reportContent')" style="padding:8px 16px;">🖨 Print</button>
       </div>
       <div id="reportContent"></div>
     </div>
   </div>
 
-  <!-- Popup Modal for Invoice -->
   <div id="invoiceModal" class="modal">
     <div class="modal-content" style="max-width: 1100px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
         <h2 class="modal-title" style="margin:0;" id="invoicePopupTitle">Invoices</h2>
-        <button onclick="closeInvoicePopup()" style="background:none; border:none; color:var(--gold-primary); font-size:1.5rem; cursor:pointer;">×</button>
+        <button onclick="document.getElementById('invoiceModal').classList.remove('active')" style="background:none; border:none; color:var(--gold-primary); font-size:1.5rem; cursor:pointer;">×</button>
       </div>
       <div class="split-view">
-        <div class="split-left">
-          <input type="text" class="search-bar" placeholder="🔍 Search invoice..." oninput="filterInvoiceList(this.value)">
-          <div id="invoiceListContainer"></div>
-        </div>
-        <div class="split-right" id="invoiceDetailContainer">
-          <p style="text-align:center; color:#999; padding:60px 20px;">← Click invoice to view details</p>
-        </div>
+        <div class="split-left"><div id="invoiceListContainer"></div></div>
+        <div class="split-right" id="invoiceDetailContainer"><p style="text-align:center; color:#999; padding:60px;">← Click invoice</p></div>
       </div>
     </div>
   </div>
@@ -130,15 +80,13 @@
   <script src="app.js"></script>
   <script>
     let currentReport = null;
-    let allData = { sales: [], purchases: [], expenses: [], payments: [], products: [], customers: [], suppliers: [], karigars: [], services: [] };
+    let allData = { sales: [], purchases: [], expenses: [], payments: [], products: [], customers: [], suppliers: [], karigars: [], services: [], returns: [] };
     let currentInvoiceList = [];
-    let selectedInvoice = null;
     let shopInfo = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
       if (!checkAuth(['admin', 'sales', 'purchase'])) return;
       if (typeof clearCache === 'function') clearCache();
-      
       shopInfo = await getShopSettings();
       await loadAllData();
     });
@@ -153,13 +101,13 @@
       allData.suppliers = await getRecordsFast('suppliers', true);
       allData.karigars = await getRecordsFast('karigars', true);
       allData.services = await getRecordsFast('services', true);
+      allData.returns = await getRecordsFast('returns', true);
     }
 
     function openReport(type) {
       currentReport = type;
       document.getElementById('reportButtons').style.display = 'none';
       document.getElementById('reportView').classList.add('active');
-      
       if (type === 'daily-sales') renderDailySales();
       else if (type === 'weekly-sales') renderWeeklySales();
       else if (type === 'monthly-sales') renderMonthlySales();
@@ -175,407 +123,179 @@
       document.getElementById('reportView').classList.remove('active');
     }
 
-    // ===== DAILY SALES REPORT =====
     function renderDailySales() {
-      document.getElementById('reportTitle').textContent = '📊 Daily Sales Report';
-      const sales = allData.sales;
-      
+      document.getElementById('reportTitle').textContent = '📊 Daily Sales';
       const byDate = {};
-      sales.forEach(s => {
-        const d = s.sale_date || s.date;
+      allData.sales.forEach(s => {
+        const d = (s.sale_date || s.date || '').slice(0, 10);
         if (!d) return;
-        const ds = d.slice(0, 10);
-        if (!byDate[ds]) byDate[ds] = { date: ds, invoices: [], total: 0 };
-        byDate[ds].invoices.push(s);
-        byDate[ds].total += Number(s.total) || 0;
+        if (!byDate[d]) byDate[d] = { date: d, invoices: [], total: 0 };
+        byDate[d].invoices.push(s);
+        byDate[d].total += Number(s.total) || 0;
       });
-      
       const dates = Object.values(byDate).sort((a, b) => new Date(b.date) - new Date(a.date));
-      
       document.getElementById('reportContent').innerHTML = `
         <table class="report-table">
-          <thead><tr><th>Date</th><th>Invoices</th><th style="text-align:right;">Total Sales</th></tr></thead>
-          <tbody>
-            ${dates.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No sales</td></tr>' : dates.map(d => `
-              <tr onclick="showInvoicesForDate('${d.date}')">
-                <td>${formatDate(d.date)}</td>
-                <td>${d.invoices.length} invoices</td>
-                <td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(d.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Date</th><th>Invoices</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>${dates.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No sales</td></tr>' : dates.map(d => `<tr onclick="showInvoices('${d.date}', 'date')"><td>${formatDate(d.date)}</td><td>${d.invoices.length}</td><td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(d.total)}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== WEEKLY SALES REPORT =====
     function renderWeeklySales() {
-      document.getElementById('reportTitle').textContent = '📅 Weekly Sales Report';
-      const sales = allData.sales;
-      
+      document.getElementById('reportTitle').textContent = '📅 Weekly Sales';
       const byWeek = {};
-      sales.forEach(s => {
+      allData.sales.forEach(s => {
         const d = s.sale_date || s.date;
         if (!d) return;
         const date = new Date(d);
-        const startOfWeek = new Date(date);
-        startOfWeek.setDate(date.getDate() - date.getDay());
-        const weekKey = startOfWeek.toISOString().slice(0, 10);
-        
-        if (!byWeek[weekKey]) {
-          const endOfWeek = new Date(startOfWeek);
-          endOfWeek.setDate(startOfWeek.getDate() + 6);
-          byWeek[weekKey] = { weekStart: weekKey, weekEnd: endOfWeek.toISOString().slice(0, 10), dates: new Set(), invoices: [], total: 0 };
-        }
-        byWeek[weekKey].dates.add(d.slice(0, 10));
-        byWeek[weekKey].invoices.push(s);
-        byWeek[weekKey].total += Number(s.total) || 0;
+        const start = new Date(date); start.setDate(date.getDate() - date.getDay());
+        const key = start.toISOString().slice(0, 10);
+        if (!byWeek[key]) byWeek[key] = { weekStart: key, invoices: [], total: 0 };
+        byWeek[key].invoices.push(s);
+        byWeek[key].total += Number(s.total) || 0;
       });
-      
-      const weeks = Object.values(byWeek).sort((a, b) => new Date(b.weekStart) - new Date(a.weekStart));
-      
+      const weeks = Object.values(byWeek).sort((a, b) => b.weekStart.localeCompare(a.weekStart));
       document.getElementById('reportContent').innerHTML = `
         <table class="report-table">
-          <thead><tr><th>Week Start</th><th>Week End</th><th>Working Days</th><th>Invoices</th><th style="text-align:right;">Total Sales</th></tr></thead>
-          <tbody>
-            ${weeks.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:30px;">No sales</td></tr>' : weeks.map(w => `
-              <tr onclick="showWeekDetail('${w.weekStart}')">
-                <td>${formatDate(w.weekStart)}</td>
-                <td>${formatDate(w.weekEnd)}</td>
-                <td>${w.dates.size} days</td>
-                <td>${w.invoices.length}</td>
-                <td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(w.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Week Start</th><th>Invoices</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>${weeks.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No sales</td></tr>' : weeks.map(w => `<tr onclick="showInvoices('${w.weekStart}', 'week')"><td>${formatDate(w.weekStart)}</td><td>${w.invoices.length}</td><td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(w.total)}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== MONTHLY SALES REPORT =====
     function renderMonthlySales() {
-      document.getElementById('reportTitle').textContent = '📆 Monthly Sales Report';
-      const sales = allData.sales;
-      
+      document.getElementById('reportTitle').textContent = '📆 Monthly Sales';
       const byMonth = {};
-      sales.forEach(s => {
-        const d = s.sale_date || s.date;
-        if (!d) return;
-        const monthKey = d.slice(0, 7);
-        if (!byMonth[monthKey]) byMonth[monthKey] = { month: monthKey, dates: new Set(), invoices: [], total: 0 };
-        byMonth[monthKey].dates.add(d.slice(0, 10));
-        byMonth[monthKey].invoices.push(s);
-        byMonth[monthKey].total += Number(s.total) || 0;
+      allData.sales.forEach(s => {
+        const m = (s.sale_date || s.date || '').slice(0, 7);
+        if (!m) return;
+        if (!byMonth[m]) byMonth[m] = { month: m, invoices: [], total: 0 };
+        byMonth[m].invoices.push(s);
+        byMonth[m].total += Number(s.total) || 0;
       });
-      
       const months = Object.values(byMonth).sort((a, b) => b.month.localeCompare(a.month));
-      
       document.getElementById('reportContent').innerHTML = `
         <table class="report-table">
-          <thead><tr><th>Month</th><th>Working Days</th><th>Invoices</th><th style="text-align:right;">Total Sales</th></tr></thead>
-          <tbody>
-            ${months.length === 0 ? '<tr><td colspan="4" style="text-align:center; padding:30px;">No sales</td></tr>' : months.map(m => `
-              <tr onclick="showMonthDetail('${m.month}')">
-                <td>${new Date(m.month + '-01').toLocaleDateString('en-PK', { month: 'long', year: 'numeric' })}</td>
-                <td>${m.dates.size} days</td>
-                <td>${m.invoices.length}</td>
-                <td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(m.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Month</th><th>Invoices</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>${months.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No sales</td></tr>' : months.map(m => `<tr onclick="showInvoices('${m.month}', 'month')"><td>${m.month}</td><td>${m.invoices.length}</td><td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(m.total)}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== YEARLY SALES REPORT =====
     function renderYearlySales() {
-      document.getElementById('reportTitle').textContent = '📈 Yearly Sales Report';
-      const sales = allData.sales;
-      
+      document.getElementById('reportTitle').textContent = '📈 Yearly Sales';
       const byYear = {};
-      sales.forEach(s => {
-        const d = s.sale_date || s.date;
-        if (!d) return;
-        const year = d.slice(0, 4);
-        if (!byYear[year]) byYear[year] = { year, dates: new Set(), invoices: [], total: 0 };
-        byYear[year].dates.add(d.slice(0, 10));
-        byYear[year].invoices.push(s);
-        byYear[year].total += Number(s.total) || 0;
+      allData.sales.forEach(s => {
+        const y = (s.sale_date || s.date || '').slice(0, 4);
+        if (!y) return;
+        if (!byYear[y]) byYear[y] = { year: y, invoices: [], total: 0 };
+        byYear[y].invoices.push(s);
+        byYear[y].total += Number(s.total) || 0;
       });
-      
       const years = Object.values(byYear).sort((a, b) => b.year.localeCompare(a.year));
-      
       document.getElementById('reportContent').innerHTML = `
         <table class="report-table">
-          <thead><tr><th>Year</th><th>Working Days</th><th>Invoices</th><th style="text-align:right;">Total Sales</th></tr></thead>
-          <tbody>
-            ${years.length === 0 ? '<tr><td colspan="4" style="text-align:center; padding:30px;">No sales</td></tr>' : years.map(y => `
-              <tr onclick="showYearDetail('${y.year}')">
-                <td>${y.year}</td>
-                <td>${y.dates.size} days</td>
-                <td>${y.invoices.length}</td>
-                <td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(y.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Year</th><th>Invoices</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>${years.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No sales</td></tr>' : years.map(y => `<tr onclick="showInvoices('${y.year}', 'year')"><td>${y.year}</td><td>${y.invoices.length}</td><td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(y.total)}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== EXPENSE REPORT =====
     function renderExpenseReport() {
-      document.getElementById('reportTitle').textContent = '💸 Expense Report';
-      const expenses = allData.expenses;
-      
-      document.getElementById('reportContent').innerHTML = `
-        <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-          <button class="btn-primary" onclick="showExpenseBy('daily')" style="padding:10px 20px; font-size:0.85rem;">Daily</button>
-          <button class="btn-primary" onclick="showExpenseBy('weekly')" style="padding:10px 20px; font-size:0.85rem;">Weekly</button>
-          <button class="btn-primary" onclick="showExpenseBy('monthly')" style="padding:10px 20px; font-size:0.85rem;">Monthly</button>
-          <button class="btn-primary" onclick="showExpenseBy('yearly')" style="padding:10px 20px; font-size:0.85rem;">Yearly</button>
-        </div>
-        <div id="expenseContent"></div>
-      `;
-      showExpenseBy('daily');
-    }
-
-    function showExpenseBy(period) {
-      const expenses = allData.expenses;
+      document.getElementById('reportTitle').textContent = '💸 Expenses';
       const groups = {};
-      
-      expenses.forEach(e => {
-        const d = e.expense_date || e.date;
+      allData.expenses.forEach(e => {
+        const d = (e.expense_date || e.date || '').slice(0, 10);
         if (!d) return;
-        let key;
-        if (period === 'daily') key = d.slice(0, 10);
-        else if (period === 'weekly') {
-          const date = new Date(d);
-          const start = new Date(date);
-          start.setDate(date.getDate() - date.getDay());
-          key = start.toISOString().slice(0, 10);
-        } else if (period === 'monthly') key = d.slice(0, 7);
-        else key = d.slice(0, 4);
-        
-        if (!groups[key]) groups[key] = { key, items: [], total: 0 };
-        groups[key].items.push(e);
-        groups[key].total += Number(e.amount) || 0;
+        if (!groups[d]) groups[d] = { date: d, count: 0, total: 0 };
+        groups[d].count++;
+        groups[d].total += Number(e.amount) || 0;
       });
-      
-      const sorted = Object.values(groups).sort((a, b) => b.key.localeCompare(a.key));
-      
-      document.getElementById('expenseContent').innerHTML = `
+      const sorted = Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
+      document.getElementById('reportContent').innerHTML = `
         <table class="report-table">
-          <thead><tr><th>${period === 'daily' ? 'Date' : period === 'weekly' ? 'Week Start' : period === 'monthly' ? 'Month' : 'Year'}</th><th>Entries</th><th style="text-align:right;">Total Expenses</th></tr></thead>
-          <tbody>
-            ${sorted.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No expenses</td></tr>' : sorted.map(g => `
-              <tr>
-                <td>${g.key}</td>
-                <td>${g.items.length} entries</td>
-                <td style="text-align:right; color:#FCA5A5; font-weight:700;">${formatPKR(g.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Date</th><th>Entries</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>${sorted.length === 0 ? '<tr><td colspan="3" style="text-align:center; padding:30px;">No expenses</td></tr>' : sorted.map(g => `<tr><td>${formatDate(g.date)}</td><td>${g.count}</td><td style="text-align:right; color:#FCA5A5; font-weight:700;">${formatPKR(g.total)}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== PAYMENT REPORT =====
     function renderPaymentReport() {
-      document.getElementById('reportTitle').textContent = '💳 Payments Report';
-      
-      document.getElementById('reportContent').innerHTML = `
-        <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-          <button class="btn-primary" onclick="showPaymentBy('daily')" style="padding:10px 20px; font-size:0.85rem;">Daily</button>
-          <button class="btn-primary" onclick="showPaymentBy('weekly')" style="padding:10px 20px; font-size:0.85rem;">Weekly</button>
-          <button class="btn-primary" onclick="showPaymentBy('monthly')" style="padding:10px 20px; font-size:0.85rem;">Monthly</button>
-          <button class="btn-primary" onclick="showPaymentBy('yearly')" style="padding:10px 20px; font-size:0.85rem;">Yearly</button>
-        </div>
-        <div id="paymentContent"></div>
-      `;
-      showPaymentBy('daily');
-    }
-
-    function showPaymentBy(period) {
-      const payments = allData.payments;
+      document.getElementById('reportTitle').textContent = '💳 Payments';
       const groups = {};
-      
-      payments.forEach(p => {
-        const d = p.payment_date || p.date;
+      allData.payments.forEach(p => {
+        const d = (p.payment_date || p.date || '').slice(0, 10);
         if (!d) return;
-        let key;
-        if (period === 'daily') key = d.slice(0, 10);
-        else if (period === 'weekly') {
-          const date = new Date(d);
-          const start = new Date(date);
-          start.setDate(date.getDate() - date.getDay());
-          key = start.toISOString().slice(0, 10);
-        } else if (period === 'monthly') key = d.slice(0, 7);
-        else key = d.slice(0, 4);
-        
-        if (!groups[key]) groups[key] = { key, items: [], total: 0, in: 0, out: 0 };
-        groups[key].items.push(p);
+        if (!groups[d]) groups[d] = { date: d, in: 0, out: 0, count: 0 };
+        groups[d].count++;
         const amt = Number(p.amount) || 0;
-        groups[key].total += amt;
-        if (p.person_type === 'customer') groups[key].in += amt;
-        else groups[key].out += amt;
+        if (p.person_type === 'customer') groups[d].in += amt; else groups[d].out += amt;
       });
-      
-      const sorted = Object.values(groups).sort((a, b) => b.key.localeCompare(a.key));
-      
-      document.getElementById('paymentContent').innerHTML = `
+      const sorted = Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
+      document.getElementById('reportContent').innerHTML = `
         <table class="report-table">
-          <thead><tr><th>${period === 'daily' ? 'Date' : period === 'weekly' ? 'Week Start' : period === 'monthly' ? 'Month' : 'Year'}</th><th>Entries</th><th style="text-align:right;">Received</th><th style="text-align:right;">Paid</th><th style="text-align:right;">Total</th></tr></thead>
-          <tbody>
-            ${sorted.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:30px;">No payments</td></tr>' : sorted.map(g => `
-              <tr>
-                <td>${g.key}</td>
-                <td>${g.items.length} entries</td>
-                <td style="text-align:right; color:#86EFAC;">${formatPKR(g.in)}</td>
-                <td style="text-align:right; color:#FCA5A5;">${formatPKR(g.out)}</td>
-                <td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(g.total)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Date</th><th>Entries</th><th style="text-align:right;">In</th><th style="text-align:right;">Out</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>${sorted.length === 0 ? '<tr><td colspan="5" style="text-align:center; padding:30px;">No payments</td></tr>' : sorted.map(g => `<tr><td>${formatDate(g.date)}</td><td>${g.count}</td><td style="text-align:right; color:#86EFAC;">${formatPKR(g.in)}</td><td style="text-align:right; color:#FCA5A5;">${formatPKR(g.out)}</td><td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(g.in + g.out)}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== STOCK REPORT =====
     function renderStockReport() {
-      document.getElementById('reportTitle').textContent = '📦 Available Stock Report';
-      const products = allData.products.filter(p => (p.current_stock || 0) > 0);
-      
+      document.getElementById('reportTitle').textContent = '📦 Available Stock';
+      const stats = calculateAllProductsStats(allData.products, allData.purchases, allData.sales, allData.returns);
+      const withStock = stats.filter(s => s.currentStock > 0);
       let totalValue = 0;
-      products.forEach(p => { totalValue += (p.current_stock || 0) * (p.cost_price || 0); });
-      
+      withStock.forEach(s => { totalValue += s.currentStock * (Number(s.product.cost_price) || 0); });
       document.getElementById('reportContent').innerHTML = `
         <div style="background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(255,215,0,0.05)); border:2px solid var(--gold-primary); border-radius:12px; padding:20px; margin-bottom:20px; text-align:center;">
-          <div style="color:var(--text-muted); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">Total Inventory Value</div>
-          <div style="color:var(--gold-primary); font-family:var(--font-heading); font-size:2rem; font-weight:700; margin-top:5px;">${formatPKR(totalValue)}</div>
+          <div style="color:var(--text-muted); font-size:0.85rem;">Total Inventory Value</div>
+          <div style="color:var(--gold-primary); font-family:var(--font-heading); font-size:2rem; font-weight:700;">${formatPKR(totalValue)}</div>
         </div>
         <table class="report-table">
-          <thead><tr><th>Product ID</th><th>Name</th><th>Stock</th><th>Weight</th><th style="text-align:right;">Cost/Unit</th><th style="text-align:right;">Total Value</th></tr></thead>
-          <tbody>
-            ${products.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:30px;">No stock available</td></tr>' : products.map(p => `
-              <tr>
-                <td style="font-family:var(--font-mono); color:#93C5FD;">${p.product_code}</td>
-                <td>${p.name}</td>
-                <td>${p.current_stock}</td>
-                <td>${formatWeight(p.weight)}</td>
-                <td style="text-align:right;">${formatPKR(p.cost_price)}</td>
-                <td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR((p.current_stock || 0) * (p.cost_price || 0))}</td>
-              </tr>
-            `).join('')}
-          </tbody>
+          <thead><tr><th>Product ID</th><th>Name</th><th>Stock</th><th>Per pc Wt</th><th style="text-align:right;">Cost/pc</th><th style="text-align:right;">Total Value</th></tr></thead>
+          <tbody>${withStock.length === 0 ? '<tr><td colspan="6" style="text-align:center; padding:30px;">No stock</td></tr>' : withStock.map(s => `<tr><td style="font-family:var(--font-mono); color:#93C5FD;">${s.productCode}</td><td>${s.productName}</td><td>${s.currentStock}</td><td>${s.perPieceWeight.toFixed(3)}g</td><td style="text-align:right;">${formatPKR(s.product.cost_price)}</td><td style="text-align:right; color:var(--gold-primary); font-weight:700;">${formatPKR(s.currentStock * (Number(s.product.cost_price) || 0))}</td></tr>`).join('')}</tbody>
         </table>
       `;
     }
 
-    // ===== DRILL DOWN =====
-    function showInvoicesForDate(dateStr) {
-      const invoices = allData.sales.filter(s => (s.sale_date || s.date)?.slice(0, 10) === dateStr);
-      showInvoicePopup(`Invoices on ${formatDate(dateStr)}`, invoices);
-    }
-
-    function showWeekDetail(weekStart) {
-      const sales = allData.sales.filter(s => {
-        const d = s.sale_date || s.date;
-        if (!d) return false;
-        const date = new Date(d);
-        const start = new Date(date);
-        start.setDate(date.getDate() - date.getDay());
-        return start.toISOString().slice(0, 10) === weekStart;
+    function showInvoices(value, type) {
+      let invoices = [];
+      if (type === 'date') invoices = allData.sales.filter(s => (s.sale_date || s.date || '').slice(0, 10) === value);
+      else if (type === 'week') invoices = allData.sales.filter(s => {
+        const d = s.sale_date || s.date; if (!d) return false;
+        const date = new Date(d); const start = new Date(date); start.setDate(date.getDate() - date.getDay());
+        return start.toISOString().slice(0, 10) === value;
       });
-      showInvoicePopup(`Week of ${formatDate(weekStart)}`, sales);
-    }
-
-    function showMonthDetail(monthKey) {
-      const sales = allData.sales.filter(s => (s.sale_date || s.date)?.slice(0, 7) === monthKey);
-      showInvoicePopup(`Month: ${monthKey}`, sales);
-    }
-
-    function showYearDetail(year) {
-      const sales = allData.sales.filter(s => (s.sale_date || s.date)?.slice(0, 4) === year);
-      showInvoicePopup(`Year: ${year}`, sales);
-    }
-
-    function showInvoicePopup(title, invoices) {
+      else if (type === 'month') invoices = allData.sales.filter(s => (s.sale_date || s.date || '').slice(0, 7) === value);
+      else if (type === 'year') invoices = allData.sales.filter(s => (s.sale_date || s.date || '').slice(0, 4) === value);
       currentInvoiceList = invoices;
-      selectedInvoice = null;
-      document.getElementById('invoicePopupTitle').textContent = title + ' (' + invoices.length + ' invoices)';
-      
-      const listHtml = invoices.length === 0 ? '<p style="text-align:center; color:var(--text-muted); padding:20px;">No invoices</p>' : invoices.map((inv, idx) => `
-        <div class="invoice-list-item" data-inv='${JSON.stringify(inv).replace(/'/g, "&#39;")}' onclick="selectInvoice(${idx})">
-          <div style="color:var(--gold-primary); font-weight:700; font-size:0.9rem;">${inv.invoice_number}</div>
-          <div style="color:var(--text-muted); font-size:0.75rem;">${inv.customer_name} • ${formatDate(inv.sale_date || inv.date)}</div>
-          <div style="color:var(--gold-primary); font-family:var(--font-mono); font-weight:700; margin-top:3px;">${formatPKR(inv.total)}</div>
+      document.getElementById('invoicePopupTitle').textContent = value + ' (' + invoices.length + ')';
+      document.getElementById('invoiceListContainer').innerHTML = invoices.map((inv, idx) => `
+        <div class="invoice-list-item" onclick="selectInvoice(${idx})">
+          <div style="color:var(--gold-primary); font-weight:700;">${inv.invoice_number}</div>
+          <div style="color:var(--text-muted); font-size:0.75rem;">${inv.customer_name} • ${formatDate(inv.sale_date)}</div>
+          <div style="color:var(--gold-primary); font-family:var(--font-mono); font-weight:700;">${formatPKR(inv.total)}</div>
         </div>
       `).join('');
-      
-      document.getElementById('invoiceListContainer').innerHTML = listHtml;
-      document.getElementById('invoiceDetailContainer').innerHTML = '<p style="text-align:center; color:#999; padding:60px 20px;">← Click invoice to view</p>';
+      document.getElementById('invoiceDetailContainer').innerHTML = '<p style="text-align:center; color:#999; padding:60px;">← Click invoice</p>';
       document.getElementById('invoiceModal').classList.add('active');
     }
 
     function selectInvoice(idx) {
-      selectedInvoice = currentInvoiceList[idx];
+      const s = currentInvoiceList[idx];
       document.querySelectorAll('.invoice-list-item').forEach((el, i) => el.classList.toggle('active', i === idx));
-      
-      const s = selectedInvoice;
-      const qty = s.qty || 1;
-      const weight = s.weight || 0;
-      const rate = s.rate || 0;
-      const making = s.making || 0;
-      const polish = s.polish || 0;
-      const discount = s.discount || 0;
-      const totalWeight = qty * weight;
-      const metal = totalWeight * rate;
-      const subtotal = metal + (making * qty) + (polish * qty);
-      const gst = Math.round(subtotal * ((s.gst_pct || 3) / 100));
-      
       document.getElementById('invoiceDetailContainer').innerHTML = `
-        <div style="text-align:center; border-bottom:2px solid #D4AF37; padding-bottom:15px; margin-bottom:20px;">
-          <h1 style="font-family:'Playfair Display',serif; color:#D4AF37; margin:0; font-size:24px;">${shopInfo.name}</h1>
-          <p style="margin:5px 0; font-size:14px; color:#D4AF37; font-family:'Noto Nastaliq Urdu',serif;" dir="rtl">${shopInfo.name_urdu || 'فیض حسینی'}</p>
-          <p style="margin:5px 0; font-size:11px; color:#666;">${shopInfo.address}</p>
-        </div>
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:13px;">
-          <div><p style="margin:3px 0;"><strong>Invoice #:</strong> ${s.invoice_number}</p><p style="margin:3px 0;"><strong>Date:</strong> ${formatDate(s.sale_date || s.date)}</p></div>
-          <div style="text-align:right;"><p style="margin:3px 0;"><strong>Customer:</strong> ${s.customer_name}</p><p style="margin:3px 0;"><strong>Phone:</strong> ${s.customer_phone || '—'}</p></div>
-        </div>
-        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-          <thead><tr style="background:#FAF7F0;"><th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Item</th><th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Qty</th><th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Weight</th><th style="border:1px solid #ddd; padding:8px; text-align:left; font-size:11px; color:#D4AF37;">Rate</th></tr></thead>
-          <tbody><tr><td style="border:1px solid #ddd; padding:8px; font-size:13px;">${s.items_summary}</td><td style="border:1px solid #ddd; padding:8px; font-size:13px;">${qty}</td><td style="border:1px solid #ddd; padding:8px; font-size:13px;">${formatWeight(totalWeight)}</td><td style="border:1px solid #ddd; padding:8px; font-size:13px;">${formatPKR(rate)}</td></tr></tbody>
-        </table>
-        <div style="background:#FAF7F0; padding:15px; border-radius:8px; margin-bottom:15px;">
-          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span style="font-size:12px; color:#666;">Metal</span><strong style="font-size:13px;">${formatPKR(metal)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span style="font-size:12px; color:#666;">Making</span><strong style="font-size:13px;">${formatPKR(making * qty)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span style="font-size:12px; color:#666;">Polish</span><strong style="font-size:13px;">${formatPKR(polish * qty)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid #D4AF37; margin-top:5px;"><span style="font-size:12px; color:#D4AF37; font-weight:700;">Subtotal</span><strong style="font-size:14px; color:#D4AF37;">${formatPKR(subtotal)}</strong></div>
-          <div style="display:flex; justify-content:space-between; padding:5px 0;"><span style="font-size:12px; color:#666;">GST</span><strong style="font-size:13px;">${formatPKR(gst)}</strong></div>
-          ${discount > 0 ? `<div style="display:flex; justify-content:space-between; padding:5px 0; color:#25D366;"><span style="font-size:12px;">Discount</span><strong style="font-size:13px;">- ${formatPKR(discount)}</strong></div>` : ''}
-          <div style="display:flex; justify-content:space-between; padding:10px 0; border-top:2px solid #D4AF37; margin-top:5px;"><span style="font-size:14px; color:#D4AF37; font-weight:700;">TOTAL</span><strong style="font-size:18px; color:#D4AF37;">${formatPKR(s.total)}</strong></div>
-        </div>
-        <div style="text-align:right; font-size:13px;">
-          <p style="margin:3px 0;">Received: <strong>${formatPKR(s.received)}</strong></p>
-          <p style="margin:3px 0;">Balance: <strong style="color:${s.balance > 0 ? '#DC2626' : '#25D366'};">${formatPKR(s.balance)}</strong></p>
-        </div>
+        <h2 style="color:#D4AF37; margin-bottom:15px;">${s.invoice_number}</h2>
+        <p><strong>Customer:</strong> ${s.customer_name}</p>
+        <p><strong>Date:</strong> ${formatDate(s.sale_date)}</p>
+        <p><strong>Item:</strong> ${s.items_summary}</p>
+        <p><strong>Qty:</strong> ${s.qty}</p>
+        <p><strong>Total:</strong> ${formatPKR(s.total)}</p>
+        <p><strong>Received:</strong> ${formatPKR(s.received)}</p>
+        <p><strong>Balance:</strong> ${formatPKR(s.balance)}</p>
+        <p><strong>Type:</strong> ${s.payment_type === 'full' ? 'CASH' : 'CREDIT'}</p>
       `;
-    }
-
-    function filterInvoiceList(search) {
-      const items = document.querySelectorAll('.invoice-list-item');
-      items.forEach(item => {
-        item.style.display = item.textContent.toLowerCase().includes(search.toLowerCase()) ? 'block' : 'none';
-      });
-    }
-
-    function closeInvoicePopup() {
-      document.getElementById('invoiceModal').classList.remove('active');
-    }
-
-    function whatsappReport() {
-      alert('Report WhatsApp feature — coming soon. Abhi ke liye Print use karein.');
     }
   </script>
 </body>

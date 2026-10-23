@@ -122,8 +122,7 @@
   <div class="sw-nav" id="navMenu"></div>
 
   <div class="sw-content">
-    <h1 class="page-title">Welcome, <span id="welcomeName" style="color:#FFD700;"></span></h1>
-    <p class="page-subtitle" id="currentDate"></p>
+   <h1 class="page-title">Welcome <span style="color:#FFD700;">Rana Akbar Sahab</span></h1> <p class="page-subtitle" id="currentDate"></p>
     <p style="color: #FFD700; font-family: 'Noto Nastaliq Urdu', serif; font-size: 1.1rem; margin-bottom: 20px;" dir="rtl">فیض حسینی</p>
 
     <!-- ===== TOP HERO BOXES (NEW) ===== -->
@@ -377,7 +376,7 @@
       if (typeof clearCache === 'function') clearCache();
 
       document.getElementById('userRole').textContent = currentUser.role.toUpperCase();
-      document.getElementById('welcomeName').textContent = currentUser.email;
+      // Welcome line static hai — koi email set nahin karna
       document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-PK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
       let navHtml = '<button class="nav-btn active">Dashboard</button>';
