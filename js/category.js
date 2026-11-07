@@ -1,8 +1,6 @@
 // ===== AKBAR JEWELLERS – CATEGORY JS =====
 
 // ===== CLOUDINARY CONFIG =====
-const CLOUDINARY_CLOUD_NAME = 'olpbssol';
-const CLOUDINARY_UPLOAD_PRESET = 'akbar-jewellers';
 
 const WEIGHT = {
   tola: 11.664,
