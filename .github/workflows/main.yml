@@ -1,0 +1,18 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Rozana dopahar 12 baje UTC (Pakistan time 5 baje)
+  workflow_dispatch:      # Taake aap manually bhi chala sakein
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -X GET "https://cvuqtmmlewaudtxzpnyg.supabase.co/rest/v1/keepalive?select=*&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            --fail --silent --show-error
+          echo "✅ Supabase pinged successfully"
