@@ -24,10 +24,17 @@
     .payment-option.selected { background: rgba(255,215,0,0.1); border-color: #FFD700; }
     .payment-option .title { color: #FFD700; font-weight: 600; font-size: 1rem; }
     .payment-option .desc { color: #B8B8B8; font-size: 0.8rem; margin-top: 4px; }
-    .payment-notice { background: linear-gradient(135deg, rgba(37,211,102,0.1), rgba(37,211,102,0.02)); border: 2px solid #25D366; border-radius: 12px; padding: 20px; margin: 15px 0; }
-    .payment-notice h4 { color: #25D366; margin-bottom: 10px; font-size: 1rem; }
-    .payment-notice p { color: #FFF8DC; font-size: 0.9rem; line-height: 1.6; margin-bottom: 8px; }
-    .payment-notice .wa-btn { display: inline-block; margin-top: 10px; padding: 10px 25px; background: #25D366; color: white; border-radius: 50px; text-decoration: none; font-weight: 700; font-size: 0.9rem; }
+    
+    /* Payment Details Box Styles */
+    .payment-details-box { background: #0A0A0A; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+    .pay-method-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: #FFD700; font-weight: 600; font-size: 1rem; }
+    .pay-method-header img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #FFD700; }
+    .account-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; }
+    .account-info { display: flex; flex-direction: column; }
+    .account-label { font-size: 0.7rem; color: #B8B8B8; text-transform: uppercase; }
+    .account-value { font-size: 1rem; color: #FFF8DC; font-weight: 600; font-family: monospace; }
+    .copy-btn { background: #FFD700; color: #0A0A0A; border: none; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 700; }
+    
     .order-summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,215,0,0.1); font-size: 0.9rem; }
     .order-summary-total { border-top: 2px solid #FFD700; padding-top: 12px; margin-top: 10px; font-size: 1.2rem; font-weight: 700; color: #FFD700; display: flex; justify-content: space-between; }
     .btn-place-order { width: 100%; padding: 16px; background: linear-gradient(135deg, #FFD700, #C9A227); color: #0A0A0A; border: none; border-radius: 50px; font-weight: 700; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
@@ -123,16 +130,12 @@
 
           <h3 style="margin-top: 25px;">💳 Payment Details</h3>
           
-          <!-- IMPORTANT: Payment details admin panel se aayengi -->
-          <div class="payment-notice" id="paymentDetailsBox">
-            <h4>📱 Payment Details</h4>
-            <p>Payment details ke liye hamari team se WhatsApp par raabta karein. Aap ko account number aur title bhej diya jayega.</p>
-            <a href="https://wa.me/923234086439?text=Assalam%20o%20Alaikum%2C%20mujhe%20payment%20details%20chahiye" target="_blank" class="wa-btn">
-              📱 WhatsApp par Rabta Karein
-            </a>
+          <!-- YAHAN ADMIN SE DATA AAYEGA -->
+          <div id="paymentDetailsContainer">
+            <p style="color: #B8B8B8; font-size: 0.9rem;">Loading payment details...</p>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" style="margin-top: 20px;">
             <label class="form-label">Transaction ID (TID) *</label>
             <input type="text" id="cTID" class="form-input" placeholder="Enter transaction ID" required>
           </div>
@@ -167,6 +170,132 @@
 
   <script src="js/supabase.js"></script>
   <script>
+    // ===== PAYMENT DETAILS FETCH KARNE KA FUNCTION =====
+    async function loadPaymentDetails() {
+      const container = document.getElementById('paymentDetailsContainer');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/payment_methods?select=*&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const methods = await res.json();
+
+        if (!methods || methods.length === 0) {
+          container.innerHTML = '<p style="color: #FCA5A5; font-size: 0.9rem;">No payment methods added yet. Please contact us on WhatsApp.</p>';
+          return;
+        }
+
+        // Icons for different types
+        const icons = {
+          easypaisa: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Easypaisa_Logo.png/240px-Easypaisa_Logo.png',
+          jazzcash: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/JazzCash_logo.png/240px-JazzCash_logo.png',
+          bank: 'https://cdn-icons-png.flaticon.com/512/2830/2830286.png'
+        };
+
+        // Group by type
+        const grouped = { easypaisa: [], jazzcash: [], bank: [] };
+        methods.forEach(m => {
+          if (grouped[m.method_type]) grouped[m.method_type].push(m);
+        });
+
+        let html = '';
+
+        // Render Easypaisa
+        grouped.easypaisa.forEach(m => {
+          html += `
+            <div class="payment-details-box" style="border-color: #25D366;">
+              <div class="pay-method-header" style="color: #25D366;">
+                <span style="font-size: 1.2rem;">💚</span> ${m.method_name} (Easypaisa)
+              </div>
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Account Title</span>
+                  <span class="account-value" style="color: #FFF8DC;">${m.account_title}</span>
+                </div>
+              </div>
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Account Number</span>
+                  <span class="account-value" style="color: #FFD700;">${m.account_number}</span>
+                </div>
+                <button type="button" class="copy-btn" onclick="copyText('${m.account_number}')">📋 Copy</button>
+              </div>
+            </div>
+          `;
+        });
+
+        // Render JazzCash
+        grouped.jazzcash.forEach(m => {
+          html += `
+            <div class="payment-details-box" style="border-color: #DC2626;">
+              <div class="pay-method-header" style="color: #DC2626;">
+                <span style="font-size: 1.2rem;">🔴</span> ${m.method_name} (JazzCash)
+              </div>
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Account Title</span>
+                  <span class="account-value" style="color: #FFF8DC;">${m.account_title}</span>
+                </div>
+              </div>
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Account Number</span>
+                  <span class="account-value" style="color: #FFD700;">${m.account_number}</span>
+                </div>
+                <button type="button" class="copy-btn" onclick="copyText('${m.account_number}')">📋 Copy</button>
+              </div>
+            </div>
+          `;
+        });
+
+        // Render Bank
+        grouped.bank.forEach(m => {
+          html += `
+            <div class="payment-details-box" style="border-color: #3B82F6;">
+              <div class="pay-method-header" style="color: #3B82F6;">
+                <span style="font-size: 1.2rem;">🏦</span> ${m.method_name} (Bank)
+              </div>
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Account Title</span>
+                  <span class="account-value" style="color: #FFF8DC;">${m.account_title}</span>
+                </div>
+              </div>
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Account / IBAN</span>
+                  <span class="account-value" style="color: #FFD700; font-size: 0.85rem;">${m.account_number}</span>
+                </div>
+                <button type="button" class="copy-btn" onclick="copyText('${m.account_number}')">📋 Copy</button>
+              </div>
+              ${m.branch ? `
+              <div class="account-row">
+                <div class="account-info">
+                  <span class="account-label">Branch</span>
+                  <span class="account-value" style="color: #B8B8B8; font-size: 0.85rem;">${m.branch}</span>
+                </div>
+              </div>` : ''}
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+
+      } catch (e) {
+        console.error('Error loading payment methods:', e);
+        container.innerHTML = '<p style="color: #FCA5A5; font-size: 0.9rem;">Error loading payment details. Please WhatsApp us.</p>';
+      }
+    }
+
+    // Copy to clipboard function
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Copied: ' + text);
+      }).catch(err => {
+        alert('Failed to copy. Please copy manually: ' + text);
+      });
+    }
+
+    // ===== BAAKI CHECKOUT CODE =====
     async function uploadToCloudinary(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -342,6 +471,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       renderSummary();
+      loadPaymentDetails(); // <-- YEH NAYI LINE ADD HUI HAI
     });
   </script>
 
